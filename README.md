@@ -1,19 +1,18 @@
 # 🛍️ HEXA Clothing – Full Stack E-Commerce Platform
 
-HEXA Clothing is a modern full-stack e-commerce web application designed to deliver a seamless online shopping experience. The system includes a responsive frontend built with React (Vite) and a scalable backend powered by Node.js, Express, and SQL.
+HEXA Clothing is a modern full-stack e-commerce web application designed to deliver a seamless online shopping experience. The system includes a responsive frontend built with React (Vite) and a scalable backend powered by Node.js, Express, and MySQL.
 
 ---
 
 ## 🚀 Project Overview
 
-This platform allows users to:
+This project aims to develop a fully functional e-commerce platform where:
 
-* Browse products by categories
-* View detailed product information
-* Add items to cart
-* Place and manage orders
-* Secure authentication and user management
-* Admin-level product and order control
+* Customers can browse products and categories
+* Users can register and log in securely
+* Customers can add items to cart and place orders
+* Orders and payments are processed efficiently
+* Admins can manage products, users, and orders
 
 ---
 
@@ -30,7 +29,7 @@ This platform allows users to:
 
 * Node.js
 * Express.js
-* SQL Database (MySQL)
+* MySQL Database
 
 ### Tools
 
@@ -55,47 +54,71 @@ hexa/
 
 ---
 
-## 👥 Team & API Responsibilities
+## 👥 Team & Responsibilities
 
-| Member     | Branch              | Responsibility     |
-| ---------- | ------------------- | ------------------ |
-| Shafrin    | feature/auth-api    | Authentication API |
-| Heli       | feature/product-api | Product API        |
-| Sara       | feature/cart-api    | Cart API           |
-| Thushalini | feature/order-api   | Order API          |
-| Piyula     | feature/payment-api | Payment API        |
-| Vithush    | feature/user-api    | User API           |
+### 🔹 Development Roles
+
+| Member     | Role                                     |
+| ---------- | ---------------------------------------- |
+| Shafrin    | Team Lead, Full Stack, Deployment, UI/UX |
+| Heli       | Database + Frontend + QA                 |
+| Thushalini | Frontend + QA                            |
+| Shavindi   | Backend Support + QA + Frontend          |
+| Piyula     | Frontend + QA                            |
+| Vithush    | Full Stack Development                   |
+| Sara       | Frontend + QA                            |
+
+---
+
+### 🎨 Page Allocation (Frontend)
+
+| Member     | Pages                                       |
+| ---------- | ------------------------------------------- |
+| Heli       | Home, Products (Grid), About                |
+| Shafrin    | Products (Single/List), Cart, Order Summary |
+| Shavindi   | Create Account, Log In                      |
+| Thushalini | Contact, Profile                            |
+| Piyula     | Address, Shipping                           |
+| Vithush    | Payment, Review                             |
+| Sara       | Order Success, Order Summary 1              |
 
 ---
 
 ## 🌿 Git Workflow
 
-We follow a **feature-based branching strategy**:
+We follow a **feature-based branching strategy (page-based)**:
 
-1. Each member works on their own branch
-2. No direct commits to `main`
-3. Push changes to feature branch
-4. Create Pull Request
-5. Review and merge into `main`
+* Each member works on their assigned pages in a separate branch
+* No direct commits to `main`
+* Push changes → Create Pull Request → Review → Merge
 
-### Branch Naming Convention
+---
+
+### 🔀 Branch Naming Convention
 
 ```bash
-feature/<api-name>
+feature/<member>-<pages>
 ```
 
-Example:
+---
+
+### 📌 Branch Allocation
 
 ```bash
-feature/auth-api
-feature/product-api
+feature/heli-home-products-about
+feature/shafrin-products-cart-order-summary
+feature/shavindi-auth-pages
+feature/thushalini-contact-profile
+feature/piyula-address-shipping
+feature/vithush-payment-review
+feature/sara-order-success-summary1
 ```
 
 ---
 
 ## ⚙️ Setup Instructions
 
-### 1. Clone the Repository
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/shafrin0721/HEXA.git
@@ -133,7 +156,7 @@ npm start
 
 ## 🔐 Environment Variables
 
-Create a `.env` file in the root or server folder:
+Create a `.env` file:
 
 ```env
 PORT=5000
@@ -146,14 +169,72 @@ JWT_SECRET=yoursecretkey
 
 ---
 
+## 📅 Project Timeline
+
+| Phase   | Task                 | Duration |
+| ------- | -------------------- | -------- |
+| Phase 1 | Project Setup        | 2 Days   |
+| Phase 2 | UI/UX Design         | 3 Days   |
+| Phase 3 | Database Design      | 3 Days   |
+| Phase 4 | Frontend Development | 10 Days  |
+| Phase 5 | Backend Development  | 12 Days  |
+| Phase 6 | Testing & QA         | 5 Days   |
+| Phase 7 | Deployment           | 2 Days   |
+
+**Total Duration:** ~6 Weeks (34 Working Days)
+
+---
+
+## 🔧 Development Workflow
+
+1. Setup environment
+2. Design UI & database
+3. Develop frontend & backend in parallel
+4. API integration
+5. Testing & debugging
+6. Deployment
+
+---
+
 ## 📌 Key Features
 
 * User Authentication (JWT)
 * Product Management
 * Cart & Checkout System
 * Order Processing
+* Payment Integration
 * RESTful APIs
-* Modular Architecture
+* Responsive UI
+
+---
+
+## 🔐 Security Measures
+
+* HTTPS (SSL)
+* Password hashing (bcrypt)
+* JWT authentication
+* Input validation & sanitization
+
+---
+
+## ⚠️ Risk Management
+
+| Risk               | Impact | Mitigation            |
+| ------------------ | ------ | --------------------- |
+| Team delays        | High   | Parallel development  |
+| Integration issues | High   | Daily sync meetings   |
+| Bugs               | Medium | Continuous testing    |
+| Deployment errors  | Medium | Pre-deployment checks |
+
+---
+
+## 🎯 Success Criteria
+
+* System runs without critical bugs
+* Smooth checkout process
+* Admin can manage products & orders
+* Fully responsive UI
+* Fast performance
 
 ---
 
@@ -164,39 +245,27 @@ https://www.figma.com/design/huBctacPiwvl9GsP0J25gK/hexa-clothing
 
 ---
 
-## ✅ Best Practices Followed
-
-* Clean folder structure
-* Separation of concerns (MVC)
-* Reusable components
-* API modularization
-* Version control with Git
-
----
-
 ## 📬 Contribution Guidelines
 
 * Pull latest `main` before starting
 * Work only in your assigned branch
 * Commit with clear messages
-* Test before submitting PR
+* Test before creating Pull Request
+
+---
+
+## 🚀 Deployment Plan
+
+* Frontend: Netlify
+* Backend: Render
+* Database: MySQL Server
 
 ---
 
 ## 📄 License
 
-This project is developed for academic and learning purposes.
+This project is developed for academic purposes.
 
 ---
 
-## 💡 Future Enhancements
-
-* Payment gateway integration
-* Admin dashboard UI
-* Order tracking system
-* Email notifications
-* Deployment (Netlify + Render)
-
----
-
-✨ Built with teamwork, structure, and clean code.
+✨ Built with teamwork, structured planning, and clean development practices.
