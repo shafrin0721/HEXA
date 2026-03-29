@@ -42,12 +42,46 @@ This project aims to develop a fully functional e-commerce platform where:
 ## 📁 Project Structure
 
 ```bash
-hexa/
+hexa-clothing/
 │
-├── client/        # React Frontend
-├── server/        # Node.js Backend
-├── database/      # SQL Scripts
-├── .env           # Environment variables
+├── client/                          # React Frontend (Vite)
+│   ├── public/
+│   │   ├── images/
+│   │   └── icons/
+│   │
+│   ├── src/
+│   │   ├── assets/                  # Static assets (images, fonts)
+│   │   ├── components/              # Reusable UI components
+│   │   │   ├── common/              # Buttons, Inputs, Loaders
+│   │   │   ├── layout/              # Navbar, Footer, Sidebar
+│   │   │   └── ui/                  # Figma-based UI blocks
+│   │   ├── pages/                   # Screens (Home, Product, Cart, Checkout)
+│   │   ├── routes/                  # Frontend routing
+│   │   ├── services/                # API services (Axios)
+│   │   ├── hooks/                   # Custom hooks
+│   │   ├── context/                 # Global context providers
+│   │   ├── utils/                   # Helper functions
+│   │   ├── styles/                  # Global styles
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
+│
+├── server/                          # Node.js Backend (Express)
+│   ├── config/                      # DB connection
+│   ├── controllers/                 # API logic
+│   ├── models/                      # SQL Models
+│   ├── routes/                      # Express routing
+│   ├── middleware/                  # Auth middleware
+│   ├── utils/                       # Helper functions
+│   ├── app.js                       # Express app setup
+│   └── server.js                    # Start server
+│
+├── database/                        # SQL Scripts
+│   ├── schema.sql
+│   └── seed.sql
+│
+├── .env
 ├── .gitignore
 └── README.md
 ```
