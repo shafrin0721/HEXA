@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState<boolean>(false);
@@ -17,34 +18,67 @@ const Auth = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const navigate = useNavigate();
+
   const handleAuth = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+      e.preventDefault();
+      setError('');
+      setSuccess('');
 
-    const endpoint = isLogin ? 'login' : 'register';
-    
-    if (!isLogin && !formData.name) {
-        setError('Please enter your name.');
-        return;
-    }
+      const endpoint = isLogin ? 'login' : 'register';
 
-    try {
-      const response = await axios.post(`http://localhost:5000/api/auth/${endpoint}`, formData);
-      if (response.data.success) {
-        setSuccess(response.data.message);
-        if (isLogin) {
-          localStorage.setItem('token', response.data.token);
-        } else {
-            setSuccess('Registration successful! Please login.');
-            setFormData({ name: '', email: '', password: '' });
-            setIsLogin(true);
-        }
+      try {
+          const response = await axios.post(`http://localhost:5000/api/auth/${endpoint}`, formData);
+          
+          if (response.data.success) {
+              setSuccess(response.data.message);
+              
+              if (isLogin) {
+                  // 1. Token එක LocalStorage එකේ save කරන්න
+                  localStorage.setItem('token', response.data.token);
+                  
+                  // 2. තත්පරයකින් පස්සේ Home page එකට යවන්න
+                  setTimeout(() => {
+                      navigate('/'); // ඔයාගේ home route එක මෙතනට දාන්න
+                  }, 1500);
+              } else {
+                  setSuccess('Registration successful! Please login.');
+                  setFormData({ name: '', email: '', password: '' });
+                  setIsLogin(true);
+              }
+          }
+      } catch (err: any) {
+          setError(err.response?.data?.message || 'An unexpected error occurred.');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'An unexpected error occurred.');
-    }
   };
+  // const handleAuth = async (e: FormEvent) => {
+  //   e.preventDefault();
+  //   setError('');
+  //   setSuccess('');
+
+  //   const endpoint = isLogin ? 'login' : 'register';
+    
+  //   if (!isLogin && !formData.name) {
+  //       setError('Please enter your name.');
+  //       return;
+  //   }
+
+  //   try {
+  //     const response = await axios.post(`http://localhost:5000/api/auth/${endpoint}`, formData);
+  //     if (response.data.success) {
+  //       setSuccess(response.data.message);
+  //       if (isLogin) {
+  //         localStorage.setItem('token', response.data.token);
+  //       } else {
+  //           setSuccess('Registration successful! Please login.');
+  //           setFormData({ name: '', email: '', password: '' });
+  //           setIsLogin(true);
+  //       }
+  //     }
+  //   } catch (err: any) {
+  //     setError(err.response?.data?.message || 'An unexpected error occurred.');
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-[#0E0E0E] text-white flex flex-col items-center justify-center px-6 font-sans">
