@@ -8,9 +8,9 @@ function OrderSummary() {
   const navigate = useNavigate();
 
 
-  useEffect(() => {
-    setOrder(orderMock);
-  }, []);
+
+  useState(orderMock);
+ 
 
   if (!order) return <p>Loading...</p>;
 
