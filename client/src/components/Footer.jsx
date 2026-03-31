@@ -33,12 +33,6 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="contact-info">
-        <p>Phone: +44 20 7946 0123</p>
-        <p>Email: support@hexa.com</p>
-        <p>Address: 123 Northern Park Lane, West London, W1A 4ZZ, United Kingdom</p>
-      </div>
-
       <div className="copyright">
         <p>&copy; {currentYear} Hexa. All rights reserved.</p>
       </div>
