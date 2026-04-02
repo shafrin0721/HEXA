@@ -2,24 +2,20 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 
-// Create new order
 router.post('/', async (req, res) => {
   try {
-    const { items, total, shipping_address, payment_info } = req.body;
-    const user_id = 1; // Default user for now
+    const { items, total, shipping_address, payment_info, payment_intent_id,  } = req.body;
+    const user_id = 1; 
 
-    // Start transaction
     const connection = await db.getConnection();
     await connection.beginTransaction();
 
     try {
-      // 1. Create payment record
-      const cardLastFour = payment_info.cardNumber ? payment_info.cardNumber.slice(-4) : '1234';
       
       const [paymentResult] = await connection.query(
-        `INSERT INTO payments (amount, payment_method, card_last_four, status, created_at) 
-         VALUES (?, ?, ?, 'completed', NOW())`,
-        [total, 'credit_card', cardLastFour]
+        `INSERT INTO payments (amount, payment_method, card_last_four,card_type, status,transaction_id, created_at) 
+         VALUES (?, ?, ?, ?, 'completed', ?, NOW())`,
+        [total, 'credit_card', payment_info.card_last4, payment_info.card_type, payment_intent_id]
       );
       const paymentId = paymentResult.insertId;
 
@@ -83,7 +79,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get order totals from cart
 router.get('/totals', async (req, res) => {
   try {
     const user_id = 1; // Default user

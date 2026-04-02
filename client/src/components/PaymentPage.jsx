@@ -1,6 +1,6 @@
-// PaymentPage.js - Card Type Dropdown instead of Card Name
+// PaymentPage.js - Updated version
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import { orderAPI, paymentAPI } from '../api';
@@ -8,6 +8,7 @@ import './PaymentPage.css';
 
 const PaymentPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Initial empty form data
   const getEmptyFormData = () => ({
@@ -47,30 +48,67 @@ const PaymentPage = () => {
 
   // Clear all localStorage data function
   const clearAllStoredData = () => {
-    localStorage.removeItem('paymentData');
-    localStorage.removeItem('orderId');
-    localStorage.removeItem('orderSummary');
-    localStorage.removeItem('paymentIntentId');
-    localStorage.removeItem('shippingData');
-    localStorage.removeItem('addressData');
-    localStorage.removeItem('cartData');
-    localStorage.removeItem('checkoutData');
+    // Only clear if not coming from review page
+    const comingFromReview = location.state?.fromReview === true;
+    if (!comingFromReview) {
+      localStorage.removeItem('paymentData');
+      localStorage.removeItem('orderId');
+      localStorage.removeItem('orderSummary');
+      localStorage.removeItem('paymentIntentId');
+      localStorage.removeItem('shippingData');
+      localStorage.removeItem('addressData');
+      localStorage.removeItem('cartData');
+      localStorage.removeItem('checkoutData');
+    }
   };
 
+  // Load existing data if coming from review page
+  const loadExistingData = () => {
+    const savedPaymentData = localStorage.getItem('paymentData');
+    if (savedPaymentData && location.state?.fromReview === true) {
+      try {
+        const paymentData = JSON.parse(savedPaymentData);
+        setFormData({
+          cardNumber: paymentData.cardNumber || '',
+          cardType: paymentData.cardType || '',
+          cvv: paymentData.cvv || '',
+          expiryDate: paymentData.expiryDate || '',
+          email: paymentData.email || '',
+          firstName: paymentData.firstName || '',
+          lastName: paymentData.lastName || '',
+          address: paymentData.address || '',
+          city: paymentData.city || '',
+          state: paymentData.state || '',
+          zipCode: paymentData.zipCode || '',
+          phoneNumber: paymentData.phoneNumber || ''
+        });
+        return true;
+      } catch (error) {
+        console.error('Error loading saved payment data:', error);
+        return false;
+      }
+    }
+    return false;
+  };
 
-  // Clear all data on page load/refresh
+  // Clear all data on page load/refresh (but not when coming from review)
   useEffect(() => {
-    // Clear all localStorage data first
+    // Clear all localStorage data first (unless coming from review)
     clearAllStoredData();
     
-    // Reset form data to empty
-    setFormData(getEmptyFormData());
-    setCardBrand(null);
-    setErrors({});
+    // Try to load existing data
+    const dataLoaded = loadExistingData();
+    
+    // If no data was loaded, reset form to empty
+    if (!dataLoaded) {
+      setFormData(getEmptyFormData());
+      setCardBrand(null);
+      setErrors({});
+    }
     
     // Fetch fresh order totals
     fetchOrderTotals();
-  }, []); // Empty dependency array ensures this runs only once on mount/refresh
+  }, [location.state]); // Add location.state as dependency to detect when coming from review
 
   const fetchOrderTotals = async () => {
     try {
@@ -214,8 +252,6 @@ const PaymentPage = () => {
       }
       
       value = formatted.slice(0, 19);
-      
-     
     }
     
     if (name === 'cardType') {
@@ -248,107 +284,139 @@ const PaymentPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      const firstError = document.querySelector('.error-message');
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!validateForm()) {
+    const firstError = document.querySelector('.error-message');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+    return;
+  }
+  
+  setIsSubmitting(true);
+  setPaymentStatus({ type: 'processing', message: 'Processing payment...' });
+  
+  try {
+    // Get clean card number and extract last 4 digits
+    const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
+    const cardLast4 = cleanCardNumber.slice(-4);
     
-    setIsSubmitting(true);
-    setPaymentStatus({ type: 'processing', message: 'Processing payment...' });
+    console.log('Card Last 4:', cardLast4);
+    console.log('Card Type:', formData.cardType);
     
-    try {
-      const paymentData = {
-        amount: orderSummary.total,
-        payment_method: 'credit_card',
-        email: formData.email,
+    const paymentData = {
+      amount: orderSummary.total,
+      payment_method: 'credit_card',
+      email: formData.email,
+      name: `${formData.firstName} ${formData.lastName}`,
+      card_info: {
+        cardType: formData.cardType,
+        cardNumber: cleanCardNumber,
+        card_last4: cardLast4,
+        cvv: formData.cvv,
+        expiryDate: formData.expiryDate
+      },
+      billing_address: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email
+      }
+    };
+    
+    console.log('Sending payment data:', JSON.stringify(paymentData, null, 2));
+    
+    const paymentResponse = await paymentAPI.processPayment(paymentData);
+    
+    console.log('Payment response:', paymentResponse.data);
+    
+    if (paymentResponse.data.success) {
+      // Extract data from payment response
+      const paymentIntentId = paymentResponse.data.payment_intent_id;
+      const returnedCardLast4 = paymentResponse.data.card_last4;
+      const returnedCardType = paymentResponse.data.card_type;
+      
+      console.log('Payment Intent ID:', paymentIntentId);
+      console.log('Returned Card Last4:', returnedCardLast4);
+      console.log('Returned Card Type:', returnedCardType);
+      
+      setPaymentStatus({ type: 'success', message: 'Payment successful! Redirecting to review...' });
+      
+      // Prepare shipping address object
+      const shippingAddress = {
         name: `${formData.firstName} ${formData.lastName}`,
-        card_info: {
-          cardType: formData.cardType,
-          cardNumber: formData.cardNumber.replace(/\s/g, ''),
-          cvv: formData.cvv,
-          expiryDate: formData.expiryDate
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        number: formData.phoneNumber,
+        email: formData.email
+      };
+      
+      // Calculate delivery date
+      const deliveryDate = new Date();
+      deliveryDate.setDate(deliveryDate.getDate() + 5);
+      const formattedDeliveryDate = deliveryDate.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      
+      // Store ALL data in localStorage for the Review Page
+      const reviewData = {
+        orderSummary: {
+          items: orderSummary.items,
+          subtotal: orderSummary.subtotal,
+          total: orderSummary.total,
+          shipping: orderSummary.shipping
         },
-        billing_address: {
+        paymentIntentId: paymentIntentId,
+        paymentInfo: {
+          card_last4: returnedCardLast4 || cardLast4,
+          card_type: returnedCardType || formData.cardType,
+          name: `${formData.firstName} ${formData.lastName}`,
+          accountNumber: `**** **** **** ${returnedCardLast4 || cardLast4}`,
+          paidDate: new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })
+        },
+        shippingAddress: shippingAddress,
+        deliveryDate: formattedDeliveryDate,
+        userInfo: {
           firstName: formData.firstName,
           lastName: formData.lastName,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
-          phoneNumber: formData.phoneNumber,
-          email: formData.email
+          email: formData.email,
+          phoneNumber: formData.phoneNumber
         }
       };
       
-      console.log('Sending payment data:', paymentData);
+      // Store in localStorage
+      localStorage.setItem('reviewOrderData', JSON.stringify(reviewData));
       
-      const paymentResponse = await paymentAPI.processPayment(paymentData);
-      
-      console.log('Payment response:', paymentResponse.data);
-      
-      if (paymentResponse.data.success) {
-        setPaymentStatus({ type: 'success', message: 'Payment successful! Redirecting...' });
-        
-        const orderData = {
-          items: orderSummary.items,
-          total: orderSummary.total,
-          subtotal: orderSummary.subtotal,
-          shipping: orderSummary.shipping,
-          payment_intent_id: paymentResponse.data.payment_intent_id,
-          payment_status: 'succeeded',
-          shipping_address: {
-            name: `${formData.firstName} ${formData.lastName}`,
-            address: formData.address,
-            city: formData.city,
-            state: formData.state,
-            zipCode: formData.zipCode,
-            phone: formData.phoneNumber,
-            email: formData.email
-          },
-          payment_info: {
-            card_last4: formData.cardNumber.slice(-4),
-            card_type: formData.cardType,
-            payment_id: paymentResponse.data.payment_intent_id
-          }
-        };
-        
-        const orderResponse = await orderAPI.createOrder(orderData);
-        
-        if (orderResponse.data.success) {
-          // Only store minimal data for the order review
-          localStorage.setItem('orderId', orderResponse.data.data.order.id);
-          localStorage.setItem('paymentIntentId', paymentResponse.data.payment_intent_id);
-          
-          setTimeout(() => {
-            navigate('/review', { 
-              state: { 
-                orderId: orderResponse.data.data.order.id,
-                paymentIntentId: paymentResponse.data.payment_intent_id,
-                totalAmount: orderSummary.total
-              } 
-            });
-          }, 1500);
-        } else {
-          throw new Error('Order creation failed');
-        }
-      }
-    } catch (error) {
-      console.error('Error submitting payment:', error);
-      setPaymentStatus({ 
-        type: 'error', 
-        message: error.response?.data?.message || error.message || 'Payment failed. Please try again.' 
-      });
-      setTimeout(() => setPaymentStatus(null), 5000);
-    } finally {
-      setIsSubmitting(false);
+      // Navigate to review page
+      setTimeout(() => {
+        navigate('/review');
+      }, 1500);
     }
-  };
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    setPaymentStatus({ 
+      type: 'error', 
+      message: error.response?.data?.message || error.message || 'Payment failed. Please try again.' 
+    });
+    setTimeout(() => setPaymentStatus(null), 5000);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   if (loading) {
     return (

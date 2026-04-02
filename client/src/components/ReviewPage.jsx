@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
+import { orderAPI } from '../api';
 import './ReviewPage.css';
 
 const ReviewPage = () => {
@@ -9,85 +10,145 @@ const ReviewPage = () => {
   
   const [orderDetails, setOrderDetails] = useState({
     shippingAddress: {
-      name: 'John Doe',
-      address: '123 Main Street, Apt 4B',
-      city: 'London',
-      zipCode: 'W1A 4ZZ',
-      number: '+44 20 7946 0123'
+      name: '',
+      address: '',
+      city: '',
+      zipCode: '',
+      number: '',
+      email: ''
     },
     paymentInfo: {
-      name: 'John Doe',
-      accountNumber: '**** **** **** 1234',
-      paidDate: new Date().toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      })
+      name: '',
+      accountNumber: '',
+      paidDate: '',
+      cardType: '',
+      card_last4: '',
+      payment_intent_id: ''
     },
     shipping: {
       method: 'Standard shipping',
-      deliveryDate: 'Friday, March 14'
+      deliveryDate: ''
     },
     items: [],
     subtotal: 0,
-    shippingCost: 12.87,
-    total: 0
+    shippingCost: 0,
+    total: 0,
+    paymentIntentId: ''
   });
+
+  const [loading, setLoading] = useState(true);
+  const [placingOrder, setPlacingOrder] = useState(false);
 
   useEffect(() => {
     // Retrieve data from localStorage
-    const savedOrderSummary = localStorage.getItem('orderSummary');
-    const savedPaymentData = localStorage.getItem('paymentData');
+    const savedReviewData = localStorage.getItem('reviewOrderData');
     
-    if (savedOrderSummary) {
-      const orderData = JSON.parse(savedOrderSummary);
-      setOrderDetails(prev => ({
-        ...prev,
-        items: orderData.items,
-        subtotal: orderData.subtotal,
-        total: orderData.total
-      }));
-    }
-    
-    if (savedPaymentData) {
-      const paymentData = JSON.parse(savedPaymentData);
-      setOrderDetails(prev => ({
-        ...prev,
+    if (savedReviewData) {
+      const data = JSON.parse(savedReviewData);
+      
+      setOrderDetails({
+        shippingAddress: data.shippingAddress || {},
         paymentInfo: {
-          ...prev.paymentInfo,
-          name: `${paymentData.firstName} ${paymentData.lastName}`,
-          accountNumber: `**** **** **** ${paymentData.cardNumber ? paymentData.cardNumber.slice(-4) : '1234'}`
+          name: data.paymentInfo.name || '',
+          accountNumber: data.paymentInfo.accountNumber || '',
+          paidDate: data.paymentInfo.paidDate || '',
+          cardType: data.paymentInfo.card_type || '',
+          card_last4: data.paymentInfo.card_last4 || '',
+          payment_intent_id: data.paymentIntentId || ''
         },
-        shippingAddress: {
-          ...prev.shippingAddress,
-          name: `${paymentData.firstName} ${paymentData.lastName}`,
-          address: paymentData.address || prev.shippingAddress.address,
-          city: paymentData.city || prev.shippingAddress.city,
-          zipCode: paymentData.zipCode || prev.shippingAddress.zipCode,
-          number: paymentData.phoneNumber || prev.shippingAddress.number
-        }
-      }));
+        shipping: {
+          method: 'Standard shipping',
+          deliveryDate: data.deliveryDate || ''
+        },
+        items: data.orderSummary?.items || [],
+        subtotal: data.orderSummary?.subtotal || 0,
+        shippingCost: data.orderSummary?.shipping || 0,
+        total: data.orderSummary?.total || 0,
+        paymentIntentId: data.paymentIntentId || ''
+      });
+      setLoading(false);
+    } else {
+      // If no data found, redirect back to payment page
+      console.log('No order data found, redirecting to payment');
+      navigate('/payment');
     }
-  }, []);
+  }, [navigate]);
 
-  const handleEdit = (section) => {
-    // Data is already saved in localStorage, just navigate back
-    // You can optionally scroll to the specific section
-    navigate('/');
+  const handleEdit = () => {
+    // Navigate back to payment page for editing
+    navigate('/payment', { 
+      state: { fromReview: true } 
+    });
   };
 
-  const handleContinue = () => {
-    alert('Order placed successfully!');
-    // Clear localStorage after order placement
-    localStorage.removeItem('paymentData');
-    localStorage.removeItem('orderSummary');
-    // Navigate to success page or home
-    navigate('/');
+  const handlePlaceOrder = async () => {
+    setPlacingOrder(true);
+    
+    try {
+      // Prepare order data
+      const orderData = {
+        items: orderDetails.items,
+        total: orderDetails.total,
+        subtotal: orderDetails.subtotal,
+        shipping: orderDetails.shippingCost,
+        payment_intent_id: orderDetails.paymentIntentId,
+        payment_status: 'succeeded',
+        shipping_address: orderDetails.shippingAddress,
+        payment_info: {
+          card_last4: orderDetails.paymentInfo.card_last4,
+          card_type: orderDetails.paymentInfo.cardType,
+          payment_id: orderDetails.paymentIntentId
+        }
+      };
+      
+      console.log('Creating order with data:', orderData);
+      
+      // Create the order in database
+      const orderResponse = await orderAPI.createOrder(orderData);
+      
+      if (orderResponse.data.success) {
+        console.log('Order created successfully:', orderResponse.data);
+        
+        // Clear localStorage
+        localStorage.removeItem('reviewOrderData');
+        localStorage.removeItem('paymentData');
+        localStorage.removeItem('orderSummary');
+        
+        // Show success message and redirect
+        alert('Order placed successfully! Thank you for your purchase.');
+        navigate('/order-success', { 
+          state: { 
+            orderId: orderResponse.data.data.order.id,
+            orderDetails: orderResponse.data.data
+          } 
+        });
+      } else {
+        throw new Error('Order creation failed');
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
+      alert('Failed to place order. Please try again.');
+    } finally {
+      setPlacingOrder(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="review-page">
+        <Header cartItemCount={0} />
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading order details...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="review-page">
-      <Header cartItemCount={2} />
+      <Header cartItemCount={orderDetails.items.reduce((total, item) => total + (item.quantity || 1), 0)} />
       
       <div className="review-container">
         {/* Progress Steps */}
@@ -118,17 +179,19 @@ const ReviewPage = () => {
             <div className="review-section">
               <div className="section-header">
                 <h3>Shipping address</h3>
-                <button className="edit-btn" onClick={() => handleEdit('shipping address')}>
+                <button className="edit-btn" onClick={handleEdit}>
                   Edit
                 </button>
               </div>
               <div className="section-content">
-                <p className="info-name">{orderDetails.shippingAddress.name}</p>
+                <p className="info-name">{orderDetails.shippingAddress.name || 'Not provided'}</p>
                 <p className="info-address">
-                  {orderDetails.shippingAddress.address}, {orderDetails.shippingAddress.zipCode}
+                  {orderDetails.shippingAddress.address && 
+                    `${orderDetails.shippingAddress.address}, ${orderDetails.shippingAddress.zipCode}`}
                 </p>
                 <p className="info-city">{orderDetails.shippingAddress.city}</p>
                 <p className="info-number">{orderDetails.shippingAddress.number}</p>
+                <p className="info-email">{orderDetails.shippingAddress.email}</p>
               </div>
             </div>
 
@@ -136,7 +199,7 @@ const ReviewPage = () => {
             <div className="review-section">
               <div className="section-header">
                 <h3>Payment Information</h3>
-                <button className="edit-btn" onClick={() => handleEdit('payment information')}>
+                <button className="edit-btn" onClick={handleEdit}>
                   Edit
                 </button>
               </div>
@@ -145,19 +208,28 @@ const ReviewPage = () => {
                 <p className="info-account">
                   Account number: {orderDetails.paymentInfo.accountNumber}
                 </p>
+                {orderDetails.paymentInfo.cardType && (
+                  <p className="info-card-type">
+                    Card type: {orderDetails.paymentInfo.cardType.toUpperCase()}
+                  </p>
+                )}
                 <p className="info-date">Paid Date: {orderDetails.paymentInfo.paidDate}</p>
+                <p className="info-transaction">
+                  Transaction ID: {orderDetails.paymentIntentId}
+                </p>
               </div>
             </div>
 
             {/* Shipping Method Section */}
             <div className="review-section">
               <div className="section-header">
-                <h3>Standard shipping</h3>
-                <button className="edit-btn" onClick={() => handleEdit('shipping method')}>
+                <h3>Shipping method</h3>
+                <button className="edit-btn" onClick={handleEdit}>
                   Edit
                 </button>
               </div>
               <div className="section-content">
+                <p className="info-method">{orderDetails.shipping.method}</p>
                 <p className="info-delivery">
                   Delivery {orderDetails.shipping.deliveryDate}
                 </p>
@@ -170,20 +242,24 @@ const ReviewPage = () => {
             <div className="order-summary-card">
               <h2>Order Summary</h2>
               <div className="order-items-count">
-                {orderDetails.items.reduce((total, item) => total + item.quantity, 0)} Item
+                {orderDetails.items.reduce((total, item) => total + (item.quantity || 1), 0)} Item(s)
               </div>
               
               <div className="order-items">
-                {orderDetails.items.map((item) => (
-                  <div key={item.id} className="order-item">
+                {orderDetails.items.map((item, index) => (
+                  <div key={item.id || index} className="order-item">
                     <img src={item.image} alt={item.name} className="order-item-image" />
                     <div className="order-item-details">
                       <h4>{item.name}</h4>
-                      <p className="item-brand">Brand: {item.brand}</p>
-                      <div className="item-rating">
-                        {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}
-                      </div>
-                      <p className="item-price">${item.price.toFixed(2)}</p>
+                      <p className="item-brand">Brand: {item.brand || 'Hexa'}</p>
+                      {item.rating && (
+                        <div className="item-rating">
+                          {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}
+                        </div>
+                      )}
+                      <p className="item-price">
+                        ${(item.price || 0).toFixed(2)} x {item.quantity || 1}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -204,8 +280,12 @@ const ReviewPage = () => {
                 </div>
               </div>
 
-              <button className="continue-btn" onClick={handleContinue}>
-                Place Order
+              <button 
+                className="continue-btn" 
+                onClick={handlePlaceOrder}
+                disabled={placingOrder}
+              >
+                {placingOrder ? 'Placing Order...' : 'Place Order'}
               </button>
             </div>
 
@@ -218,7 +298,10 @@ const ReviewPage = () => {
         </div>
 
         {/* Back to Top Button */}
-        <button className="back-to-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+        <button 
+          className="back-to-top" 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        >
           Back to top
         </button>
       </div>

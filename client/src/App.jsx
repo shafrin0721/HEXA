@@ -5,7 +5,7 @@ import ReviewPage from './components/ReviewPage';
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<PaymentPage />} />
+      <Route path="/payment" element={<PaymentPage />} />
       <Route path="/review" element={<ReviewPage />} />
     </Routes>
   );
