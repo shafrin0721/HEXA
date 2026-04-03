@@ -8,17 +8,16 @@ import productImg1 from "../assets/t-12.jpg";
 function OrderSummary() {
   return (
 
-    <div className="page">
+  <div className="page"> 
 
   {/* Navbar */}
   <nav className="navbar">
 
   {/* LEFT SIDE */}
-
-  <div className="nav-left">
-
-    <img src={logo} alt="logo" className="logo" />
+   <div className="nav-left">
+    <img src={logo} className="logo" />
   </div>
+
 
   {/* CENTER */}
   <div className="nav-center">
@@ -34,9 +33,11 @@ function OrderSummary() {
     <img src = {avatar} alt="avatar" className="icon"/>
   </div>
 </nav>
- 
 
-      {/* Title */}
+  
+
+ {/* Title */}
+ 
       <h2 className="title">Order Summary</h2>
 
       {/* Table */}
@@ -48,25 +49,30 @@ function OrderSummary() {
           <span>Total</span>
         </div>
 
-        {/* Row 1 */}
-        <div className="table-row">
+{/*row1*/}
+ <div className="table-row">
+  <div className="item-cell">
+    <img src={productImg} className="product-img" />
+    <span>Hexa Classic Tee</span>
+  </div>
 
-          <span>Hexa Classic Tee</span>
-          <span>$19.99</span>
-          <span>01</span>
-          <span>$19.99</span>
-        </div>
-        
+  <span>$19.99</span>
+  <span>01</span>
+  <span>$19.99</span>
+</div>
 
-        {/* Row 2 */}
-        <div className="table-row">
-        
-          <span>Hexa Classic Tee</span>
-          <span>$19.99</span>
-          <span>01</span>
-          <span>$19.99</span>
-        </div>
-      </div>
+{/*row2*/}
+<div className="table-row">
+  <div className="item-cell">
+    <img src={productImg1} className="product-img" />
+    <span>Hexa Classic Tee</span>
+  </div>
+
+ <span>$19.99</span>
+  <span>01</span>
+  <span>$19.99</span>
+</div>
+       
 
       {/* Total */}
     <div className="order-total">
@@ -128,6 +134,7 @@ function OrderSummary() {
         <p>&copy; {} Hexa. All rights reserved.</p>
       </div>
 </footer>
+ </div>
  </div>
   );
 }
