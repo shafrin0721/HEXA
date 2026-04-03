@@ -299,25 +299,25 @@ const handleSubmit = async (e) => {
   setPaymentStatus({ type: 'processing', message: 'Processing payment...' });
   
   try {
-    // Get clean card number and extract last 4 digits
-    const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
-    const cardLast4 = cleanCardNumber.slice(-4);
+    // Map card type to Stripe test tokens
+    const getTestPaymentToken = (cardType) => {
+      const tokens = {
+        'visa': 'pm_card_visa',
+        'mastercard': 'pm_card_mastercard',
+        'amex': 'pm_card_amex',
+        'discover': 'pm_card_discover',
+        'diners': 'pm_card_diners'
+      };
+      return tokens[cardType] || 'pm_card_visa';
+    };
     
-    console.log('Card Last 4:', cardLast4);
-    console.log('Card Type:', formData.cardType);
+    const paymentMethodToken = getTestPaymentToken(formData.cardType);
     
     const paymentData = {
       amount: orderSummary.total,
-      payment_method: 'credit_card',
+      payment_method_token: paymentMethodToken,  // Send token instead of card data
       email: formData.email,
       name: `${formData.firstName} ${formData.lastName}`,
-      card_info: {
-        cardType: formData.cardType,
-        cardNumber: cleanCardNumber,
-        card_last4: cardLast4,
-        cvv: formData.cvv,
-        expiryDate: formData.expiryDate
-      },
       billing_address: {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -330,22 +330,13 @@ const handleSubmit = async (e) => {
       }
     };
     
-    console.log('Sending payment data:', JSON.stringify(paymentData, null, 2));
+    console.log('Sending payment data with token:', paymentMethodToken);
     
     const paymentResponse = await paymentAPI.processPayment(paymentData);
     
     console.log('Payment response:', paymentResponse.data);
     
-    if (paymentResponse.data.success) {
-      // Extract data from payment response
-      const paymentIntentId = paymentResponse.data.payment_intent_id;
-      const returnedCardLast4 = paymentResponse.data.card_last4;
-      const returnedCardType = paymentResponse.data.card_type;
-      
-      console.log('Payment Intent ID:', paymentIntentId);
-      console.log('Returned Card Last4:', returnedCardLast4);
-      console.log('Returned Card Type:', returnedCardType);
-      
+    if (paymentResponse.data.success && paymentResponse.data.payment_status === 'succeeded') {
       setPaymentStatus({ type: 'success', message: 'Payment successful! Redirecting to review...' });
       
       // Prepare shipping address object
@@ -368,7 +359,11 @@ const handleSubmit = async (e) => {
         day: 'numeric' 
       });
       
-      // Store ALL data in localStorage for the Review Page
+      // Get last 4 digits from the card number they entered (for display only)
+      const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
+      const cardLast4 = cleanCardNumber.slice(-4);
+      
+      // Store data for review page
       const reviewData = {
         orderSummary: {
           items: orderSummary.items,
@@ -376,12 +371,12 @@ const handleSubmit = async (e) => {
           total: orderSummary.total,
           shipping: orderSummary.shipping
         },
-        paymentIntentId: paymentIntentId,
+        paymentIntentId: paymentResponse.data.payment_intent_id,
         paymentInfo: {
-          card_last4: returnedCardLast4 || cardLast4,
-          card_type: returnedCardType || formData.cardType,
+          card_last4: cardLast4,
+          card_type: formData.cardType,
           name: `${formData.firstName} ${formData.lastName}`,
-          accountNumber: `**** **** **** ${returnedCardLast4 || cardLast4}`,
+          accountNumber: `**** **** **** ${cardLast4}`,
           paidDate: new Date().toLocaleDateString('en-US', { 
             year: 'numeric', 
             month: 'long', 
@@ -398,13 +393,13 @@ const handleSubmit = async (e) => {
         }
       };
       
-      // Store in localStorage
       localStorage.setItem('reviewOrderData', JSON.stringify(reviewData));
       
-      // Navigate to review page
       setTimeout(() => {
         navigate('/review');
       }, 1500);
+    } else {
+      throw new Error('Payment failed');
     }
   } catch (error) {
     console.error('Error processing payment:', error);
@@ -417,7 +412,6 @@ const handleSubmit = async (e) => {
     setIsSubmitting(false);
   }
 };
-
   if (loading) {
     return (
       <div className="payment-page">
