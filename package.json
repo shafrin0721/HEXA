@@ -1,0 +1,19 @@
+{
+  "name": "hexa-clothing",
+  "version": "1.0.0",
+  "description": "E-Commerce application for HEXA Clothing",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "start": "npm run start --prefix server",
+    "build": "npm run build --prefix client",
+    "install-client": "npm install --prefix client",
+    "install-server": "npm install --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "keywords": ["e-commerce", "react", "node"],
+  "author": "",
+  "license": "ISC"
+}
