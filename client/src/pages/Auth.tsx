@@ -20,37 +20,49 @@ const Auth = () => {
 
   const navigate = useNavigate();
 
-  const handleAuth = async (e: FormEvent) => {
-      e.preventDefault();
-      setError('');
-      setSuccess('');
+const handleAuth = async (e: FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
 
-      const endpoint = isLogin ? 'login' : 'register';
+    // Endpoint එක තෝරා ගැනීම
+    const endpoint = isLogin ? 'login' : 'register';
 
-      try {
-          const response = await axios.post(`http://localhost:5000/api/auth/${endpoint}`, formData);
-          
-          if (response.data.success) {
-              setSuccess(response.data.message);
-              
-              if (isLogin) {
-                  // 1. Token එක LocalStorage එකේ save කරන්න
-                  localStorage.setItem('token', response.data.token);
-                  
-                  // 2. තත්පරයකින් පස්සේ Home page එකට යවන්න
-                  setTimeout(() => {
-                      navigate('/'); // ඔයාගේ home route එක මෙතනට දාන්න
-                  }, 1500);
-              } else {
-                  setSuccess('Registration successful! Please login.');
-                  setFormData({ name: '', email: '', password: '' });
-                  setIsLogin(true);
-              }
-          }
-      } catch (err: any) {
-          setError(err.response?.data?.message || 'An unexpected error occurred.');
-      }
-  };
+    // Backend එක බලාපොරොත්තු වන format එකට data සකස් කිරීම
+    const dataToSend = isLogin 
+      ? { email: formData.email, password: formData.password } 
+      : { name: formData.name, email: formData.email, password: formData.password };
+
+    try {
+        const response = await axios.post(`http://localhost:5001/api/auth/${endpoint}`, dataToSend);
+        
+        if (response.data.success) {
+            if (isLogin) {
+                // Backend එකෙන් එන user ගේ නම පෙන්වීම
+                setSuccess(`Welcome back, ${response.data.user?.name || 'User'}!`);
+                
+                // Token එක සහ Role එක localStorage එකේ save කිරීම (Security සඳහා වැදගත්)
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('role', response.data.user?.role); // 'admin' හෝ 'customer'
+
+                setTimeout(() => {
+                    // Role එක මත පදනම්ව navigate කරන තැන වෙනස් කිරීම
+                    if (response.data.user?.role === 'admin') {
+                        navigate('/admin-dashboard'); // Admin සඳහා වෙනම route එකක්
+                    } else {
+                        navigate('/'); // සාමාන්‍ය Customer සඳහා Home
+                    }
+                }, 1500);
+            } else {
+                setSuccess('Registration successful! Please login.');
+                setFormData({ name: '', email: '', password: '' });
+                setIsLogin(true);
+            }
+        }
+    } catch (err: any) {
+        setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+    }
+};
   // const handleAuth = async (e: FormEvent) => {
   //   e.preventDefault();
   //   setError('');
