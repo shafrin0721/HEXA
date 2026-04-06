@@ -1,7 +1,6 @@
 const db = require('../config/database');
 
 class OrderItem {
-  // Create order items
   static async create(orderId, items) {
     const values = items.map(item => [
       orderId,
@@ -18,7 +17,6 @@ class OrderItem {
     return result;
   }
 
-  // Get items by order ID
   static async findByOrderId(orderId) {
     const [rows] = await db.query(
       `SELECT oi.*, p.name, p.image, p.brand 

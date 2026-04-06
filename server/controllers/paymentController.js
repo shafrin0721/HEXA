@@ -10,15 +10,9 @@ exports.processPayment = catchAsyncError(async (req, res, next) => {
         payment_method_token
     } = req.body;
     
-    console.log('=== PAYMENT CONTROLLER ===');
-    console.log('Amount:', amount);
-    console.log('Payment Method Token:', payment_method_token);
-    
-    // Format amount to cents
     const amountInCents = Math.round(amount * 100);
     
     try {
-        // Create and CONFIRM the payment intent with automatic payment methods disabled
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amountInCents,
             currency: "usd",
@@ -45,13 +39,9 @@ exports.processPayment = catchAsyncError(async (req, res, next) => {
             receipt_email: email || billing_address?.email
         });
         
-        console.log('Payment Intent status:', paymentIntent.status);
-        
-        // Get card details from the confirmed payment
         const cardLast4 = paymentIntent.payment_method_details?.card?.last4 || '4242';
         const cardType = paymentIntent.payment_method_details?.card?.brand || 'visa';
         
-        // Return success response
         res.status(200).json({
             success: true,
             payment_intent_id: paymentIntent.id,

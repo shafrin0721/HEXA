@@ -1,7 +1,6 @@
 const db = require('../config/database');
 
 class Order {
-  // Create new order
   static async create(orderData) {
     const { 
       user_id, 
@@ -22,7 +21,6 @@ class Order {
     return result.insertId;
   }
 
-  // Get order by ID
   static async findById(orderId) {
     const [rows] = await db.query(
       `SELECT * FROM orders WHERE id = ?`,
@@ -34,7 +32,6 @@ class Order {
     return rows[0];
   }
 
-  // Get orders by user ID
   static async findByUserId(userId) {
     const [rows] = await db.query(
       `SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC`,
@@ -48,7 +45,6 @@ class Order {
     return rows;
   }
 
-  // Update order status
   static async updateStatus(orderId, status) {
     const [result] = await db.query(
       `UPDATE orders SET status = ? WHERE id = ?`,
@@ -57,7 +53,6 @@ class Order {
     return result.affectedRows > 0;
   }
 
-  // Get all orders (admin)
   static async getAll() {
     const [rows] = await db.query(
       `SELECT o.*, u.name as user_name, u.email as user_email 

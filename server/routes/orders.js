@@ -19,7 +19,6 @@ router.post('/', async (req, res) => {
       );
       const paymentId = paymentResult.insertId;
 
-      // 2. Create order
       const [orderResult] = await connection.query(
         `INSERT INTO orders (user_id, total, status, shipping_address, payment_id, created_at) 
          VALUES (?, ?, 'pending', ?, ?, NOW())`,
@@ -27,13 +26,11 @@ router.post('/', async (req, res) => {
       );
       const orderId = orderResult.insertId;
 
-      // 3. Update payment with order_id
       await connection.query(
         `UPDATE payments SET order_id = ? WHERE id = ?`,
         [orderId, paymentId]
       );
 
-      // 4. Create order items
       for (const item of items) {
         await connection.query(
           `INSERT INTO order_items (order_id, product_id, quantity, price) 
@@ -42,7 +39,6 @@ router.post('/', async (req, res) => {
         );
       }
 
-      // Commit transaction
       await connection.commit();
 
       res.status(201).json({
@@ -81,9 +77,7 @@ router.post('/', async (req, res) => {
 
 router.get('/totals', async (req, res) => {
   try {
-    const user_id = 1; // Default user
-    
-    // Get cart items with product details
+    const user_id = 1; 
     const [cartItems] = await db.query(`
       SELECT 
         ci.product_id,
@@ -110,7 +104,6 @@ router.get('/totals', async (req, res) => {
       });
     }
     
-    // Calculate totals
     let subtotal = 0;
     const items = cartItems.map(item => {
       const itemTotal = item.quantity * parseFloat(item.price);
@@ -149,7 +142,6 @@ router.get('/totals', async (req, res) => {
   }
 });
 
-// Get order by ID
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;

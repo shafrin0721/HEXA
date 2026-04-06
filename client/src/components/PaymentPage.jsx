@@ -1,5 +1,4 @@
-// PaymentPage.js - Updated version
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
@@ -10,7 +9,6 @@ const PaymentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Initial empty form data
   const getEmptyFormData = () => ({
     cardNumber: '',
     cardType: '',
@@ -35,21 +33,20 @@ const PaymentPage = () => {
   });
   
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cardBrand, setCardBrand] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
 
-  // Card type options with logos/emojis
   const cardTypeOptions = [
     { value: 'visa', label: 'Visa', icon: '💳', logo: 'https://cdn.simpleicons.org/visa', color: '#1a1f71' },
     { value: 'mastercard', label: 'Mastercard', icon: '💳', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg', color: '#eb001b' },
   ];
 
-  // Clear all localStorage data function
   const clearAllStoredData = () => {
-    // Only clear if not coming from review page
     const comingFromReview = location.state?.fromReview === true;
+    // Only clear data if NOT coming from review page
     if (!comingFromReview) {
       localStorage.removeItem('paymentData');
       localStorage.removeItem('orderId');
@@ -62,10 +59,12 @@ const PaymentPage = () => {
     }
   };
 
-  // Load existing data if coming from review page
   const loadExistingData = () => {
     const savedPaymentData = localStorage.getItem('paymentData');
-    if (savedPaymentData && location.state?.fromReview === true) {
+    const comingFromReview = location.state?.fromReview === true;
+    
+    // If coming from review page, load the saved data
+    if (comingFromReview && savedPaymentData) {
       try {
         const paymentData = JSON.parse(savedPaymentData);
         setFormData({
@@ -91,24 +90,31 @@ const PaymentPage = () => {
     return false;
   };
 
-  // Clear all data on page load/refresh (but not when coming from review)
   useEffect(() => {
-    // Clear all localStorage data first (unless coming from review)
-    clearAllStoredData();
+    const comingFromReview = location.state?.fromReview === true;
     
-    // Try to load existing data
+    // Clear data only if NOT coming from review
+    if (!comingFromReview) {
+      clearAllStoredData();
+    }
+    
     const dataLoaded = loadExistingData();
-    
-    // If no data was loaded, reset form to empty
-    if (!dataLoaded) {
+    if (!dataLoaded && !comingFromReview) {
       setFormData(getEmptyFormData());
       setCardBrand(null);
       setErrors({});
     }
-    
-    // Fetch fresh order totals
+
     fetchOrderTotals();
-  }, [location.state]); // Add location.state as dependency to detect when coming from review
+  }, [location.state]);
+
+  // Save form data to localStorage whenever it changes (for review page edit)
+  useEffect(() => {
+    // Only save if we have valid form data
+    if (formData.cardNumber || formData.email || formData.firstName) {
+      localStorage.setItem('paymentData', JSON.stringify(formData));
+    }
+  }, [formData]);
 
   const fetchOrderTotals = async () => {
     try {
@@ -117,60 +123,12 @@ const PaymentPage = () => {
       if (response.data.success) {
         setOrderSummary(response.data.data);
       } else {
-        // Fallback data if API fails
-        setOrderSummary({
-          items: [
-            {
-              id: 1,
-              name: 'Hexa Classic Tee',
-              brand: 'Hexa',
-              rating: 5,
-              price: 19.99,
-              quantity: 2,
-              image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=80&h=80&fit=crop'
-            },
-            {
-              id: 2,
-              name: 'HEXA GOLD PLAN',
-              brand: 'Hexa',
-              rating: 5,
-              price: 19.99,
-              quantity: 1,
-              image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=80&h=80&fit=crop'
-            }
-          ],
-          subtotal: 59.97,
-          shipping: 12.87,
-          total: 72.84
-        });
+        console.warn('No valid order data available');
+        setFetchError(true);
       }
     } catch (error) {
       console.error('Error fetching order totals:', error);
-      setOrderSummary({
-        items: [
-          {
-            id: 1,
-            name: 'Hexa Classic Tee',
-            brand: 'Hexa',
-            rating: 5,
-            price: 19.99,
-            quantity: 2,
-            image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=80&h=80&fit=crop'
-          },
-          {
-            id: 2,
-            name: 'HEXA GOLD PLAN',
-            brand: 'Hexa',
-            rating: 5,
-            price: 19.99,
-            quantity: 1,
-            image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=80&h=80&fit=crop'
-          }
-        ],
-        subtotal: 59.97,
-        shipping: 12.87,
-        total: 72.84
-      });
+      setFetchError(true);
     } finally {
       setLoading(false);
     }
@@ -198,7 +156,6 @@ const PaymentPage = () => {
       const cleanedNumber = formData.cardNumber.replace(/\s/g, '');
       const isAmex = /^3[47]/.test(cleanedNumber) || formData.cardType === 'amex';
       
-      // Force CVV to be exactly 3 digits for all card types
       if (!/^\d{3}$/.test(formData.cvv)) {
         newErrors.cvv = `CVV must be 3 digits`;
       }
@@ -239,10 +196,8 @@ const PaymentPage = () => {
     const name = e.target.name;
     
     if (name === 'cardNumber') {
-      // Remove all non-digits
       const cleaned = value.replace(/\D/g, '');
       
-      // Format with spaces every 4 digits
       let formatted = '';
       for (let i = 0; i < cleaned.length; i++) {
         if (i > 0 && i % 4 === 0) {
@@ -256,7 +211,6 @@ const PaymentPage = () => {
     
     if (name === 'cardType') {
       setFormData({ ...formData, [name]: value });
-      // Clear error if exists
       if (errors.cardType) {
         setErrors({ ...errors, cardType: '' });
       }
@@ -272,146 +226,140 @@ const PaymentPage = () => {
     }
     
     if (name === 'cvv') {
-      // Limit CVV to exactly 3 digits
       value = value.replace(/\D/g, '').slice(0, 3);
     }
     
     setFormData({ ...formData, [name]: value });
-    // REMOVED: localStorage.setItem - we don't want to save anything
     
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!validateForm()) {
-    const firstError = document.querySelector('.error-message');
-    if (firstError) {
-      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    return;
-  }
-  
-  setIsSubmitting(true);
-  setPaymentStatus({ type: 'processing', message: 'Processing payment...' });
-  
-  try {
-    // Map card type to Stripe test tokens
-    const getTestPaymentToken = (cardType) => {
-      const tokens = {
-        'visa': 'pm_card_visa',
-        'mastercard': 'pm_card_mastercard',
-        'amex': 'pm_card_amex',
-        'discover': 'pm_card_discover',
-        'diners': 'pm_card_diners'
-      };
-      return tokens[cardType] || 'pm_card_visa';
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    const paymentMethodToken = getTestPaymentToken(formData.cardType);
-    
-    const paymentData = {
-      amount: orderSummary.total,
-      payment_method_token: paymentMethodToken,  // Send token instead of card data
-      email: formData.email,
-      name: `${formData.firstName} ${formData.lastName}`,
-      billing_address: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zipCode: formData.zipCode,
-        phoneNumber: formData.phoneNumber,
-        email: formData.email
+    if (!validateForm()) {
+      const firstError = document.querySelector('.error-message');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-    };
+      return;
+    }
     
-    console.log('Sending payment data with token:', paymentMethodToken);
+    setIsSubmitting(true);
+    setPaymentStatus({ type: 'processing', message: 'Processing payment...' });
     
-    const paymentResponse = await paymentAPI.processPayment(paymentData);
-    
-    console.log('Payment response:', paymentResponse.data);
-    
-    if (paymentResponse.data.success && paymentResponse.data.payment_status === 'succeeded') {
-      setPaymentStatus({ type: 'success', message: 'Payment successful! Redirecting to review...' });
-      
-      // Prepare shipping address object
-      const shippingAddress = {
-        name: `${formData.firstName} ${formData.lastName}`,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zipCode: formData.zipCode,
-        number: formData.phoneNumber,
-        email: formData.email
+    try {
+      const getTestPaymentToken = (cardType) => {
+        const tokens = {
+          'visa': 'pm_card_visa',
+          'mastercard': 'pm_card_mastercard',
+          'amex': 'pm_card_amex',
+          'discover': 'pm_card_discover',
+          'diners': 'pm_card_diners'
+        };
+        return tokens[cardType] || 'pm_card_visa';
       };
       
-      // Calculate delivery date
-      const deliveryDate = new Date();
-      deliveryDate.setDate(deliveryDate.getDate() + 5);
-      const formattedDeliveryDate = deliveryDate.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        month: 'long', 
-        day: 'numeric' 
-      });
+      const paymentMethodToken = getTestPaymentToken(formData.cardType);
       
-      // Get last 4 digits from the card number they entered (for display only)
-      const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
-      const cardLast4 = cleanCardNumber.slice(-4);
-      
-      // Store data for review page
-      const reviewData = {
-        orderSummary: {
-          items: orderSummary.items,
-          subtotal: orderSummary.subtotal,
-          total: orderSummary.total,
-          shipping: orderSummary.shipping
-        },
-        paymentIntentId: paymentResponse.data.payment_intent_id,
-        paymentInfo: {
-          card_last4: cardLast4,
-          card_type: formData.cardType,
-          name: `${formData.firstName} ${formData.lastName}`,
-          accountNumber: `**** **** **** ${cardLast4}`,
-          paidDate: new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })
-        },
-        shippingAddress: shippingAddress,
-        deliveryDate: formattedDeliveryDate,
-        userInfo: {
+      const paymentData = {
+        amount: orderSummary.total,
+        payment_method_token: paymentMethodToken,
+        email: formData.email,
+        name: `${formData.firstName} ${formData.lastName}`,
+        billing_address: {
           firstName: formData.firstName,
           lastName: formData.lastName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          phoneNumber: formData.phoneNumber,
+          email: formData.email
         }
       };
       
-      localStorage.setItem('reviewOrderData', JSON.stringify(reviewData));
+      console.log('Sending payment data with token:', paymentMethodToken);
       
-      setTimeout(() => {
-        navigate('/review');
-      }, 1500);
-    } else {
-      throw new Error('Payment failed');
+      const paymentResponse = await paymentAPI.processPayment(paymentData);
+      
+      console.log('Payment response:', paymentResponse.data);
+      
+      if (paymentResponse.data.success && paymentResponse.data.payment_status === 'succeeded') {
+        setPaymentStatus({ type: 'success', message: 'Payment successful! Redirecting to review...' });
+
+        const shippingAddress = {
+          name: `${formData.firstName} ${formData.lastName}`,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          number: formData.phoneNumber,
+          email: formData.email
+        };
+        
+        const deliveryDate = new Date();
+        deliveryDate.setDate(deliveryDate.getDate() + 5);
+        const formattedDeliveryDate = deliveryDate.toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        
+        const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
+        const cardLast4 = cleanCardNumber.slice(-4);
+        
+        const reviewData = {
+          orderSummary: {
+            items: orderSummary.items,
+            subtotal: orderSummary.subtotal,
+            total: orderSummary.total,
+            shipping: orderSummary.shipping
+          },
+          paymentIntentId: paymentResponse.data.payment_intent_id,
+          paymentInfo: {
+            card_last4: cardLast4,
+            card_type: formData.cardType,
+            name: `${formData.firstName} ${formData.lastName}`,
+            accountNumber: `**** **** **** ${cardLast4}`,
+            paidDate: new Date().toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })
+          },
+          shippingAddress: shippingAddress,
+          deliveryDate: formattedDeliveryDate,
+          userInfo: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phoneNumber: formData.phoneNumber
+          }
+        };
+        
+        localStorage.setItem('reviewOrderData', JSON.stringify(reviewData));
+        
+        setTimeout(() => {
+          navigate('/review');
+        }, 1500);
+      } else {
+        throw new Error('Payment failed');
+      }
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      setPaymentStatus({ 
+        type: 'error', 
+        message: error.response?.data?.message || error.message || 'Payment failed. Please try again.' 
+      });
+      setTimeout(() => setPaymentStatus(null), 5000);
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error('Error processing payment:', error);
-    setPaymentStatus({ 
-      type: 'error', 
-      message: error.response?.data?.message || error.message || 'Payment failed. Please try again.' 
-    });
-    setTimeout(() => setPaymentStatus(null), 5000);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
+
   if (loading) {
     return (
       <div className="payment-page">
@@ -425,13 +373,11 @@ const handleSubmit = async (e) => {
     );
   }
 
-  // Get selected card type display
   const selectedCardType = cardTypeOptions.find(opt => opt.value === formData.cardType);
 
-  // Custom dropdown component with logos
   const CardTypeDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = React.useRef(null);
+    const dropdownRef = useRef(null);
 
     useEffect(() => {
       const handleClickOutside = (event) => {
@@ -448,25 +394,12 @@ const handleSubmit = async (e) => {
         <div 
           className={`dropdown-header ${errors.cardType ? 'error' : ''}`}
           onClick={() => setIsOpen(!isOpen)}
-          style={{
-            width: '100%',
-            padding: '12px',
-            backgroundColor: '#0a0a0a',
-            border: `1px solid ${errors.cardType ? '#ff4444' : '#333'}`,
-            borderRadius: '6px',
-            color: '#ffffff',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}
         >
-          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span className="dropdown-header-content">
             {selectedCardType ? (
               <>
                 {selectedCardType.logo ? (
-                  <img src={selectedCardType.logo} alt={selectedCardType.label} style={{ width: '40px', height: 'auto' }} />
+                  <img src={selectedCardType.logo} alt={selectedCardType.label} className="card-logo" />
                 ) : (
                   <span>{selectedCardType.icon}</span>
                 )}
@@ -476,23 +409,11 @@ const handleSubmit = async (e) => {
               <span>Select card type</span>
             )}
           </span>
-          <span>{isOpen ? '▲' : '▼'}</span>
+          <span className="dropdown-arrow">{isOpen ? '▲' : '▼'}</span>
         </div>
         
         {isOpen && (
-          <div className="dropdown-menu" style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            backgroundColor: '#1a1a1a',
-            border: '1px solid #333',
-            borderRadius: '6px',
-            marginTop: '4px',
-            zIndex: 1000,
-            maxHeight: '300px',
-            overflowY: 'auto'
-          }}>
+          <div className="dropdown-menu">
             {cardTypeOptions.map(option => (
               <div
                 key={option.value}
@@ -501,21 +422,9 @@ const handleSubmit = async (e) => {
                   handleChange({ target: { name: 'cardType', value: option.value } });
                   setIsOpen(false);
                 }}
-                style={{
-                  padding: '12px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  transition: 'background-color 0.2s',
-                  backgroundColor: formData.cardType === option.value ? '#2a2a2a' : 'transparent',
-                  color: '#ffffff'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2a2a2a'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = formData.cardType === option.value ? '#2a2a2a' : 'transparent'}
               >
                 {option.logo ? (
-                  <img src={option.logo} alt={option.label} style={{ width: '40px', height: 'auto' }} />
+                  <img src={option.logo} alt={option.label} className="card-logo" />
                 ) : (
                   <span>{option.icon}</span>
                 )}
@@ -618,7 +527,7 @@ const handleSubmit = async (e) => {
                       maxLength="3"
                       value={formData.cvv}
                       onChange={handleChange}
-                      className={errors.cvv ? 'error' : ''}
+                      className={`cvv-input ${errors.cvv ? 'error' : ''}`}
                     />
                     {errors.cvv && <span className="error-message">{errors.cvv}</span>}
                     <small className="helper-text">

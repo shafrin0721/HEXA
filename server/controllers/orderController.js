@@ -1,4 +1,4 @@
-// Create new order
+
 exports.createOrder = async (req, res) => {
   try {
     const { 
@@ -14,14 +14,6 @@ exports.createOrder = async (req, res) => {
     
     const user_id = req.user?.id || 1;
 
-    console.log('\n=== CREATE ORDER DEBUG ===');
-    console.log('payment_intent_id:', payment_intent_id);
-    console.log('payment_info:', payment_info);
-    console.log('card_last4 from payment_info:', payment_info?.card_last4);
-    console.log('card_type from payment_info:', payment_info?.card_type);
-    console.log('========================\n');
-
-    // Validate required data
     if (!payment_intent_id) {
       throw new Error('payment_intent_id is required');
     }
@@ -30,33 +22,28 @@ exports.createOrder = async (req, res) => {
       throw new Error('payment_info with card_last4 is required');
     }
 
-    // Start transaction
     const connection = await require('../config/database').getConnection();
     await connection.beginTransaction();
 
     try {
-      // Create payment record with EXPLICIT values
       const paymentQuery = `
         INSERT INTO payments (order_id, amount, payment_method, card_last_four, status, transaction_id, card_type, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
       `;
       
       const paymentValues = [
-        null,  // order_id (will update later)
+        null, 
         total,
         'credit_card',
-        payment_info.card_last4,  // Use the actual card last 4 digits
+        payment_info.card_last4, 
         payment_status || 'completed',
-        payment_intent_id,  // Use Stripe payment intent ID
-        payment_info.card_type || 'unknown'  // Use actual card type
+        payment_intent_id, 
+        payment_info.card_type || 'unknown'
       ];
-      
-      console.log('Inserting payment with values:', paymentValues);
       
       const [paymentResult] = await connection.query(paymentQuery, paymentValues);
       const paymentId = paymentResult.insertId;
 
-      // Create order
       const orderQuery = `
         INSERT INTO orders (user_id, total, subtotal, shipping_cost, status, shipping_address, payment_id, payment_intent_id, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
@@ -76,13 +63,11 @@ exports.createOrder = async (req, res) => {
       const [orderResult] = await connection.query(orderQuery, orderValues);
       const orderId = orderResult.insertId;
 
-      // Update payment with order_id
       await connection.query(
         `UPDATE payments SET order_id = ? WHERE id = ?`,
         [orderId, paymentId]
       );
 
-      // Create order items
       if (items && items.length > 0) {
         for (const item of items) {
           await connection.query(
@@ -93,19 +78,13 @@ exports.createOrder = async (req, res) => {
         }
       }
 
-      // Commit transaction
       await connection.commit();
 
-      // Verify the inserted payment
       const [verifyPayment] = await connection.query(
         `SELECT * FROM payments WHERE id = ?`,
         [paymentId]
       );
       
-      console.log('\n=== VERIFICATION ===');
-      console.log('Payment record saved:', verifyPayment[0]);
-      console.log('===================\n');
-
       res.status(201).json({
         success: true,
         message: 'Order created successfully',

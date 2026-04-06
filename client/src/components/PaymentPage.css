@@ -1,8 +1,4 @@
-/* ============================================
-   FULL COVER PAYMENT PAGE
-   ============================================ */
 
-/* Base Reset */
 * {
   margin: 0;
   padding: 0;
@@ -747,37 +743,6 @@ html, body {
   font-size: 1rem;
 }
 
-/* Card Type Dropdown Styles */
-.card-type-dropdown {
-  position: relative;
-  width: 100%;
-}
-
-.dropdown-header {
-  transition: all 0.2s ease;
-}
-
-.dropdown-header:hover {
-  border-color: #666 !important;
-}
-
-.dropdown-menu {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.dropdown-option {
-  transition: all 0.2s ease;
-}
-
-.dropdown-option img {
-  max-height: 24px;
-  width: auto;
-  object-fit: contain;
-}
-
-.dropdown-option:hover {
-  background-color: #2a2a2a !important;
-}
 
 /* CVV input styling */
 input[name="cvv"] {
@@ -800,16 +765,6 @@ input[name="cvv"] {
   position: relative;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .dropdown-option img {
-    max-height: 20px;
-  }
-  
-  .dropdown-header {
-    padding: 10px !important;
-  }
-}
 
 /* Three column row for Card Type, Expiry Date, CVV */
 .form-row-three {
@@ -827,17 +782,208 @@ input[name="cvv"] {
   }
 }
 
-/* Adjust card type dropdown for three column layout */
-.form-row-three .card-type-dropdown {
+
+
+
+
+
+
+
+/* PaymentPage.css - Updated version */
+
+/* Card Type Dropdown Styles - FIXED SIZE */
+.card-type-dropdown {
+  position: relative;
   width: 100%;
 }
 
-.form-row-three .form-group {
+.dropdown-header {
+  width: 100%;
+  padding: 12px;
+  background-color: #0a0a0a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  min-height: 46px;
+  box-sizing: border-box;
+}
+
+.dropdown-header:hover {
+  border-color: #666 !important;
+}
+
+.dropdown-header.error {
+  border-color: #ff4444;
+}
+
+.dropdown-header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.dropdown-arrow {
+  margin-left: 10px;
+  font-size: 0.8rem;
+}
+
+.card-logo {
+  width: 40px;
+  height: auto;
+  max-height: 24px;
+  object-fit: contain;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  margin-top: 4px;
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-option {
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.2s ease;
+  background-color: transparent;
+  color: #ffffff;
+}
+
+.dropdown-option:hover {
+  background-color: #2a2a2a !important;
+}
+
+.dropdown-option.selected {
+  background-color: #2a2a2a;
+}
+
+/* CVV Input - FIXED SIZE */
+input[name="cvv"] {
+  letter-spacing: 2px;
+  font-family: monospace;
+  font-size: 1rem;
+  width: 100%;
+  padding: 12px;
+  background-color: #0a0a0a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #ffffff;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.cvv-input {
+  width: 100%;
+  padding: 12px;
+  background-color: #0a0a0a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  font-family: monospace;
+  box-sizing: border-box;
+}
+
+.cvv-input.error {
+  border-color: #ff4444;
+}
+
+input[name="cvv"]:focus,
+.cvv-input:focus {
+  outline: none;
+  border-color: #666;
+}
+
+/* Helper text styling */
+.helper-text {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+/* Form group adjustments */
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Three column row for Card Type, Expiry Date, CVV */
+.form-row-three {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
   margin-bottom: 0;
 }
 
+/* Ensure all inputs in three-column row have consistent height */
+.form-row-three .form-group input,
+.form-row-three .dropdown-header {
+  height: 46px;
+  box-sizing: border-box;
+}
+
+/* Responsive adjustments for three columns */
 @media (max-width: 768px) {
+  .form-row-three {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
   .form-row-three .form-group {
     margin-bottom: 1rem;
   }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dropdown-option img,
+  .card-logo {
+    max-height: 20px;
+    width: auto;
+  }
+  
+  .dropdown-header {
+    padding: 10px !important;
+  }
+}
+
+/* Error message styling */
+.error-message {
+  color: #ff4444;
+  font-size: 0.75rem;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Input error styling */
+input.error {
+  border-color: #ff4444 !important;
 }

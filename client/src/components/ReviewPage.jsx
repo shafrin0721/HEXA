@@ -40,7 +40,6 @@ const ReviewPage = () => {
   const [placingOrder, setPlacingOrder] = useState(false);
 
   useEffect(() => {
-    // Retrieve data from localStorage
     const savedReviewData = localStorage.getItem('reviewOrderData');
     
     if (savedReviewData) {
@@ -68,14 +67,12 @@ const ReviewPage = () => {
       });
       setLoading(false);
     } else {
-      // If no data found, redirect back to payment page
       console.log('No order data found, redirecting to payment');
       navigate('/payment');
     }
   }, [navigate]);
 
   const handleEdit = () => {
-    // Navigate back to payment page for editing
     navigate('/payment', { 
       state: { fromReview: true } 
     });
@@ -85,7 +82,6 @@ const ReviewPage = () => {
     setPlacingOrder(true);
     
     try {
-      // Prepare order data
       const orderData = {
         items: orderDetails.items,
         total: orderDetails.total,
@@ -103,18 +99,15 @@ const ReviewPage = () => {
       
       console.log('Creating order with data:', orderData);
       
-      // Create the order in database
       const orderResponse = await orderAPI.createOrder(orderData);
       
       if (orderResponse.data.success) {
         console.log('Order created successfully:', orderResponse.data);
         
-        // Clear localStorage
         localStorage.removeItem('reviewOrderData');
         localStorage.removeItem('paymentData');
         localStorage.removeItem('orderSummary');
         
-        // Show success message and redirect
         alert('Order placed successfully! Thank you for your purchase.');
         navigate('/order-success', { 
           state: { 
