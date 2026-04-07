@@ -43,47 +43,150 @@ This project aims to develop a fully functional e-commerce platform where:
 
 ```bash
 hexa-clothing/
-│
-├── client/                          # React Frontend (Vite)
-│   ├── public/
-│   │   ├── images/
-│   │   └── icons/
-│   │
-│   ├── src/
-│   │   ├── assets/                  # Static assets (images, fonts)
-│   │   ├── components/              # Reusable UI components
-│   │   │   ├── common/              # Buttons, Inputs, Loaders
-│   │   │   ├── layout/              # Navbar, Footer, Sidebar
-│   │   │   └── ui/                  # Figma-based UI blocks
-│   │   ├── pages/                   # Screens (Home, Product, Cart, Checkout)
-│   │   ├── routes/                  # Frontend routing
-│   │   ├── services/                # API services (Axios)
-│   │   ├── hooks/                   # Custom hooks
-│   │   ├── context/                 # Global context providers
-│   │   ├── utils/                   # Helper functions
-│   │   ├── styles/                  # Global styles
-│   │   ├── App.jsx
-│   │   └── main.jsx
+├── package.json
+├── README.md
+├── client/
 │   ├── package.json
-│   └── vite.config.js
-│
-├── server/                          # Node.js Backend (Express)
-│   ├── config/                      # DB connection
-│   ├── controllers/                 # API logic
-│   ├── models/                      # SQL Models
-│   ├── routes/                      # Express routing
-│   ├── middleware/                  # Auth middleware
-│   ├── utils/                       # Helper functions
-│   ├── app.js                       # Express app setup
-│   └── server.js                    # Start server
-│
-├── database/                        # SQL Scripts
+│   ├── README.md
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── tailwind.config.js/
+│   │   └── config.js
+│   ├── postcss.config.js
+│   ├── eslint.config.js
+│   ├── public/
+│   │   └── icons/
+│   │       └── images/
+│   └── src/
+│       ├── App.jsx
+│       ├── index.css
+│       ├── main.jsx
+│       ├── App.css
+│       ├── styles/
+│       │   └── globals.css
+│       ├── assets/
+│       ├── components/
+│       │   ├── common/
+│       │   │   ├── Button.jsx
+│       │   │   ├── Input.jsx
+│       │   │   └── Loader.jsx
+│       │   ├── layout/
+│       │   │   ├── Footer.jsx
+│       │   │   ├── Footer.css
+│       │   │   ├── Navbar.jsx
+│       │   │   ├── Navbar.css
+│       │   │   └── Sidebar.jsx
+│       │   └── ui/
+│       │       ├── Banner.jsx
+│       │       ├── CategoryCard.jsx
+│       │       └── ProductCard.jsx
+│       ├── context/
+│       │   ├── AuthContext.jsx
+│       │   └── CartContext.jsx
+│       ├── data/
+│       │   └── OrderMock.js
+│       ├── hooks/
+│       │   └── useAuth.js
+│       ├── pages/
+│       │   ├── Cart.jsx
+│       │   ├── checkout.css
+│       │   ├── checkout.jsx
+│       │   ├── Home.css
+│       │   ├── Home.jsx
+│       │   ├── Login.css
+│       │   ├── Login.jsx
+│       │   ├── OrderSuccess.jsx
+│       │   ├── OrderSummary.jsx
+│       │   ├── Products.jsx
+│       │   ├── Register.jsx
+│       │   ├── shipping.css
+│       │   └── ShippingStep.jsx
+│       ├── routes/
+│       │   └── AppRoutes.jsx
+│       ├── services/
+│       │   ├── api.js
+│       │   ├── authService.js
+│       │   ├── orderService.js
+│       │   └── productService.js
+│       └── utils/
+│           └── helpers.js
+├── database/
 │   ├── schema.sql
 │   └── seed.sql
-│
-├── .env
-├── .gitignore
-└── README.md
+├── react-ui-creator-main/
+│   ├── bun.lockb
+│   ├── components.json
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── playwright-fixture.ts
+│   ├── playwright.config.ts
+│   ├── postcss.config.js
+│   ├── README.md
+│   ├── tailwind.config.ts
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   ├── vite.config.ts
+│   ├── vitest.config.ts
+│   ├── backend/
+│   │   ├── package.json
+│   │   └── src/
+│   │       ├── db.js
+│   │       └── server.js
+│   │       └── routes/
+│   │           └── contactRoutes.js
+│   │           └── profileRoutes.js
+│   └── public/
+│       └── robots.txt
+│   └── src/
+│       ├── App.css
+│       ├── App.tsx
+│       ├── index.css
+│       ├── main.tsx
+│       ├── vite-env.d.ts
+│       ├── components/
+│       │   └── Footer.tsx
+│       │   └── Layout.tsx
+│       │   └── Navbar.tsx
+│       │   └── NavLink.tsx
+│       │   └── ui/
+│       ├── hooks/
+│       │   └── use-mobile.tsx
+│       │   └── use-toast.ts
+│       ├── lib/
+│       │   └── api.ts
+│       │   └── utils.ts
+│       ├── pages/
+│       │   └── Contact.tsx
+│       │   └── Index.tsx
+│       │   └── NotFound.tsx
+│       │   └── Settings.tsx
+│       └── test/
+│           └── example.test.ts
+│           └── setup.ts
+└── server/
+    ├── app.js
+    ├── package.json
+    ├── server.js
+    ├── config/
+    │   └── db.js
+    ├── controllers/
+    │   ├── authController.js
+    │   ├── orderController.js
+    │   └── productController.js
+    ├── middleware/
+    │   └── auth.js
+    ├── models/
+    │   ├── orderModel.js
+    │   ├── productModel.js
+    │   └── userModel.js
+    ├── routes/
+    │   ├── auth.routes.js
+    │   ├── cart.routes.js
+    │   ├── product.routes.js
+    └── utils/
+        └── helpers.js
 ```
 
 ---
