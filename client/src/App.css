@@ -16,6 +16,15 @@
     outline-offset: 2px;
   }
 }
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+}
 
 .hero {
   position: relative;

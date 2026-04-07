@@ -1,67 +1,76 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useCart } from '../../context/CartContext';
+import './Navbar.css';
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
-    const { getItemCount } = useCart();
     const navigate = useNavigate();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [cartCount] = useState(2); // Example cart count
 
-    const handleLogout = () => {
-        logout();
-        navigate('/');
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
     };
 
     return (
-        <nav className="bg-white shadow-md">
-            <div className="container mx-auto px-4">
-                <div className="flex justify-between items-center h-16">
-                    <Link to="/" className="text-2xl font-bold text-gray-800">
-                        HEXA
-                    </Link>
-                    
-                    <div className="hidden md:flex space-x-8">
-                        <Link to="/" className="text-gray-600 hover:text-gray-900">Home</Link>
-                        <Link to="/products" className="text-gray-600 hover:text-gray-900">Products</Link>
-                        <Link to="/about" className="text-gray-600 hover:text-gray-900">About</Link>
-                        <Link to="/contact" className="text-gray-600 hover:text-gray-900">Contact</Link>
-                    </div>
-                    
-                    <div className="flex items-center space-x-4">
-                        <Link to="/cart" className="relative">
-                            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M9 21a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            {getItemCount() > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                                    {getItemCount()}
-                                </span>
-                            )}
-                        </Link>
-                        
-                        {user ? (
-                            <div className="relative group">
-                                <button className="flex items-center space-x-2">
-                                    <span className="text-gray-700">{user.firstName}</span>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block">
-                                    <Link to="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</Link>
-                                    <Link to="/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Orders</Link>
-                                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
-                                        Logout
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <Link to="/login" className="text-gray-600 hover:text-gray-900">Login</Link>
+        <nav className="navbar">
+            <div className="nav-container">
+                {/* Logo */}
+                <Link to="/" className="nav-logo">
+                    HEXA
+                </Link>
+
+                {/* Desktop Navigation */}
+                <div className="nav-menu desktop-menu">
+                    <Link to="/" className="nav-link">Home</Link>
+                    <Link to="/products" className="nav-link">Products</Link>
+                    <Link to="/about" className="nav-link">About</Link>
+                    <Link to="/contact" className="nav-link">Contact</Link>
+                </div>
+
+                {/* Right Side Icons */}
+                <div className="nav-icons">
+                    {/* Cart Icon */}
+                    <Link to="/cart" className="nav-icon cart-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M9 21a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        {cartCount > 0 && (
+                            <span className="cart-badge">{cartCount}</span>
                         )}
-                    </div>
+                    </Link>
+
+                    {/* User Icon */}
+                    <Link to="/login" className="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </Link>
+
+                    {/* Mobile Menu Button */}
+                    <button className="mobile-menu-btn" onClick={toggleMenu}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            {isMenuOpen ? (
+                                <path d="M6 18L18 6M6 6l12 12"/>
+                            ) : (
+                                <path d="M3 12h18M3 6h18M3 18h18"/>
+                            )}
+                        </svg>
+                    </button>
                 </div>
             </div>
+
+            {/* Mobile Navigation */}
+            {isMenuOpen && (
+                <div className="mobile-menu">
+                    <Link to="/" className="mobile-nav-link" onClick={toggleMenu}>Home</Link>
+                    <Link to="/products" className="mobile-nav-link" onClick={toggleMenu}>Products</Link>
+                    <Link to="/about" className="mobile-nav-link" onClick={toggleMenu}>About</Link>
+                    <Link to="/contact" className="mobile-nav-link" onClick={toggleMenu}>Contact</Link>
+                    <Link to="/login" className="mobile-nav-link" onClick={toggleMenu}>Login</Link>
+                    <Link to="/cart" className="mobile-nav-link" onClick={toggleMenu}>Cart ({cartCount})</Link>
+                </div>
+            )}
         </nav>
     );
 };

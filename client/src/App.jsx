@@ -6,7 +6,10 @@ import OrderSummary from "./pages/OrderSummary";
 import OrderSuccess from "./pages/OrderSuccess";
 import CheckoutPage from "./pages/Checkout/Checkout";
 import ShippingStep from "./pages/Checkout/ShippingStep";
-import Home from "./pages/Home/Home";
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
+import Home from "./pages/Home";
+import './App.css';
 
 function App() {
   return (
@@ -17,8 +20,20 @@ function App() {
         <Route path="/checkout/shipping" element={<ShippingStep />} />
         <Route path="/order-summary" element={<OrderSummary />} />
         <Route path="/order-success" element={<OrderSuccess />} />
+        <div className="app">
+        <Navbar />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            {/* Add more routes as you develop */}
+          </Routes>
+        </main>
+        <Footer />
+      </div>
       </Routes>
+      
     </BrowserRouter>
+    
   );
 }
 
