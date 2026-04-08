@@ -41,71 +41,101 @@ This project aims to develop a fully functional e-commerce platform where:
 
 ```bash
 hexa-clothing/
-│
-├── client/                          # React Frontend (Vite)
+├── client/
 │   ├── public/
+│   │   ├── icons/
 │   │   ├── images/
-│   │   └── icons/
-│   │       └── images/
-│   └── src/
-│       ├── App.jsx
-│       ├── index.css
-│       ├── main.jsx
-│       ├── App.css
-│       ├── styles/
-│       │   └── globals.css
-│       ├── assets/
-│       ├── components/
-│       │   ├── common/
-│       │   │   ├── Button.jsx
-│       │   │   ├── Input.jsx
-│       │   │   └── Loader.jsx
-│       │   ├── layout/
-│       │   │   ├── Footer.jsx
-│       │   │   ├── Footer.css
-│       │   │   ├── Navbar.jsx
-│       │   │   ├── Navbar.css
-│       │   │   └── Sidebar.jsx
-│       │   └── ui/
-│       │       ├── Banner.jsx
-│       │       ├── CategoryCard.jsx
-│       │       └── ProductCard.jsx
-│       ├── context/
-│       │   ├── AuthContext.jsx
-│       │   └── CartContext.jsx
-│       ├── data/
-│       │   └── OrderMock.js
-│       ├── hooks/
-│       │   └── useAuth.js
-│       ├── pages/
-│       │   ├── Cart.jsx
-│       │   ├── checkout.css
-│       │   ├── checkout.jsx
-│       │   ├── Home.css
-│       │   ├── Home.jsx
-│       │   ├── Login.css
-│       │   ├── Login.jsx
-│       │   ├── OrderSuccess.jsx
-│       │   ├── OrderSummary.jsx
-│       │   ├── Products.jsx
-│       │   ├── Register.jsx
-│       │   ├── shipping.css
-│       │   └── ShippingStep.jsx
-│       ├── routes/
-│       │   └── AppRoutes.jsx
-│       ├── services/
-│       │   ├── api.js
-│       │   ├── authService.js
-│       │   ├── orderService.js
-│       │   └── productService.js
-│       └── utils/
-│           └── helpers.js
+│   │   └── robots.txt
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   │   ├── common/
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Input.jsx
+│   │   │   │   └── Loader.jsx
+│   │   │   ├── layout/
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   ├── Footer.jsx
+│   │   │   │   └── Sidebar.jsx
+│   │   │   └── ui/
+│   │   ├── context/
+│   │   │   ├── AuthContext.jsx
+│   │   │   └── CartContext.jsx
+│   │   ├── data/
+│   │   │   └── OrderMock.js
+│   │   ├── hooks/
+│   │   │   └── useAuth.js
+│   │   ├── pages/
+│   │   │   ├── About/
+│   │   │   ├── Cart/
+│   │   │   ├── Checkout/
+│   │   │   ├── Contact/
+│   │   │   ├── Home/
+│   │   │   ├── Login/
+│   │   │   ├── OrderSuccess/
+│   │   │   ├── OrderSummary/
+│   │   │   ├── Products/
+│   │   │   ├── Register/
+│   │   │   └── ShippingStep/
+│   │   ├── routes/
+│   │   │   └── AppRoutes.jsx
+│   │   ├── services/
+│   │   │   ├── api.js
+│   │   │   ├── authService.js
+│   │   │   ├── cartService.js
+│   │   │   ├── orderService.js
+│   │   │   ├── productService.js
+│   │   │   └── userService.js
+│   │   ├── styles/
+│   │   │   └── globals.css
+│   │   ├── utils/
+│   │   │   └── helpers.js
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   ├── main.jsx
+│   │   └── tailwind.config.js/
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── vite.config.js
+│   ├── eslint.config.js
+│   └── README.md
+├── server/
+│   ├── app.js
+│   ├── package.json
+│   ├── server.js
+│   ├── config/
+│   │   └── db.js
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── cartController.js
+│   │   ├── orderController.js
+│   │   ├── productController.js
+│   │   └── userController.js
+│   ├── middleware/
+│   │   ├── auth.js
+│   │   └── errorHandler.js
+│   ├── models/
+│   │   ├── orderModel.js
+│   │   ├── productModel.js
+│   │   └── userModel.js
+│   ├── routes/
+│   │   ├── auth.routes.js
+│   │   ├── cart.routes.js
+│   │   ├── order.routes.js
+│   │   ├── product.routes.js
+│   │   └── user.routes.js
+│   └── utils/
+│       ├── helpers.js
+│       └── validators.js
 ├── database/
 │   ├── schema.sql
 │   └── seed.sql
-│
-├── .env
+├── package.json
 ├── .gitignore
+├── SETUP.md
+├── STRUCTURE.md
+├── API_DOCUMENTATION.md
 └── README.md
 ```
 
