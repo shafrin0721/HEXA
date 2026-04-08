@@ -1,18 +1,19 @@
 # 🛍️ HEXA Clothing – Full Stack E-Commerce Platform
 
-HEXA Clothing is a modern full-stack e-commerce web application designed to deliver a seamless online shopping experience. The system includes a responsive frontend built with React (Vite) and a scalable backend powered by Node.js, Express, and MySQL.
+HEXA Clothing is a modern full-stack e-commerce web application designed to deliver a seamless online shopping experience. The system includes a responsive frontend built with React (Vite) and a scalable backend powered by Node.js, Express, and SQL.
 
 ---
 
 ## 🚀 Project Overview
 
-This project aims to develop a fully functional e-commerce platform where:
+This platform allows users to:
 
-* Customers can browse products and categories
-* Users can register and log in securely
-* Customers can add items to cart and place orders
-* Orders and payments are processed efficiently
-* Admins can manage products, users, and orders
+* Browse products by categories
+* View detailed product information
+* Add items to cart
+* Place and manage orders
+* Secure authentication and user management
+* Admin-level product and order control
 
 ---
 
@@ -29,7 +30,7 @@ This project aims to develop a fully functional e-commerce platform where:
 
 * Node.js
 * Express.js
-* MySQL Database
+* SQL Database (MySQL)
 
 ### Tools
 
@@ -43,219 +44,95 @@ This project aims to develop a fully functional e-commerce platform where:
 
 ```bash
 hexa-clothing/
-├── package.json
-├── README.md
-├── client/
-│   ├── package.json
-│   ├── README.md
-│   ├── index.html
-│   ├── vite.config.js
-│   ├── tailwind.config.js/
-│   │   └── config.js
-│   ├── postcss.config.js
-│   ├── eslint.config.js
+│
+├── client/                          # React Frontend (Vite)
 │   ├── public/
+│   │   ├── images/
 │   │   └── icons/
-│   │       └── images/
-│   └── src/
-│       ├── App.jsx
-│       ├── index.css
-│       ├── main.jsx
-│       ├── App.css
-│       ├── styles/
-│       │   └── globals.css
-│       ├── assets/
-│       ├── components/
-│       │   ├── common/
-│       │   │   ├── Button.jsx
-│       │   │   ├── Input.jsx
-│       │   │   └── Loader.jsx
-│       │   ├── layout/
-│       │   │   ├── Footer.jsx
-│       │   │   ├── Footer.css
-│       │   │   ├── Navbar.jsx
-│       │   │   ├── Navbar.css
-│       │   │   └── Sidebar.jsx
-│       │   └── ui/
-│       │       ├── Banner.jsx
-│       │       ├── CategoryCard.jsx
-│       │       └── ProductCard.jsx
-│       ├── context/
-│       │   ├── AuthContext.jsx
-│       │   └── CartContext.jsx
-│       ├── data/
-│       │   └── OrderMock.js
-│       ├── hooks/
-│       │   └── useAuth.js
-│       ├── pages/
-│       │   ├── Cart.jsx
-│       │   ├── checkout.css
-│       │   ├── checkout.jsx
-│       │   ├── Home.css
-│       │   ├── Home.jsx
-│       │   ├── Login.css
-│       │   ├── Login.jsx
-│       │   ├── OrderSuccess.jsx
-│       │   ├── OrderSummary.jsx
-│       │   ├── Products.jsx
-│       │   ├── Register.jsx
-│       │   ├── shipping.css
-│       │   └── ShippingStep.jsx
-│       ├── routes/
-│       │   └── AppRoutes.jsx
-│       ├── services/
-│       │   ├── api.js
-│       │   ├── authService.js
-│       │   ├── orderService.js
-│       │   └── productService.js
-│       └── utils/
-│           └── helpers.js
-├── database/
+│   │
+│   ├── src/
+│   │   ├── assets/                  # Static assets (images, fonts)
+│   │   │
+│   │   ├── components/              # Reusable UI components
+│   │   │   ├── common/              # Buttons, Inputs, Loader
+│   │   │   ├── layout/              # Navbar, Footer, Sidebar
+│   │   │   └── ui/                  # Figma-based UI blocks
+│   │   │
+│   │   ├── pages/                   # Screens (Home, Product, Cart...)
+│   │   ├── routes/                  # Frontend routing
+│   │   ├── services/                # API services (axios)
+│   │   ├── hooks/                   # Custom hooks
+│   │   ├── context/                 # Global context providers
+│   │   ├── utils/                   # Helper functions
+│   │   ├── styles/                  # Global styles
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   │
+│   ├── package.json
+│   └── vite.config.js
+│
+├── server/                          # Node.js Backend (Express)
+│   ├── config/                      # DB connection
+│   ├── controllers/                 # API logic
+│   ├── models/                      # SQL Models
+│   ├── routes/                      # Express routing
+│   ├── middleware/                  # Auth middleware
+│   ├── utils/                       # Helper functions
+│   ├── app.js                       # Express app setup
+│   └── server.js                    # Start server
+│
+├── database/                        # SQL Scripts
 │   ├── schema.sql
 │   └── seed.sql
-├── react-ui-creator-main/
-│   ├── bun.lockb
-│   ├── components.json
-│   ├── eslint.config.js
-│   ├── index.html
-│   ├── package.json
-│   ├── playwright-fixture.ts
-│   ├── playwright.config.ts
-│   ├── postcss.config.js
-│   ├── README.md
-│   ├── tailwind.config.ts
-│   ├── tsconfig.app.json
-│   ├── tsconfig.json
-│   ├── tsconfig.node.json
-│   ├── vite.config.ts
-│   ├── vitest.config.ts
-│   ├── backend/
-│   │   ├── package.json
-│   │   └── src/
-│   │       ├── db.js
-│   │       └── server.js
-│   │       └── routes/
-│   │           └── contactRoutes.js
-│   │           └── profileRoutes.js
-│   └── public/
-│       └── robots.txt
-│   └── src/
-│       ├── App.css
-│       ├── App.tsx
-│       ├── index.css
-│       ├── main.tsx
-│       ├── vite-env.d.ts
-│       ├── components/
-│       │   └── Footer.tsx
-│       │   └── Layout.tsx
-│       │   └── Navbar.tsx
-│       │   └── NavLink.tsx
-│       │   └── ui/
-│       ├── hooks/
-│       │   └── use-mobile.tsx
-│       │   └── use-toast.ts
-│       ├── lib/
-│       │   └── api.ts
-│       │   └── utils.ts
-│       ├── pages/
-│       │   └── Contact.tsx
-│       │   └── Index.tsx
-│       │   └── NotFound.tsx
-│       │   └── Settings.tsx
-│       └── test/
-│           └── example.test.ts
-│           └── setup.ts
-└── server/
-    ├── app.js
-    ├── package.json
-    ├── server.js
-    ├── config/
-    │   └── db.js
-    ├── controllers/
-    │   ├── authController.js
-    │   ├── orderController.js
-    │   └── productController.js
-    ├── middleware/
-    │   └── auth.js
-    ├── models/
-    │   ├── orderModel.js
-    │   ├── productModel.js
-    │   └── userModel.js
-    ├── routes/
-    │   ├── auth.routes.js
-    │   ├── cart.routes.js
-    │   ├── product.routes.js
-    └── utils/
-        └── helpers.js
+│
+├── .env
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## 👥 Team & Responsibilities
+## 👥 Team & API Responsibilities
 
-### 🔹 Development Roles
-
-| Member     | Role                                     |
-| ---------- | ---------------------------------------- |
-| Shafrin    | Team Lead, Full Stack, Deployment, UI/UX |
-| Heli       | Database + Frontend + QA                 |
-| Thushalini | Frontend + QA                            |
-| Shavindi   | Backend Support + QA + Frontend          |
-| Piyula     | Frontend + QA                            |
-| Vithush    | Full Stack Development                   |
-| Sara       | Frontend + QA                            |
-
----
-
-### 🎨 Page Allocation (Frontend)
-
-| Member     | Pages                                       |
-| ---------- | ------------------------------------------- |
-| Heli       | Home, Products (Grid), About                |
-| Shafrin    | Products (Single/List), Cart, Order Summary |
-| Shavindi   | Create Account, Log In                      |
-| Thushalini | Contact, Profile                            |
-| Piyula     | Address, Shipping                           |
-| Vithush    | Payment, Review                             |
-| Sara       | Order Success, Order Summary 1              |
+| Member     | Branch              | Responsibility     |
+| ---------- | ------------------- | ------------------ |
+| Shafrin    | feature/auth-api    | Authentication API |
+| Heli       | feature/product-api | Product API        |
+| Sara       | feature/cart-api    | Cart API           |
+| Thushalini | feature/order-api   | Order API          |
+| Piyula     | feature/payment-api | Payment API        |
+| Vithush    | feature/user-api    | User API           |
 
 ---
 
 ## 🌿 Git Workflow
 
-We follow a **feature-based branching strategy (page-based)**:
+We follow a **feature-based branching strategy**:
 
-* Each member works on their assigned pages in a separate branch
-* No direct commits to `main`
-* Push changes → Create Pull Request → Review → Merge
+1. Each member works on their own branch
+2. No direct commits to `main`
+3. Push changes to feature branch
+4. Create Pull Request
+5. Review and merge into `main`
 
----
-
-### 🔀 Branch Naming Convention
+### Branch Naming Convention
 
 ```bash
-feature/<member>-<pages>
+feature/<api-name>
 ```
 
----
-
-### 📌 Branch Allocation
+Example:
 
 ```bash
-feature/heli-home-products-about
-feature/shafrin-products-cart-order-summary
-feature/shavindi-auth-pages
-feature/thushalini-contact-profile
-feature/piyula-address-shipping
-feature/vithush-payment-review
-feature/sara-order-success-summary1
+feature/auth-api
+feature/product-api
 ```
 
 ---
 
 ## ⚙️ Setup Instructions
 
-### 1. Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/shafrin0721/HEXA.git
@@ -293,7 +170,7 @@ npm start
 
 ## 🔐 Environment Variables
 
-Create a `.env` file:
+Create a `.env` file in the root or server folder:
 
 ```env
 PORT=5000
@@ -306,72 +183,14 @@ JWT_SECRET=yoursecretkey
 
 ---
 
-## 📅 Project Timeline
-
-| Phase   | Task                 | Duration |
-| ------- | -------------------- | -------- |
-| Phase 1 | Project Setup        | 2 Days   |
-| Phase 2 | UI/UX Design         | 3 Days   |
-| Phase 3 | Database Design      | 3 Days   |
-| Phase 4 | Frontend Development | 10 Days  |
-| Phase 5 | Backend Development  | 12 Days  |
-| Phase 6 | Testing & QA         | 5 Days   |
-| Phase 7 | Deployment           | 2 Days   |
-
-**Total Duration:** ~6 Weeks (34 Working Days)
-
----
-
-## 🔧 Development Workflow
-
-1. Setup environment
-2. Design UI & database
-3. Develop frontend & backend in parallel
-4. API integration
-5. Testing & debugging
-6. Deployment
-
----
-
 ## 📌 Key Features
 
 * User Authentication (JWT)
 * Product Management
 * Cart & Checkout System
 * Order Processing
-* Payment Integration
 * RESTful APIs
-* Responsive UI
-
----
-
-## 🔐 Security Measures
-
-* HTTPS (SSL)
-* Password hashing (bcrypt)
-* JWT authentication
-* Input validation & sanitization
-
----
-
-## ⚠️ Risk Management
-
-| Risk               | Impact | Mitigation            |
-| ------------------ | ------ | --------------------- |
-| Team delays        | High   | Parallel development  |
-| Integration issues | High   | Daily sync meetings   |
-| Bugs               | Medium | Continuous testing    |
-| Deployment errors  | Medium | Pre-deployment checks |
-
----
-
-## 🎯 Success Criteria
-
-* System runs without critical bugs
-* Smooth checkout process
-* Admin can manage products & orders
-* Fully responsive UI
-* Fast performance
+* Modular Architecture
 
 ---
 
@@ -382,27 +201,39 @@ https://www.figma.com/design/huBctacPiwvl9GsP0J25gK/hexa-clothing
 
 ---
 
+## ✅ Best Practices Followed
+
+* Clean folder structure
+* Separation of concerns (MVC)
+* Reusable components
+* API modularization
+* Version control with Git
+
+---
+
 ## 📬 Contribution Guidelines
 
 * Pull latest `main` before starting
 * Work only in your assigned branch
 * Commit with clear messages
-* Test before creating Pull Request
-
----
-
-## 🚀 Deployment Plan
-
-* Frontend: Netlify
-* Backend: Render
-* Database: MySQL Server
+* Test before submitting PR
 
 ---
 
 ## 📄 License
 
-This project is developed for academic purposes.
+This project is developed for academic and learning purposes.
 
 ---
 
-✨ Built with teamwork, structured planning, and clean development practices.
+## 💡 Future Enhancements
+
+* Payment gateway integration
+* Admin dashboard UI
+* Order tracking system
+* Email notifications
+* Deployment (Netlify + Render)
+
+---
+
+✨ Built with teamwork, structure, and clean code.
