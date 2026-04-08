@@ -1,33 +1,21 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const db = require('../config/db');
-
 const router = express.Router();
+const authController = require('../controllers/authController');
+const auth = require('../middleware/auth');
 
-// Register
-router.post('/register', async (req, res) => {
-    try {
-        const { firstName, lastName, email, password } = req.body;
-        
-        // Check if user exists
-        const [existing] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
-        if (existing.length > 0) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
-        
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
-        
-        // Create user
-        const [result] = await db.query(
-            'INSERT INTO users (first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?)',
-            [firstName, lastName, email, hashedPassword]
-        );
-        
-        // Generate token
-        const token = jwt.sign(
-            { id: result.insertId, email, role: 'user' },
+// Register new user
+router.post('/register', authController.register);
+
+// Login user
+router.post('/login', authController.login);
+
+// Logout user
+router.post('/logout', auth, authController.logout);
+
+// Refresh token
+router.post('/refresh', authController.refreshToken);
+
+module.exports = router;
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );

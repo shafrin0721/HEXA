@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Cart = () => {
     const { cartItems, updateQuantity, removeFromCart, getCartTotal, loading } = useCart();
@@ -27,7 +27,6 @@ const Cart = () => {
             <h1 className="text-3xl font-bold mb-8">Shopping Cart ({cartItems.length} items)</h1>
             
             <div className="flex flex-col lg:flex-row gap-8">
-                {/* Cart Items */}
                 <div className="lg:w-2/3">
                     <div className="bg-white rounded-lg shadow overflow-hidden">
                         <div className="hidden md:grid grid-cols-12 gap-4 bg-gray-50 px-6 py-3 font-semibold text-gray-600">
@@ -89,7 +88,6 @@ const Cart = () => {
                     </div>
                 </div>
                 
-                {/* Order Summary */}
                 <div className="lg:w-1/3">
                     <div className="bg-white rounded-lg shadow p-6">
                         <h2 className="text-xl font-bold mb-4">Order Summary</h2>
@@ -110,7 +108,7 @@ const Cart = () => {
                             </div>
                         </div>
                         {user ? (
-                            <Link to="/checkout/address">
+                            <Link to="/checkout">
                                 <button className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800">
                                     Proceed to Checkout
                                 </button>

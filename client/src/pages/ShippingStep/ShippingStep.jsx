@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Phone, Mail, MapPin } from 'lucide-react';
 import './shipping.css';
 
 export default function ShippingStep() {
@@ -66,12 +65,8 @@ export default function ShippingStep() {
   const handleContinue = () => {
     if (currentStep < 4) {
       if (currentStep === 2) {
-        // Navigate to payment step (you can create this component later)
-        // navigate('/checkout/payment');
         setCurrentStep(3);
       } else if (currentStep === 3) {
-        // Navigate to review step
-        // navigate('/checkout/review');
         setCurrentStep(4);
       }
     }
@@ -89,12 +84,10 @@ export default function ShippingStep() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header */}
       <div className="border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
-          {/* Progress Steps */}
           <div className="flex items-center gap-8 overflow-x-auto pb-4">
             {steps.map((step, index) => (
               <div key={step.number} className="flex items-center gap-3 whitespace-nowrap">
@@ -123,16 +116,13 @@ export default function ShippingStep() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Form Section */}
           <div className="lg:col-span-2">
             <div className="space-y-8">
               <div>
                 <h2 className="text-2xl font-bold mb-8">Shipping</h2>
 
-                {/* Shipping Options */}
                 <div className="space-y-6">
                   {shippingOptions.map((option) => (
                     <div
@@ -166,7 +156,6 @@ export default function ShippingStep() {
                 </div>
               </div>
 
-              {/* Navigation Buttons */}
               <div className="flex gap-4 mt-8">
                 <button
                   onClick={handleBack}
@@ -184,7 +173,6 @@ export default function ShippingStep() {
             </div>
           </div>
 
-          {/* Order Summary Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-6 space-y-6">
               <div>
@@ -215,109 +203,27 @@ export default function ShippingStep() {
                   ))}
                 </div>
 
-                {/* Price Breakdown */}
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">SUBTOTAL</span>
-                    <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                    <span>Subtotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">Shipping</span>
-                    <span className="font-semibold">${shippingCost.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm border-t border-gray-700 pt-3">
-                    <span className="font-bold">Order total</span>
-                    <span className="font-bold">${total.toFixed(2)}</span>
+                    <span>Shipping</span>
+                    <span>${shippingCost.toFixed(2)}</span>
                   </div>
                 </div>
-
-                {/* Continue Button */}
-                <button
-                  onClick={handleContinue}
-                  className="w-full py-3 rounded-lg font-semibold bg-yellow-500 hover:bg-yellow-600 text-black transition-colors"
-                >
-                  Continue
-                </button>
-
-                {/* Footer Links */}
-                <div className="space-y-2 text-right text-xs mt-6">
-                  <a href="#" className="text-gray-400 hover:text-white block transition-colors">
-                    RETURN POLICY
-                  </a>
-                  <a href="#" className="text-gray-400 hover:text-white block transition-colors">
-                    HELP
-                  </a>
+                <div className="border-t pt-4 mb-6">
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span>${total.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-700 bg-gray-950 mt-16">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            {/* Get to Know Us */}
-            <div>
-              <h4 className="font-bold mb-4">Get to Know Us</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Home</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Cart</a></li>
-              </ul>
-            </div>
-
-            {/* Make Money with Us */}
-            <div>
-              <h4 className="font-bold mb-4">Make Money with Us</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Sell products</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Sell on Business</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Advertise Your Products</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Self-Publish with Us</a></li>
-              </ul>
-            </div>
-
-            {/* Let Us Help You */}
-            <div>
-              <h4 className="font-bold mb-4">Let Us Help You</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Your Account</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Your Orders</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Returns & Replacements</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Manage Your Content and Devices</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Help</a></li>
-              </ul>
-            </div>
-
-            {/* Contact Info */}
-            <div>
-              <h4 className="font-bold mb-4">Contact Us</h4>
-              <ul className="space-y-3 text-sm text-gray-400">
-                <li className="flex items-center gap-2">
-                  <Phone size={16} />
-                  <span>+44 20 7946 0123</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Mail size={16} className="mt-0.5" />
-                  <span>support@hexa.com</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <MapPin size={16} className="mt-0.5" />
-                  <span>123 Northern Park Lane, West London, W1A 4ZZ, United Kingdom</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Back to Top */}
-          <div className="border-t border-gray-700 pt-6 text-center text-sm text-gray-500">
-            <button className="hover:text-white transition-colors">Back to top</button>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

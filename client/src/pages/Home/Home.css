@@ -382,13 +382,18 @@ body {
   color: #fff;
   outline: none;
   font-size: 1rem;
-  transition: all 0.3s ease;
 }
 
 .contact-form input:focus,
 .contact-form textarea:focus {
   border-color: rgba(255,255,255,0.3);
   background: rgba(255,255,255,0.1);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+}
+
+.contact-form input:hover:not(:focus),
+.contact-form textarea:hover:not(:focus) {
+  border-color: rgba(255,255,255,0.15);
 }
 
 .contact-form input::placeholder,

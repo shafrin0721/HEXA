@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ChevronRight, Phone, Mail, MapPin } from 'lucide-react';
 import './checkout.css';
 
 export default function CheckoutPage() {
@@ -75,12 +74,10 @@ export default function CheckoutPage() {
   return (
     <>
       <div className="checkout-container" style={{ minHeight: '100vh', background: '#000', color: '#fff', paddingBottom: '0' }}>
-        {/* Header */}
         <div className="checkout-header" style={{ borderBottom: '1px solid #444', padding: '40px 0 20px 0', marginBottom: '0' }}>
           <div className="checkout-header-inner" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
             <h1 className="checkout-title" style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>Checkout</h1>
 
-            {/* Progress Steps */}
             <div className="progress-steps" style={{ display: 'flex', alignItems: 'center', gap: '32px', overflowX: 'auto', paddingBottom: '16px' }}>
               {steps.map((step, index) => (
                 <div key={step.number} className="progress-step" style={{ display: 'flex', alignItems: 'center', gap: '12px', whiteSpace: 'nowrap' }}>
@@ -118,15 +115,12 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="checkout-main" style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '48px' }}>
-          {/* Form Section */}
           <div className="form-section" style={{ paddingRight: '32px' }}>
             {currentStep === 1 && (
               <div className="form-section-inner" style={{ marginBottom: '32px' }}>
                 <h2 className="form-section-title" style={{ fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '18px' }}>Address</h2>
 
-                {/* Email Address */}
                 <div className="form-group" style={{ marginBottom: '18px' }}>
                   <label className="form-label" style={{ display: 'block', marginBottom: '6px' }}>Email Address</label>
                   <input
@@ -140,7 +134,6 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                {/* First and Last Name */}
                 <div className="form-row" style={{ display: 'flex', gap: '18px', marginBottom: '18px' }}>
                   <div className="form-group" style={{ flex: 1 }}>
                     <label className="form-label" style={{ display: 'block', marginBottom: '6px' }}>First Name</label>
@@ -168,7 +161,6 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Address */}
                 <div className="form-group" style={{ marginBottom: '18px' }}>
                   <label className="form-label" style={{ display: 'block', marginBottom: '6px' }}>Address</label>
                   <input
@@ -182,7 +174,6 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                {/* City and State */}
                 <div className="form-row" style={{ display: 'flex', gap: '18px', marginBottom: '18px' }}>
                   <div className="form-group" style={{ flex: 1 }}>
                     <label className="form-label" style={{ display: 'block', marginBottom: '6px' }}>City</label>
@@ -210,7 +201,6 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Zip Code */}
                 <div className="form-group" style={{ marginBottom: '18px' }}>
                   <label className="form-label" style={{ display: 'block', marginBottom: '6px' }}>Zip Code</label>
                   <input
@@ -224,15 +214,14 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                {/* Phone Number */}
                 <div className="form-group" style={{ marginBottom: '18px' }}>
-                  <label className="form-label" style={{ display: 'block', marginBottom: '6px' }}>Phone number</label>
+                  <label className="form-label" style={{ display: 'block', marginBottom: '6px' }}>Phone</label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="Phone number"
+                    placeholder="(123) 456-7890"
                     className="form-input"
                     style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #aaa', background: '#111', color: '#fff' }}
                   />
@@ -240,143 +229,57 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {currentStep === 2 && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold">Shipping Method</h2>
-                <div className="bg-gray-900 p-6 rounded-lg border border-gray-700">
-                  <p className="text-gray-400">Select your preferred shipping method on this screen.</p>
-                </div>
-              </div>
-            )}
-
-            {currentStep === 3 && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold">Payment Method</h2>
-                <div className="bg-gray-900 p-6 rounded-lg border border-gray-700">
-                  <p className="text-gray-400">Enter your payment details on this screen.</p>
-                </div>
-              </div>
-            )}
-
-            {currentStep === 4 && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold">Review Order</h2>
-                <div className="bg-gray-900 p-6 rounded-lg border border-gray-700">
-                  <p className="text-gray-400">Review your order details before completing your purchase.</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Order Summary Sidebar */}
-          <div className="order-summary" style={{ background: '#111', borderRadius: '12px', padding: '32px 24px', border: '1px solid #444', position: 'sticky', top: '32px', alignSelf: 'start' }}>
-            <h3 className="order-summary-title" style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '16px' }}>Order Summary</h3>
-            <div className="order-summary-list">
-              <p className="order-summary-count" style={{ color: '#aaa', fontSize: '0.95rem', marginBottom: '18px' }}>{orderItems.length} Item</p>
-              {orderItems.map((item) => (
-                <div key={item.id} className="order-summary-item" style={{ display: 'flex', gap: '16px', marginBottom: '18px', paddingBottom: '18px', borderBottom: '1px solid #444' }}>
-                  <div className="order-summary-image" style={{ width: '70px', height: '70px', background: '#222', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', flexShrink: 0 }}>
-                    {/* Replace emoji with image if available */}
-                    {item.image}
-                  </div>
-                  <div className="order-summary-details" style={{ flex: 1, minWidth: 0 }}>
-                    <h4 className="order-summary-name" style={{ fontWeight: 600, fontSize: '1rem', marginBottom: '4px', color: '#fff' }}>{item.name}</h4>
-                    <p className="order-summary-brand" style={{ fontSize: '0.8rem', color: '#aaa', marginBottom: '6px' }}>Brand: {item.brand}</p>
-                    <div className="order-summary-rating" style={{ display: 'flex', alignItems: 'center', gap: '2px', marginBottom: '6px' }}>
-                      {[...Array(item.rating)].map((_, i) => (
-                        <span key={i} className="order-summary-star" style={{ color: '#FFD700', fontSize: '1rem' }}>★</span>
-                      ))}
-                    </div>
-                    <p className="order-summary-price" style={{ fontWeight: 600, fontSize: '1rem', color: '#fff' }}>${item.price.toFixed(2)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="price-breakdown" style={{ marginBottom: '18px' }}>
-              <div className="price-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', marginBottom: '6px', color: '#ccc' }}>
-                <span>SUBTOTAL</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="price-row" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', marginBottom: '6px', color: '#ccc' }}>
-                <span>Shipping</span>
-                <span>${shipping.toFixed(2)}</span>
-              </div>
-              <div className="price-row total" style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #444', paddingTop: '12px', fontWeight: 'bold', color: '#fff' }}>
-                <span>Order total</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-            </div>
             <button
               onClick={handleContinue}
-              disabled={currentStep === 1 && !isFormValid()}
-              className="continue-btn"
-              style={{ width: '100%', padding: '12px 0', borderRadius: '6px', fontWeight: 600, background: currentStep === 1 && !isFormValid() ? '#444' : '#FFD700', color: currentStep === 1 && !isFormValid() ? '#aaa' : '#000', border: 'none', marginBottom: '12px', cursor: currentStep === 1 && !isFormValid() ? 'not-allowed' : 'pointer', fontSize: '1rem' }}
+              className="btn btn-continue"
+              disabled={!isFormValid()}
             >
               Continue
             </button>
-            <div className="footer-links" style={{ textAlign: 'right', fontSize: '0.85rem', marginTop: '18px' }}>
-              <a href="#" className="footer-link" style={{ color: '#aaa', display: 'block', marginBottom: '4px', textDecoration: 'none' }}>RETURN POLICY</a>
-              <a href="#" className="footer-link" style={{ color: '#aaa', display: 'block', textDecoration: 'none' }}>HELP</a>
-            </div>
           </div>
+
+          <aside className="sidebar">
+            <div className="order-summary">
+              <h3>Order Summary</h3>
+              <div className="order-summary-divider">
+                <p className="item-count">{orderItems.length} items</p>
+                {orderItems.map((item) => (
+                  <div key={item.id} className="order-item">
+                    <div className="order-item-image">
+                      <span>{item.image}</span>
+                    </div>
+                    <div className="order-item-details">
+                      <p className="order-item-name">{item.name}</p>
+                      <p className="order-item-brand">{item.brand}</p>
+                      <div className="order-item-rating">
+                        {[...Array(item.rating)].map((_, index) => (
+                          <span key={index} className="order-item-star">★</span>
+                        ))}
+                      </div>
+                      <p className="order-item-price">${item.price.toFixed(2)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="pricing-section">
+                <div className="price-row">
+                  <span className="price-label">Subtotal</span>
+                  <span className="price-value">${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="price-row">
+                  <span className="price-label">Shipping</span>
+                  <span className="price-value">${shipping.toFixed(2)}</span>
+                </div>
+                <div className="price-row total">
+                  <span className="price-label">Total</span>
+                  <span className="price-value">${total.toFixed(2)}</span>
+                </div>
+                <button className="btn btn-continue">Proceed to Payment</button>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="checkout-footer" style={{ background: '#eee', marginTop: '40px', padding: '0', borderTop: 'none' }}>
-        <div className="checkout-footer-inner" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0' }}>
-          <div className="footer-sections" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '32px', padding: '32px 24px 0 24px', background: '#eee' }}>
-            {/* Get to Know Us */}
-            <div className="footer-section" style={{ color: '#000' }}>
-              <h4 className="footer-section-title">Get to Know Us</h4>
-              <ul className="footer-section-list">
-                <li><a href="#" className="footer-section-link">Home</a></li>
-                <li><a href="#" className="footer-section-link">About</a></li>
-                <li><a href="#" className="footer-section-link">Contact</a></li>
-                <li><a href="#" className="footer-section-link">Cart</a></li>
-              </ul>
-            </div>
-
-            {/* Make Money with Us */}
-            <div className="footer-section" style={{ color: '#000' }}>
-              <h4 className="footer-section-title">Make Money with Us</h4>
-              <ul className="footer-section-list">
-                <li><a href="#" className="footer-section-link">Sell products</a></li>
-                <li><a href="#" className="footer-section-link">Sell on Business</a></li>
-                <li><a href="#" className="footer-section-link">Advertise Your Products</a></li>
-                <li><a href="#" className="footer-section-link">Self-Publish with Us</a></li>
-              </ul>
-            </div>
-
-            {/* Let Us Help You */}
-            <div className="footer-section" style={{ color: '#000' }}>
-              <h4 className="footer-section-title">Let Us Help You</h4>
-              <ul className="footer-section-list">
-                <li><a href="#" className="footer-section-link">Your Account</a></li>
-                <li><a href="#" className="footer-section-link">Your Orders</a></li>
-                <li><a href="#" className="footer-section-link">Returns & Replacements</a></li>
-                <li><a href="#" className="footer-section-link">Manage Your Content and Devices</a></li>
-                <li><a href="#" className="footer-section-link">Help</a></li>
-              </ul>
-            </div>
-
-            {/* Contact Info */}
-            <div className="footer-section" style={{ color: '#000' }}>
-              <h4 className="footer-section-title">Contact Us</h4>
-              <ul className="footer-section-list">
-                <li className="contact-info"><Phone size={16} /><span>+44 20 7946 0123</span></li>
-                <li className="contact-info"><Mail size={16} /><span>support@hexa.com</span></li>
-                <li className="contact-info"><MapPin size={16} /><span>123 Northern Park Lane, West London, W1A 4ZZ, United Kingdom</span></li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Back to Top */}
-          <div className="back-to-top" style={{ background: '#ddd', borderTop: 'none', padding: '8px 0', textAlign: 'center', fontSize: '1rem', color: '#222' }}>
-            Back to top
-          </div>
-        </div>
-      </footer>
     </>
   );
 }

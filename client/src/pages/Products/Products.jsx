@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { productAPI } from '../services/api';
-import { useCart } from '../context/CartContext';
+import { productAPI } from '../../services/api';
+import { useCart } from '../../context/CartContext';
 
 const Products = () => {
     const [products, setProducts] = useState([]);
@@ -42,7 +42,6 @@ const Products = () => {
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-8">All Products</h1>
             
-            {/* Filters */}
             <div className="mb-8 flex flex-col md:flex-row gap-4">
                 <input
                     type="text"
@@ -63,7 +62,6 @@ const Products = () => {
                 </select>
             </div>
 
-            {/* Products Grid */}
             {loading ? (
                 <div className="text-center py-12">Loading...</div>
             ) : (

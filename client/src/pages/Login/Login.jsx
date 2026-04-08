@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import './Login.css';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -38,7 +39,6 @@ const Login = () => {
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                    {/* Social Login Buttons */}
                     <div className="space-y-3">
                         <button className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
                             <span className="mr-2">G</span> Continue with Google

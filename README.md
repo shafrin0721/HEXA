@@ -4,35 +4,60 @@ HEXA Clothing is a modern full-stack e-commerce web application designed to deli
 
 ---
 
-## 🚀 Project Overview
+## 🚀 Quick Start
 
-This project aims to develop a fully functional e-commerce platform where:
+### Prerequisites
+- **Node.js** v14+ ([Download](https://nodejs.org))
+- **MySQL** v5.7+ ([Download](https://www.mysql.com/downloads/))
+- **Git** ([Download](https://git-scm.com))
 
-* Customers can browse products and categories
-* Users can register and log in securely
-* Customers can add items to cart and place orders
-* Orders and payments are processed efficiently
-* Admins can manage products, users, and orders
+### Installation (5 minutes)
+
+```bash
+# 1. Clone repository
+git clone <repository-url>
+cd hexa-clothing
+
+# 2. Install dependencies
+npm run install-client
+npm run install-server
+
+# 3. Setup database
+mysql -u root -p < database/schema.sql
+mysql -u root -p < database/seed.sql
+
+# 4. Configure environment
+cp .env.example .env
+# Edit .env and add your database credentials
+
+# 5. Start development servers
+npm run dev
+```
+
+**Access:**
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5000
+- Default Admin: `admin@hexaclothing.com` / `Admin@123`
 
 ---
 
 ## 🧱 Tech Stack
 
 ### Frontend
-
-* React.js (Vite)
-* CSS / Tailwind (optional)
+* React.js 19.2 (Vite)
+* React Router v7
 * Axios (API calls)
-* React Router
+* Lucide React (Icons)
+* CSS / Tailwind (optional)
 
 ### Backend
-
 * Node.js
 * Express.js
 * MySQL Database
+* JWT Authentication
+* bcryptjs Password Hashing
 
 ### Tools
-
 * Git & GitHub (Version Control)
 * Postman (API Testing)
 * Figma (UI/UX Design)
@@ -81,23 +106,100 @@ hexa-clothing/
 │   ├── schema.sql
 │   └── seed.sql
 │
-├── .env
+├── SETUP.md                         # Setup instructions
+├── API_DOCUMENTATION.md             # API reference
+├── STRUCTURE.md                     # Structure explanation
+├── CONTRIBUTING.md                  # Developer guide
+├── .env.example                     # Environment template
 ├── .gitignore
-└── README.md
+└── README.md                        # This file
 ```
 
 ---
 
-## 👥 Team & Responsibilities
+## 📡 API Endpoints
 
-### 🔹 Development Roles
+### Authentication
+```
+POST   /api/auth/register        # Register user
+POST   /api/auth/login           # Login user
+POST   /api/auth/logout          # Logout user
+POST   /api/auth/refresh         # Refresh token
+```
 
-| Member     | Role                                     |
-| ---------- | ---------------------------------------- |
-| Shafrin    | Team Lead, Full Stack, Deployment, UI/UX |
-| Heli       | Database + Frontend + QA                 |
-| Thushalini | Frontend + QA                            |
-| Shavindi   | Backend Support + QA + Frontend          |
+### Products
+```
+GET    /api/products             # Get all products
+GET    /api/products/:id         # Get product details
+GET    /api/products/category/:id # Get by category
+POST   /api/products             # Create (Admin)
+PUT    /api/products/:id         # Update (Admin)
+DELETE /api/products/:id         # Delete (Admin)
+```
+
+### Cart
+```
+GET    /api/cart                 # Get cart
+POST   /api/cart/add             # Add item
+PUT    /api/cart/:itemId         # Update item
+DELETE /api/cart/:itemId         # Remove item
+DELETE /api/cart                 # Clear cart
+```
+
+### Orders
+```
+POST   /api/orders               # Create order
+GET    /api/orders               # Get all (Admin)
+GET    /api/orders/user          # Get user orders
+GET    /api/orders/:id           # Get order details
+PUT    /api/orders/:id           # Update status (Admin)
+DELETE /api/orders/:id           # Delete (Admin)
+```
+
+### User
+```
+GET    /api/user/profile         # Get profile
+PUT    /api/user/profile         # Update profile
+PUT    /api/user/change-password # Change password
+GET    /api/user                 # Get all (Admin)
+DELETE /api/user/account         # Delete account
+```
+
+**Full API docs: [API_DOCUMENTATION.md](API_DOCUMENTATION.md)**
+
+---
+
+## ✨ Features
+
+### 👥 User Management
+- ✅ User registration and authentication
+- ✅ JWT-based authentication
+- ✅ User profile management
+- ✅ Password change functionality
+- ✅ Account deletion
+
+### 🛍️ Product Catalog
+- ✅ Browse products by category
+- ✅ Product search and filtering
+- ✅ Product details with reviews
+- ✅ Rating system
+- ✅ Pagination support
+
+### 🛒 Shopping Cart
+- ✅ Add/remove items
+- ✅ Update quantities
+- ✅ Calculate totals
+- ✅ Item availability check
+- ✅ Clear cart option
+
+### 💳 Orders
+- ✅ Place orders
+- ✅ Order history tracking
+- ✅ Order status management
+- ✅ Order details view
+- ✅ Multiple payment method support
+
+---
 | Piyula     | Frontend + QA                            |
 | Vithush    | Full Stack Development                   |
 | Sara       | Frontend + QA                            |
