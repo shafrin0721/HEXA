@@ -1,43 +1,18 @@
 # 🛍️ HEXA Clothing – Full Stack E-Commerce Platform
 
-HEXA Clothing is a modern full-stack e-commerce web application designed to deliver a seamless online shopping experience. The system includes a responsive frontend built with React (Vite) and a scalable backend powered by Node.js, Express, and MySQL.
+HEXA Clothing is a modern full-stack e-commerce web application designed to deliver a seamless online shopping experience. The system includes a responsive frontend built with React (Vite) and a scalable backend powered by Node.js, Express, and SQL.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Project Overview
 
-### Prerequisites
-- **Node.js** v14+ ([Download](https://nodejs.org))
-- **MySQL** v5.7+ ([Download](https://www.mysql.com/downloads/))
-- **Git** ([Download](https://git-scm.com))
+This project aims to develop a fully functional e-commerce platform where:
 
-### Installation (5 minutes)
-
-```bash
-# 1. Clone repository
-git clone <repository-url>
-cd hexa-clothing
-
-# 2. Install dependencies
-npm run install-client
-npm run install-server
-
-# 3. Setup database
-mysql -u root -p < database/schema.sql
-mysql -u root -p < database/seed.sql
-
-# 4. Configure environment
-cp .env.example .env
-# Edit .env and add your database credentials
-
-# 5. Start development servers
-npm run dev
-```
-
-**Access:**
-- Frontend: http://localhost:5173
-- Backend: http://localhost:5000
-- Default Admin: `admin@hexaclothing.com` / `Admin@123`
+* Customers can browse products and categories
+* Users can register and log in securely
+* Customers can add items to cart and place orders
+* Orders and payments are processed efficiently
+* Admins can manage products, users, and orders
 
 ---
 
@@ -54,8 +29,6 @@ npm run dev
 * Node.js
 * Express.js
 * MySQL Database
-* JWT Authentication
-* bcryptjs Password Hashing
 
 ### Tools
 * Git & GitHub (Version Control)
@@ -73,36 +46,61 @@ hexa-clothing/
 │   ├── public/
 │   │   ├── images/
 │   │   └── icons/
-│   │
-│   ├── src/
-│   │   ├── assets/                  # Static assets (images, fonts)
-│   │   ├── components/              # Reusable UI components
-│   │   │   ├── common/              # Buttons, Inputs, Loaders
-│   │   │   ├── layout/              # Navbar, Footer, Sidebar
-│   │   │   └── ui/                  # Figma-based UI blocks
-│   │   ├── pages/                   # Screens (Home, Product, Cart, Checkout)
-│   │   ├── routes/                  # Frontend routing
-│   │   ├── services/                # API services (Axios)
-│   │   ├── hooks/                   # Custom hooks
-│   │   ├── context/                 # Global context providers
-│   │   ├── utils/                   # Helper functions
-│   │   ├── styles/                  # Global styles
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   └── vite.config.js
-│
-├── server/                          # Node.js Backend (Express)
-│   ├── config/                      # DB connection
-│   ├── controllers/                 # API logic
-│   ├── models/                      # SQL Models
-│   ├── routes/                      # Express routing
-│   ├── middleware/                  # Auth middleware
-│   ├── utils/                       # Helper functions
-│   ├── app.js                       # Express app setup
-│   └── server.js                    # Start server
-│
-├── database/                        # SQL Scripts
+│   │       └── images/
+│   └── src/
+│       ├── App.jsx
+│       ├── index.css
+│       ├── main.jsx
+│       ├── App.css
+│       ├── styles/
+│       │   └── globals.css
+│       ├── assets/
+│       ├── components/
+│       │   ├── common/
+│       │   │   ├── Button.jsx
+│       │   │   ├── Input.jsx
+│       │   │   └── Loader.jsx
+│       │   ├── layout/
+│       │   │   ├── Footer.jsx
+│       │   │   ├── Footer.css
+│       │   │   ├── Navbar.jsx
+│       │   │   ├── Navbar.css
+│       │   │   └── Sidebar.jsx
+│       │   └── ui/
+│       │       ├── Banner.jsx
+│       │       ├── CategoryCard.jsx
+│       │       └── ProductCard.jsx
+│       ├── context/
+│       │   ├── AuthContext.jsx
+│       │   └── CartContext.jsx
+│       ├── data/
+│       │   └── OrderMock.js
+│       ├── hooks/
+│       │   └── useAuth.js
+│       ├── pages/
+│       │   ├── Cart.jsx
+│       │   ├── checkout.css
+│       │   ├── checkout.jsx
+│       │   ├── Home.css
+│       │   ├── Home.jsx
+│       │   ├── Login.css
+│       │   ├── Login.jsx
+│       │   ├── OrderSuccess.jsx
+│       │   ├── OrderSummary.jsx
+│       │   ├── Products.jsx
+│       │   ├── Register.jsx
+│       │   ├── shipping.css
+│       │   └── ShippingStep.jsx
+│       ├── routes/
+│       │   └── AppRoutes.jsx
+│       ├── services/
+│       │   ├── api.js
+│       │   ├── authService.js
+│       │   ├── orderService.js
+│       │   └── productService.js
+│       └── utils/
+│           └── helpers.js
+├── database/
 │   ├── schema.sql
 │   └── seed.sql
 │
@@ -113,89 +111,16 @@ hexa-clothing/
 
 ---
 
-## 📡 API Endpoints
+## 👥 Team & Responsibilities
 
-### Authentication
-```
-POST   /api/auth/register        # Register user
-POST   /api/auth/login           # Login user
-POST   /api/auth/logout          # Logout user
-POST   /api/auth/refresh         # Refresh token
-```
+### 🔹 Development Roles
 
-### Products
-```
-GET    /api/products             # Get all products
-GET    /api/products/:id         # Get product details
-GET    /api/products/category/:id # Get by category
-POST   /api/products             # Create (Admin)
-PUT    /api/products/:id         # Update (Admin)
-DELETE /api/products/:id         # Delete (Admin)
-```
-
-### Cart
-```
-GET    /api/cart                 # Get cart
-POST   /api/cart/add             # Add item
-PUT    /api/cart/:itemId         # Update item
-DELETE /api/cart/:itemId         # Remove item
-DELETE /api/cart                 # Clear cart
-```
-
-### Orders
-```
-POST   /api/orders               # Create order
-GET    /api/orders               # Get all (Admin)
-GET    /api/orders/user          # Get user orders
-GET    /api/orders/:id           # Get order details
-PUT    /api/orders/:id           # Update status (Admin)
-DELETE /api/orders/:id           # Delete (Admin)
-```
-
-### User
-```
-GET    /api/user/profile         # Get profile
-PUT    /api/user/profile         # Update profile
-PUT    /api/user/change-password # Change password
-GET    /api/user                 # Get all (Admin)
-DELETE /api/user/account         # Delete account
-```
-
-**Full API docs: [API_DOCUMENTATION.md](API_DOCUMENTATION.md)**
-
----
-
-## ✨ Features
-
-### 👥 User Management
-- ✅ User registration and authentication
-- ✅ JWT-based authentication
-- ✅ User profile management
-- ✅ Password change functionality
-- ✅ Account deletion
-
-### 🛍️ Product Catalog
-- ✅ Browse products by category
-- ✅ Product search and filtering
-- ✅ Product details with reviews
-- ✅ Rating system
-- ✅ Pagination support
-
-### 🛒 Shopping Cart
-- ✅ Add/remove items
-- ✅ Update quantities
-- ✅ Calculate totals
-- ✅ Item availability check
-- ✅ Clear cart option
-
-### 💳 Orders
-- ✅ Place orders
-- ✅ Order history tracking
-- ✅ Order status management
-- ✅ Order details view
-- ✅ Multiple payment method support
-
----
+| Member     | Role                                     |
+| ---------- | ---------------------------------------- |
+| Shafrin    | Team Lead, Full Stack, Deployment, UI/UX |
+| Heli       | Database + Frontend + QA                 |
+| Thushalini | Frontend + QA                            |
+| Shavindi   | Backend Support + QA + Frontend          |
 | Piyula     | Frontend + QA                            |
 | Vithush    | Full Stack Development                   |
 | Sara       | Frontend + QA                            |
@@ -218,39 +143,32 @@ DELETE /api/user/account         # Delete account
 
 ## 🌿 Git Workflow
 
-We follow a **feature-based branching strategy (page-based)**:
+We follow a **feature-based branching strategy**:
 
-* Each member works on their assigned pages in a separate branch
-* No direct commits to `main`
-* Push changes → Create Pull Request → Review → Merge
+1. Each member works on their own branch
+2. No direct commits to `main`
+3. Push changes to feature branch
+4. Create Pull Request
+5. Review and merge into `main`
 
----
-
-### 🔀 Branch Naming Convention
+### Branch Naming Convention
 
 ```bash
-feature/<member>-<pages>
+feature/<api-name>
 ```
 
----
-
-### 📌 Branch Allocation
+Example:
 
 ```bash
-feature/heli-home-products-about
-feature/shafrin-products-cart-order-summary
-feature/shavindi-auth-pages
-feature/thushalini-contact-profile
-feature/piyula-address-shipping
-feature/vithush-payment-review
-feature/sara-order-success-summary1
+feature/auth-api
+feature/product-api
 ```
 
 ---
 
 ## ⚙️ Setup Instructions
 
-### 1. Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/shafrin0721/HEXA.git
@@ -288,7 +206,7 @@ npm start
 
 ## 🔐 Environment Variables
 
-Create a `.env` file:
+Create a `.env` file in the root or server folder:
 
 ```env
 PORT=5000
@@ -301,72 +219,14 @@ JWT_SECRET=yoursecretkey
 
 ---
 
-## 📅 Project Timeline
-
-| Phase   | Task                 | Duration |
-| ------- | -------------------- | -------- |
-| Phase 1 | Project Setup        | 2 Days   |
-| Phase 2 | UI/UX Design         | 3 Days   |
-| Phase 3 | Database Design      | 3 Days   |
-| Phase 4 | Frontend Development | 10 Days  |
-| Phase 5 | Backend Development  | 12 Days  |
-| Phase 6 | Testing & QA         | 5 Days   |
-| Phase 7 | Deployment           | 2 Days   |
-
-**Total Duration:** ~6 Weeks (34 Working Days)
-
----
-
-## 🔧 Development Workflow
-
-1. Setup environment
-2. Design UI & database
-3. Develop frontend & backend in parallel
-4. API integration
-5. Testing & debugging
-6. Deployment
-
----
-
 ## 📌 Key Features
 
 * User Authentication (JWT)
 * Product Management
 * Cart & Checkout System
 * Order Processing
-* Payment Integration
 * RESTful APIs
-* Responsive UI
-
----
-
-## 🔐 Security Measures
-
-* HTTPS (SSL)
-* Password hashing (bcrypt)
-* JWT authentication
-* Input validation & sanitization
-
----
-
-## ⚠️ Risk Management
-
-| Risk               | Impact | Mitigation            |
-| ------------------ | ------ | --------------------- |
-| Team delays        | High   | Parallel development  |
-| Integration issues | High   | Daily sync meetings   |
-| Bugs               | Medium | Continuous testing    |
-| Deployment errors  | Medium | Pre-deployment checks |
-
----
-
-## 🎯 Success Criteria
-
-* System runs without critical bugs
-* Smooth checkout process
-* Admin can manage products & orders
-* Fully responsive UI
-* Fast performance
+* Modular Architecture
 
 ---
 
@@ -377,27 +237,39 @@ https://www.figma.com/design/huBctacPiwvl9GsP0J25gK/hexa-clothing
 
 ---
 
+## ✅ Best Practices Followed
+
+* Clean folder structure
+* Separation of concerns (MVC)
+* Reusable components
+* API modularization
+* Version control with Git
+
+---
+
 ## 📬 Contribution Guidelines
 
 * Pull latest `main` before starting
 * Work only in your assigned branch
 * Commit with clear messages
-* Test before creating Pull Request
-
----
-
-## 🚀 Deployment Plan
-
-* Frontend: Netlify
-* Backend: Render
-* Database: MySQL Server
+* Test before submitting PR
 
 ---
 
 ## 📄 License
 
-This project is developed for academic purposes.
+This project is developed for academic and learning purposes.
 
 ---
 
-✨ Built with teamwork, structured planning, and clean development practices.
+## 💡 Future Enhancements
+
+* Payment gateway integration
+* Admin dashboard UI
+* Order tracking system
+* Email notifications
+* Deployment (Netlify + Render)
+
+---
+
+✨ Built with teamwork, structure, and clean code.
