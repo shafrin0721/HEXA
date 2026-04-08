@@ -68,51 +68,102 @@ npm run dev
 
 ```bash
 hexa-clothing/
-│
-├── client/                          # React Frontend (Vite)
+├── client/
 │   ├── public/
+│   │   ├── icons/
 │   │   ├── images/
-│   │   └── icons/
-│   │
+│   │   └── robots.txt
 │   ├── src/
-│   │   ├── assets/                  # Static assets (images, fonts)
-│   │   ├── components/              # Reusable UI components
-│   │   │   ├── common/              # Buttons, Inputs, Loaders
-│   │   │   ├── layout/              # Navbar, Footer, Sidebar
-│   │   │   └── ui/                  # Figma-based UI blocks
-│   │   ├── pages/                   # Screens (Home, Product, Cart, Checkout)
-│   │   ├── routes/                  # Frontend routing
-│   │   ├── services/                # API services (Axios)
-│   │   ├── hooks/                   # Custom hooks
-│   │   ├── context/                 # Global context providers
-│   │   ├── utils/                   # Helper functions
-│   │   ├── styles/                  # Global styles
+│   │   ├── assets/
+│   │   ├── components/
+│   │   │   ├── common/
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Input.jsx
+│   │   │   │   └── Loader.jsx
+│   │   │   ├── layout/
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   ├── Footer.jsx
+│   │   │   │   └── Sidebar.jsx
+│   │   │   └── ui/
+│   │   ├── context/
+│   │   │   ├── AuthContext.jsx
+│   │   │   └── CartContext.jsx
+│   │   ├── data/
+│   │   │   └── OrderMock.js
+│   │   ├── hooks/
+│   │   │   └── useAuth.js
+│   │   ├── pages/
+│   │   │   ├── About/
+│   │   │   ├── Cart/
+│   │   │   ├── Checkout/
+│   │   │   ├── Contact/
+│   │   │   ├── Home/
+│   │   │   ├── Login/
+│   │   │   ├── OrderSuccess/
+│   │   │   ├── OrderSummary/
+│   │   │   ├── Products/
+│   │   │   ├── Register/
+│   │   │   └── ShippingStep/
+│   │   ├── routes/
+│   │   │   └── AppRoutes.jsx
+│   │   ├── services/
+│   │   │   ├── api.js
+│   │   │   ├── authService.js
+│   │   │   ├── cartService.js
+│   │   │   ├── orderService.js
+│   │   │   ├── productService.js
+│   │   │   └── userService.js
+│   │   ├── styles/
+│   │   │   └── globals.css
+│   │   ├── utils/
+│   │   │   └── helpers.js
 │   │   ├── App.jsx
-│   │   └── main.jsx
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   ├── main.jsx
+│   │   └── tailwind.config.js/
 │   ├── package.json
-│   └── vite.config.js
-│
-├── server/                          # Node.js Backend (Express)
-│   ├── config/                      # DB connection
-│   ├── controllers/                 # API logic
-│   ├── models/                      # SQL Models
-│   ├── routes/                      # Express routing
-│   ├── middleware/                  # Auth middleware
-│   ├── utils/                       # Helper functions
-│   ├── app.js                       # Express app setup
-│   └── server.js                    # Start server
-│
-├── database/                        # SQL Scripts
+│   ├── postcss.config.js
+│   ├── vite.config.js
+│   ├── eslint.config.js
+│   └── README.md
+├── server/
+│   ├── app.js
+│   ├── package.json
+│   ├── server.js
+│   ├── config/
+│   │   └── db.js
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── cartController.js
+│   │   ├── orderController.js
+│   │   ├── productController.js
+│   │   └── userController.js
+│   ├── middleware/
+│   │   ├── auth.js
+│   │   └── errorHandler.js
+│   ├── models/
+│   │   ├── orderModel.js
+│   │   ├── productModel.js
+│   │   └── userModel.js
+│   ├── routes/
+│   │   ├── auth.routes.js
+│   │   ├── cart.routes.js
+│   │   ├── order.routes.js
+│   │   ├── product.routes.js
+│   │   └── user.routes.js
+│   └── utils/
+│       ├── helpers.js
+│       └── validators.js
+├── database/
 │   ├── schema.sql
 │   └── seed.sql
-│
-├── SETUP.md                         # Setup instructions
-├── API_DOCUMENTATION.md             # API reference
-├── STRUCTURE.md                     # Structure explanation
-├── CONTRIBUTING.md                  # Developer guide
-├── .env.example                     # Environment template
+├── package.json
 ├── .gitignore
-└── README.md                        # This file
+├── SETUP.md
+├── STRUCTURE.md
+├── API_DOCUMENTATION.md
+└── README.md                     # This file
 ```
 
 ---
