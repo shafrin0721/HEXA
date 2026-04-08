@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
 import { orderAPI, paymentAPI } from '../api';
-import './PaymentPage.css';
 
 const PaymentPage = () => {
   const navigate = useNavigate();
@@ -36,17 +33,15 @@ const PaymentPage = () => {
   const [fetchError, setFetchError] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [cardBrand, setCardBrand] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
 
   const cardTypeOptions = [
-    { value: 'visa', label: 'Visa', icon: '💳', logo: 'https://cdn.simpleicons.org/visa', color: '#1a1f71' },
-    { value: 'mastercard', label: 'Mastercard', icon: '💳', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg', color: '#eb001b' },
+    { value: 'visa', label: 'Visa', logo: 'https://cdn.simpleicons.org/visa' },
+    { value: 'mastercard', label: 'Mastercard', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg' },
   ];
 
   const clearAllStoredData = () => {
     const comingFromReview = location.state?.fromReview === true;
-    // Only clear data if NOT coming from review page
     if (!comingFromReview) {
       localStorage.removeItem('paymentData');
       localStorage.removeItem('orderId');
@@ -63,7 +58,6 @@ const PaymentPage = () => {
     const savedPaymentData = localStorage.getItem('paymentData');
     const comingFromReview = location.state?.fromReview === true;
     
-    // If coming from review page, load the saved data
     if (comingFromReview && savedPaymentData) {
       try {
         const paymentData = JSON.parse(savedPaymentData);
@@ -93,7 +87,6 @@ const PaymentPage = () => {
   useEffect(() => {
     const comingFromReview = location.state?.fromReview === true;
     
-    // Clear data only if NOT coming from review
     if (!comingFromReview) {
       clearAllStoredData();
     }
@@ -101,16 +94,13 @@ const PaymentPage = () => {
     const dataLoaded = loadExistingData();
     if (!dataLoaded && !comingFromReview) {
       setFormData(getEmptyFormData());
-      setCardBrand(null);
       setErrors({});
     }
 
     fetchOrderTotals();
   }, [location.state]);
 
-  // Save form data to localStorage whenever it changes (for review page edit)
   useEffect(() => {
-    // Only save if we have valid form data
     if (formData.cardNumber || formData.email || formData.firstName) {
       localStorage.setItem('paymentData', JSON.stringify(formData));
     }
@@ -153,9 +143,6 @@ const PaymentPage = () => {
     if (!formData.cvv.trim()) {
       newErrors.cvv = 'CVV is required';
     } else {
-      const cleanedNumber = formData.cardNumber.replace(/\s/g, '');
-      const isAmex = /^3[47]/.test(cleanedNumber) || formData.cardType === 'amex';
-      
       if (!/^\d{3}$/.test(formData.cvv)) {
         newErrors.cvv = `CVV must be 3 digits`;
       }
@@ -197,7 +184,6 @@ const PaymentPage = () => {
     
     if (name === 'cardNumber') {
       const cleaned = value.replace(/\D/g, '');
-      
       let formatted = '';
       for (let i = 0; i < cleaned.length; i++) {
         if (i > 0 && i % 4 === 0) {
@@ -205,7 +191,6 @@ const PaymentPage = () => {
         }
         formatted += cleaned[i];
       }
-      
       value = formatted.slice(0, 19);
     }
     
@@ -240,10 +225,6 @@ const PaymentPage = () => {
     e.preventDefault();
     
     if (!validateForm()) {
-      const firstError = document.querySelector('.error-message');
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
       return;
     }
     
@@ -255,9 +236,6 @@ const PaymentPage = () => {
         const tokens = {
           'visa': 'pm_card_visa',
           'mastercard': 'pm_card_mastercard',
-          'amex': 'pm_card_amex',
-          'discover': 'pm_card_discover',
-          'diners': 'pm_card_diners'
         };
         return tokens[cardType] || 'pm_card_visa';
       };
@@ -281,33 +259,11 @@ const PaymentPage = () => {
         }
       };
       
-      console.log('Sending payment data with token:', paymentMethodToken);
-      
       const paymentResponse = await paymentAPI.processPayment(paymentData);
-      
-      console.log('Payment response:', paymentResponse.data);
       
       if (paymentResponse.data.success && paymentResponse.data.payment_status === 'succeeded') {
         setPaymentStatus({ type: 'success', message: 'Payment successful! Redirecting to review...' });
 
-        const shippingAddress = {
-          name: `${formData.firstName} ${formData.lastName}`,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
-          number: formData.phoneNumber,
-          email: formData.email
-        };
-        
-        const deliveryDate = new Date();
-        deliveryDate.setDate(deliveryDate.getDate() + 5);
-        const formattedDeliveryDate = deliveryDate.toLocaleDateString('en-US', { 
-          weekday: 'long', 
-          month: 'long', 
-          day: 'numeric' 
-        });
-        
         const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
         const cardLast4 = cleanCardNumber.slice(-4);
         
@@ -330,8 +286,20 @@ const PaymentPage = () => {
               day: 'numeric' 
             })
           },
-          shippingAddress: shippingAddress,
-          deliveryDate: formattedDeliveryDate,
+          shippingAddress: {
+            name: `${formData.firstName} ${formData.lastName}`,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zipCode: formData.zipCode,
+            number: formData.phoneNumber,
+            email: formData.email
+          },
+          deliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            month: 'long', 
+            day: 'numeric' 
+          }),
           userInfo: {
             firstName: formData.firstName,
             lastName: formData.lastName,
@@ -360,152 +328,171 @@ const PaymentPage = () => {
     }
   };
 
+  const CardTypeDropdown = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedCardType = cardTypeOptions.find(opt => opt.value === formData.cardType);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <div 
+        className={`w-[90%] h-10 px-3 border rounded-lg bg-gray-300 cursor-pointer flex items-center justify-between ${
+          errors.cardType ? 'border-red-500' : 'border-gray-700'
+        } hover:border-gray-500 transition-colors`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex-1 h-full flex items-center justify-center">
+          {selectedCardType ? (
+            <img 
+              src={selectedCardType.logo} 
+              alt={selectedCardType.label} 
+              className="h-full w-auto max-w-full object-contain" 
+            />
+          ) : (
+            <span className="text-gray-500 text-sm">Select card type</span>
+          )}
+        </div>
+        <span className="text-gray-600 text-xs ml-2">{isOpen ? '▲' : '▼'}</span>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-gray-300 border border-gray-700 rounded-lg shadow-lg z-10">
+          {cardTypeOptions.map(option => (
+            <div
+              key={option.value}
+              className={`h-10 px-3 cursor-pointer flex items-center justify-center hover:bg-gray-400 transition-colors relative ${
+                formData.cardType === option.value ? 'bg-gray-700' : ''
+              }`}
+              onClick={() => {
+                handleChange({ target: { name: 'cardType', value: option.value } });
+                setIsOpen(false);
+              }}
+            >
+              <img 
+                src={option.logo} 
+                alt={option.label} 
+                className="h-full w-auto max-w-full object-contain" 
+              />
+              {formData.cardType === option.value && (
+                <span className="text-green-500 absolute right-3">✓</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
   if (loading) {
     return (
-      <div className="payment-page">
-        <Header cartItemCount={0} />
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading order summary...</p>
+      <div className="min-h-screen bg-black flex flex-col">
+       
+        <div className="flex-1 flex justify-center items-center">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+            <p className="mt-4 text-gray-400">Loading order summary...</p>
+          </div>
         </div>
-        <Footer />
+        
       </div>
     );
   }
 
-  const selectedCardType = cardTypeOptions.find(opt => opt.value === formData.cardType);
-
-  const CardTypeDropdown = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef(null);
-
-    useEffect(() => {
-      const handleClickOutside = (event) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-          setIsOpen(false);
-        }
-      };
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    return (
-      <div className="card-type-dropdown" ref={dropdownRef}>
-        <div 
-          className={`dropdown-header ${errors.cardType ? 'error' : ''}`}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <span className="dropdown-header-content">
-            {selectedCardType ? (
-              <>
-                {selectedCardType.logo ? (
-                  <img src={selectedCardType.logo} alt={selectedCardType.label} className="card-logo" />
-                ) : (
-                  <span>{selectedCardType.icon}</span>
-                )}
-                <span>{selectedCardType.label}</span>
-              </>
-            ) : (
-              <span>Select card type</span>
-            )}
-          </span>
-          <span className="dropdown-arrow">{isOpen ? '▲' : '▼'}</span>
-        </div>
-        
-        {isOpen && (
-          <div className="dropdown-menu">
-            {cardTypeOptions.map(option => (
-              <div
-                key={option.value}
-                className={`dropdown-option ${formData.cardType === option.value ? 'selected' : ''}`}
-                onClick={() => {
-                  handleChange({ target: { name: 'cardType', value: option.value } });
-                  setIsOpen(false);
-                }}
-              >
-                {option.logo ? (
-                  <img src={option.logo} alt={option.label} className="card-logo" />
-                ) : (
-                  <span>{option.icon}</span>
-                )}
-                <span style={{ flex: 1 }}>{option.label}</span>
-                {formData.cardType === option.value && <span>✓</span>}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
-    <div className="payment-page">
-      <Header cartItemCount={orderSummary.items.reduce((sum, item) => sum + item.quantity, 0)} />
+    <div className="min-h-screen bg-black flex flex-col">
       
-      <div className="payment-container">
-        {/* Progress Steps */}
-        <div className="progress-steps">
-          <div className="step completed">
-            <div className="step-number">1</div>
-            <div className="step-label">Address</div>
-          </div>
-          <div className="step completed">
-            <div className="step-number">2</div>
-            <div className="step-label">Shipping</div>
-          </div>
-          <div className="step active">
-            <div className="step-number">3</div>
-            <div className="step-label">Payment</div>
-          </div>
-          <div className="step">
-            <div className="step-number">4</div>
-            <div className="step-label">Review</div>
-          </div>
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  {/* Progress Steps - Labels on the right side of numbers (Increased Size) */}
+<div className="flex items-center justify-center gap-6 mb-12">
+  {['Address', 'Shipping', 'Payment', 'Review'].map((label, index) => (
+    <React.Fragment key={index}>
+      <div className="flex items-center gap-3">
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-base font-bold ${
+          index < 2 ? 'bg-white text-black' :
+          index === 2 ? 'bg-gray-500 text-white ring-4 ring-gray-500/50' :
+          'bg-gray-800 text-gray-400'
+        }`}>
+          {index + 1}
         </div>
+        <span className={`text-base ${
+          index === 2 ? 'text-white font-semibold' : 'text-gray-300'
+        }`}>
+          {label}
+        </span>
+      </div>
+      {/* Add separator between steps */}
+      {index < 3 && (
+        <span className="text-gray-500 text-base font-medium">---</span>
+      )}
+    </React.Fragment>
+  ))}
+</div>
 
         {/* Payment Status Message */}
         {paymentStatus && (
-          <div className={`payment-status ${paymentStatus.type}`}>
-            {paymentStatus.type === 'processing' && '⏳'}
-            {paymentStatus.type === 'success' && '✅'}
-            {paymentStatus.type === 'error' && '❌'}
-            <span>{paymentStatus.message}</span>
+          <div className={`mb-6 p-4 rounded-lg ${
+            paymentStatus.type === 'processing' ? 'bg-blue-900/50 text-blue-200 border border-blue-500' :
+            paymentStatus.type === 'success' ? 'bg-green-900/50 text-green-200 border border-green-500' :
+            'bg-red-900/50 text-red-200 border border-red-500'
+          }`}>
+            <div className="flex items-center gap-2">
+              <span>{paymentStatus.type === 'processing' && '⏳'}</span>
+              <span>{paymentStatus.type === 'success' && '✅'}</span>
+              <span>{paymentStatus.type === 'error' && '❌'}</span>
+              <span>{paymentStatus.message}</span>
+            </div>
           </div>
         )}
 
         {/* Main Content */}
-        <div className="payment-content">
-          <div className="payment-left">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Side - Forms */}
+          <div className="flex-1 space-y-6">
             {/* Payment Information Section */}
-            <div className="payment-section">
-              <h2>Payment Information</h2>
-              <div className="payment-form">
-                <div className="form-group">
-                  <label>Card number</label>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type="text"
-                      name="cardNumber"
-                      placeholder="1234 5678 9012 3456"
-                      value={formData.cardNumber}
-                      onChange={handleChange}
-                      maxLength="19"
-                      className={errors.cardNumber ? 'error' : ''}
-                    />
-                  </div>
-                  {errors.cardNumber && <span className="error-message">{errors.cardNumber}</span>}
+            <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+              <h2 className="text-2xl font-semibold text-white mb-6 border-b border-gray-700 pb-3 inline-block">
+                Payment Information
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Card number</label>
+                  <input
+                    type="text"
+                    name="cardNumber"
+                    placeholder="1234 5678 9012 3456"
+                    value={formData.cardNumber}
+                    onChange={handleChange}
+                    maxLength="19"
+                    className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      errors.cardNumber ? 'border-red-500' : 'border-gray-700'
+                    }`}
+                  />
+                  {errors.cardNumber && <p className="mt-1 text-sm text-red-500">{errors.cardNumber}</p>}
                 </div>
 
-                {/* Three columns in one row - Card Type, Expiry Date, CVV */}
-                <div className="form-row-three">
-                  <div className="form-group">
-                    <label>Card Type</label>
+                {/* Three columns */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Card Type</label>
                     <CardTypeDropdown />
-                    {errors.cardType && <span className="error-message">{errors.cardType}</span>}
+                    {errors.cardType && <p className="mt-1 text-sm text-red-500">{errors.cardType}</p>}
                   </div>
                   
-                  <div className="form-group">
-                    <label>Expiry Date</label>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Expiry Date</label>
                     <input
                       type="text"
                       name="expiryDate"
@@ -513,13 +500,15 @@ const PaymentPage = () => {
                       maxLength="5"
                       value={formData.expiryDate}
                       onChange={handleChange}
-                      className={errors.expiryDate ? 'error' : ''}
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                        errors.expiryDate ? 'border-red-500' : 'border-gray-700'
+                      }`}
                     />
-                    {errors.expiryDate && <span className="error-message">{errors.expiryDate}</span>}
+                    {errors.expiryDate && <p className="mt-1 text-sm text-red-500">{errors.expiryDate}</p>}
                   </div>
                   
-                  <div className="form-group">
-                    <label>CVV</label>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">CVV</label>
                     <input
                       type="text"
                       name="cvv"
@@ -527,119 +516,198 @@ const PaymentPage = () => {
                       maxLength="3"
                       value={formData.cvv}
                       onChange={handleChange}
-                      className={`cvv-input ${errors.cvv ? 'error' : ''}`}
+                      className={`w-full px-2 py-1 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono tracking-wider h-10  ${
+                        errors.cvv ? 'border-red-500' : 'border-gray-700'
+                      }`}
                     />
-                    {errors.cvv && <span className="error-message">{errors.cvv}</span>}
-                    <small className="helper-text">
-                      3 digits
-                    </small>
+                    {errors.cvv && <p className="mt-1 text-sm text-red-500">{errors.cvv}</p>}
+                    <small className="text-xs text-gray-500 mt-1 block">3 digits</small>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Billing Address Section */}
-            <div className="payment-section">
-              <h2>Billing address</h2>
-              <div className="billing-form">
-                <div className="form-group">
-                  <label>Email Address</label>
-                  <input type="email" name="email" placeholder="your@email.com" value={formData.email} onChange={handleChange} className={errors.email ? 'error' : ''} />
-                  {errors.email && <span className="error-message">{errors.email}</span>}
+            <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+              <h2 className="text-2xl font-semibold text-white mb-6 border-b border-gray-700 pb-3 inline-block">
+                Billing address
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="your@email.com" 
+                    value={formData.email} 
+                    onChange={handleChange} 
+                    className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      errors.email ? 'border-red-500' : 'border-gray-700'
+                    }`} 
+                  />
+                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>First Name</label>
-                    <input type="text" name="firstName" placeholder="John" value={formData.firstName} onChange={handleChange} className={errors.firstName ? 'error' : ''} />
-                    {errors.firstName && <span className="error-message">{errors.firstName}</span>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+                    <input 
+                      type="text" 
+                      name="firstName" 
+                      placeholder="John" 
+                      value={formData.firstName} 
+                      onChange={handleChange} 
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                        errors.firstName ? 'border-red-500' : 'border-gray-700'
+                      }`} 
+                    />
+                    {errors.firstName && <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>}
                   </div>
-                  <div className="form-group">
-                    <label>Last Name</label>
-                    <input type="text" name="lastName" placeholder="Doe" value={formData.lastName} onChange={handleChange} className={errors.lastName ? 'error' : ''} />
-                    {errors.lastName && <span className="error-message">{errors.lastName}</span>}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+                    <input 
+                      type="text" 
+                      name="lastName" 
+                      placeholder="Doe" 
+                      value={formData.lastName} 
+                      onChange={handleChange} 
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                        errors.lastName ? 'border-red-500' : 'border-gray-700'
+                      }`} 
+                    />
+                    {errors.lastName && <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>}
                   </div>
                 </div>
                 
-                <div className="form-group">
-                  <label>Address</label>
-                  <input type="text" name="address" placeholder="123 Main St" value={formData.address} onChange={handleChange} className={errors.address ? 'error' : ''} />
-                  {errors.address && <span className="error-message">{errors.address}</span>}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Address</label>
+                  <input 
+                    type="text" 
+                    name="address" 
+                    placeholder="123 Main St" 
+                    value={formData.address} 
+                    onChange={handleChange} 
+                    className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      errors.address ? 'border-red-500' : 'border-gray-700'
+                    }`} 
+                  />
+                  {errors.address && <p className="mt-1 text-sm text-red-500">{errors.address}</p>}
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>City</label>
-                    <input type="text" name="city" placeholder="San Francisco" value={formData.city} onChange={handleChange} className={errors.city ? 'error' : ''} />
-                    {errors.city && <span className="error-message">{errors.city}</span>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
+                    <input 
+                      type="text" 
+                      name="city" 
+                      placeholder="San Francisco" 
+                      value={formData.city} 
+                      onChange={handleChange} 
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                        errors.city ? 'border-red-500' : 'border-gray-700'
+                      }`} 
+                    />
+                    {errors.city && <p className="mt-1 text-sm text-red-500">{errors.city}</p>}
                   </div>
-                  <div className="form-group">
-                    <label>State</label>
-                    <input type="text" name="state" placeholder="CA" value={formData.state} onChange={handleChange} />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">State</label>
+                    <input 
+                      type="text" 
+                      name="state" 
+                      placeholder="CA" 
+                      value={formData.state} 
+                      onChange={handleChange} 
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
                   </div>
                 </div>
                 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Zip Code</label>
-                    <input type="text" name="zipCode" placeholder="94105" value={formData.zipCode} onChange={handleChange} className={errors.zipCode ? 'error' : ''} />
-                    {errors.zipCode && <span className="error-message">{errors.zipCode}</span>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Zip Code</label>
+                    <input 
+                      type="text" 
+                      name="zipCode" 
+                      placeholder="94105" 
+                      value={formData.zipCode} 
+                      onChange={handleChange} 
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                        errors.zipCode ? 'border-red-500' : 'border-gray-700'
+                      }`} 
+                    />
+                    {errors.zipCode && <p className="mt-1 text-sm text-red-500">{errors.zipCode}</p>}
                   </div>
-                  <div className="form-group">
-                    <label>Phone number</label>
-                    <input type="tel" name="phoneNumber" placeholder="+1 555-555-5555" value={formData.phoneNumber} onChange={handleChange} className={errors.phoneNumber ? 'error' : ''} />
-                    {errors.phoneNumber && <span className="error-message">{errors.phoneNumber}</span>}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Phone number</label>
+                    <input 
+                      type="tel" 
+                      name="phoneNumber" 
+                      placeholder="+1 555-555-5555" 
+                      value={formData.phoneNumber} 
+                      onChange={handleChange} 
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                        errors.phoneNumber ? 'border-red-500' : 'border-gray-700'
+                      }`} 
+                    />
+                    {errors.phoneNumber && <p className="mt-1 text-sm text-red-500">{errors.phoneNumber}</p>}
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="payment-right">
-            <div className="order-summary-card">
-              <h2>Order Summary</h2>
-              <div className="order-items">
+          {/* Right Side - Order Summary */}
+          <div className="lg:w-96">
+            <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 sticky top-4">
+              <h2 className="text-xl font-semibold text-orange-500 mb-4">Order Summary</h2>
+              
+              <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
                 {orderSummary.items.map((item, index) => (
-                  <div key={index} className="order-item">
-                    <img src={item.image} alt={item.name} className="order-item-image" />
-                    <div className="order-item-details">
-                      <h4>{item.name}</h4>
-                      <p className="item-brand">Brand: {item.brand}</p>
-                      <p className="item-price">${item.price.toFixed(2)} x {item.quantity}</p>
+                  <div key={index} className="flex gap-3 pb-4 border-b border-gray-800">
+                    <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-white text-sm">{item.name}</h4>
+                      <p className="text-xs text-gray-400 mt-1">Brand: {item.brand}</p>
+                      <p className="text-sm font-semibold text-orange-500 mt-1">
+                        ${item.price.toFixed(2)} x {item.quantity}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="order-totals">
-                <div className="total-row">
+              <div className="border-t border-gray-800 pt-4 mt-4 space-y-2">
+                <div className="flex justify-between text-sm text-gray-300">
                   <span>SUBTOTAL</span>
                   <span>${orderSummary.subtotal.toFixed(2)}</span>
                 </div>
-                <div className="total-row">
+                <div className="flex justify-between text-sm text-gray-300">
                   <span>Shipping</span>
                   <span>${orderSummary.shipping.toFixed(2)}</span>
                 </div>
-                <div className="total-row grand-total">
+                <div className="flex justify-between text-lg font-bold text-white pt-2 border-t border-gray-800">
                   <span>Order total</span>
                   <span>${orderSummary.total.toFixed(2)}</span>
                 </div>
               </div>
 
-              <button className="pay-now-btn" onClick={handleSubmit} disabled={isSubmitting}>
+              <button 
+                className="w-full mt-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                onClick={handleSubmit} 
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? 'Processing...' : 'Continue'}
               </button>
             </div>
 
-            <div className="help-section">
-              <a href="#" className="help-link">RETURN POLICY</a>
-              <a href="#" className="help-link">HELP</a>
+            <div className="mt-4 flex justify-center gap-6">
+              <a href="#" className="text-sm text-gray-400 hover:text-orange-500 transition-colors">RETURN POLICY</a>
+              <a href="#" className="text-sm text-gray-400 hover:text-orange-500 transition-colors">HELP</a>
             </div>
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };
