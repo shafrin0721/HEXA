@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { orderAPI, paymentAPI } from '../api';
+import { orderAPI, paymentAPI } from '../services/api';
 
 const PaymentPage = () => {
   const navigate = useNavigate();

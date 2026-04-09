@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { orderAPI } from '../api';
+import { orderAPI } from '../services/api';
 
 const ReviewPage = () => {
   const navigate = useNavigate();
