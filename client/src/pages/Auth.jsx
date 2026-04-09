@@ -1,56 +1,55 @@
 import React, { useState } from 'react';
-import type { ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState<boolean>(false);
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  // TypeScript types (<boolean>, <string> වැනි) ඉවත් කරන ලදී
+  const [isLogin, setIsLogin] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
   });
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const navigate = useNavigate();
 
-const handleAuth = async (e: FormEvent) => {
+  // Parameter එකේ තිබූ type definition එක ඉවත් කරන ලදී
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    // Endpoint එක තෝරා ගැනීම
     const endpoint = isLogin ? 'login' : 'register';
 
-    // Backend එක බලාපොරොත්තු වන format එකට data සකස් කිරීම
     const dataToSend = isLogin 
       ? { email: formData.email, password: formData.password } 
       : { name: formData.name, email: formData.email, password: formData.password };
 
     try {
+        // Backend port එක 5001 ලෙස ඇති බව පරීක්ෂා කරන්න
         const response = await axios.post(`http://localhost:5001/api/auth/${endpoint}`, dataToSend);
         
         if (response.data.success) {
             if (isLogin) {
-                // Backend එකෙන් එන user ගේ නම පෙන්වීම
                 setSuccess(`Welcome back, ${response.data.user?.name || 'User'}!`);
                 
-                // Token එක සහ Role එක localStorage එකේ save කිරීම (Security සඳහා වැදගත්)
+                // Token සහ Role එක localStorage හි තැන්පත් කිරීම
                 localStorage.setItem('token', response.data.token);
-                localStorage.setItem('role', response.data.user?.role); // 'admin' හෝ 'customer'
+                localStorage.setItem('role', response.data.user?.role); 
 
                 setTimeout(() => {
-                    // Role එක මත පදනම්ව navigate කරන තැන වෙනස් කිරීම
+                    // Admin හෝ Customer මත පදනම්ව අදාළ පිටුවට යොමු කිරීම [cite: 10, 36]
                     if (response.data.user?.role === 'admin') {
-                        navigate('/admin-dashboard'); // Admin සඳහා වෙනම route එකක්
+                        navigate('/admin-dashboard'); 
                     } else {
-                        navigate('/'); // සාමාන්‍ය Customer සඳහා Home
+                        navigate('/'); 
                     }
                 }, 1500);
             } else {
@@ -59,38 +58,11 @@ const handleAuth = async (e: FormEvent) => {
                 setIsLogin(true);
             }
         }
-    } catch (err: any) {
+    } catch (err) {
+        // catch block එකේ තිබූ 'any' type එක ඉවත් කරන ලදී
         setError(err.response?.data?.message || 'Something went wrong. Please try again.');
     }
-};
-  // const handleAuth = async (e: FormEvent) => {
-  //   e.preventDefault();
-  //   setError('');
-  //   setSuccess('');
-
-  //   const endpoint = isLogin ? 'login' : 'register';
-    
-  //   if (!isLogin && !formData.name) {
-  //       setError('Please enter your name.');
-  //       return;
-  //   }
-
-  //   try {
-  //     const response = await axios.post(`http://localhost:5000/api/auth/${endpoint}`, formData);
-  //     if (response.data.success) {
-  //       setSuccess(response.data.message);
-  //       if (isLogin) {
-  //         localStorage.setItem('token', response.data.token);
-  //       } else {
-  //           setSuccess('Registration successful! Please login.');
-  //           setFormData({ name: '', email: '', password: '' });
-  //           setIsLogin(true);
-  //       }
-  //     }
-  //   } catch (err: any) {
-  //     setError(err.response?.data?.message || 'An unexpected error occurred.');
-  //   }
-  // };
+  };
 
   return (
     <div className="min-h-screen bg-[#0E0E0E] text-white flex flex-col items-center justify-center px-6 font-sans">
@@ -129,6 +101,7 @@ const handleAuth = async (e: FormEvent) => {
                 onChange={handleChange}
                 placeholder="Enter your profile name"
                 className="w-full px-4 py-3 bg-transparent border border-[#333] rounded-xl text-sm placeholder:text-[#555] focus:outline-none focus:border-white transition-all"
+                required={!isLogin}
               />
             </div>
           )}
@@ -143,6 +116,7 @@ const handleAuth = async (e: FormEvent) => {
               onChange={handleChange}
               placeholder="Enter your email address"
               className="w-full px-4 py-3 bg-transparent border border-[#333] rounded-xl text-sm placeholder:text-[#555] focus:outline-none focus:border-white transition-all"
+              required
             />
           </div>
 
@@ -167,17 +141,12 @@ const handleAuth = async (e: FormEvent) => {
               onChange={handleChange}
               placeholder="Enter your password"
               className="w-full px-4 py-3 bg-transparent border border-[#333] rounded-xl text-sm placeholder:text-[#555] focus:outline-none focus:border-white transition-all"
+              required
             />
             {!isLogin && (
                 <p className="text-[11px] text-[#666] leading-tight">Use 8 or more characters with a mix of letters, numbers & symbols</p>
             )}
           </div>
-
-          {!isLogin && (
-            <p className="text-[11px] text-[#A1A1A1] text-center px-2 mt-4">
-              By creating an account, you agree to the <span className="text-white underline cursor-pointer">Terms of use</span> and <span className="text-white underline cursor-pointer">Privacy Policy</span>.
-            </p>
-          )}
 
           <button
             type="submit"
@@ -187,7 +156,7 @@ const handleAuth = async (e: FormEvent) => {
           </button>
         </form>
 
-        {/* Divider - Figma Style */}
+        {/* Figma Style Social Divider */}
         <div className="relative my-10">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t border-[#333]"></span>
@@ -197,7 +166,6 @@ const handleAuth = async (e: FormEvent) => {
           </div>
         </div>
 
-        {/* Social Buttons - Fix with 'text-black' */}
         <div className="grid grid-cols-3 gap-3">
           <button className="flex items-center justify-center py-2.5 bg-white text-black rounded-full hover:bg-[#D1D1D1] transition-colors">
             <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.04c-5.5 0-10 4.5-10 10c0 5 3.66 9.12 8.44 9.88v-6.99H7.9v-2.89h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89c1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.89h-2.33v6.99C18.34 21.16 22 17.04 22 12.04c0-5.5-4.5-10-10-10Z"/></svg>
