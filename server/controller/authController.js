@@ -1,8 +1,8 @@
-import db from '../config/db.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+const db = require('../config/db.js');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-export const register = async (req, res) => {
+const register = async (req, res) => {
     const { name, email, password } = req.body; 
 
     try {
@@ -26,7 +26,7 @@ export const register = async (req, res) => {
     }
 };
 
-export const login = async (req, res) => {
+const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -57,10 +57,13 @@ export const login = async (req, res) => {
                 id: user.id,
                 name: user.full_name,
                 email: user.email,
-                role: user.role // Frontend එකට අඳුරගන්න role එකත් යවන්න
+                role: user.role // Frontend එකට අඳුරගන්න role එකත් යවනවා
             }
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// CommonJS ක්‍රමයට export කිරීම
+module.exports = { register, login };

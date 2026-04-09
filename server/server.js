@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const ordersRoutes = require('./routes/orders');
 const paymentsRoutes = require('./routes/payments');
+const authRoutes = require('./routes/authRoutes');
 
 dotenv.config();
 
