@@ -12,3 +12,9 @@ client/dist/
 # OS files
 .DS_Store
 Thumbs.db
+.env
+.env.*
+/dist
+logs
+*.log
+.vscode/
