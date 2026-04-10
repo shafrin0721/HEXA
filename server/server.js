@@ -4,9 +4,10 @@ const dotenv = require('dotenv');
 const ordersRoutes = require('./routes/orders');
 const paymentsRoutes = require('./routes/payments');
 const authRoutes = require('./routes/authRoutes');
+const contactRoutes = require('./routes/contactRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 
 dotenv.config();
-
 const app = express();
 
 // Middleware
@@ -19,16 +20,9 @@ app.use('/api/auth', authRoutes);
 // Routes - IMPORTANT: Order matters
 app.use('/api/orders', ordersRoutes);
 app.use('/api', paymentsRoutes);
+app.use("/api/contact", contactRoutes);
+app.use("/api/profile", profileRoutes);
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
-});
-
-// Test endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'API is working' });
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
