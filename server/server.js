@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const ordersRoutes = require('./routes/orders');
 const paymentsRoutes = require('./routes/payments');
+const authRoutes = require('./routes/authRoutes');
 
 dotenv.config();
 
@@ -11,6 +12,9 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Routes
+app.use('/api/auth', authRoutes);
 
 // Routes - IMPORTANT: Order matters
 app.use('/api/orders', ordersRoutes);
@@ -36,7 +40,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📝 API available at http://localhost:${PORT}/api`);
