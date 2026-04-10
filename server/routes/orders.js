@@ -1,36 +1,39 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database');
+const db = require('../config/db');
 
 router.post('/', async (req, res) => {
   try {
-    const { items, total, shipping_address, payment_info, payment_intent_id,  } = req.body;
-    const user_id = 1; 
+    const { items, total, shipping_address, payment_info, payment_intent_id } = req.body;
+    const user_id = 1; // In production: req.user.id
 
     const connection = await db.getConnection();
     await connection.beginTransaction();
 
     try {
-      
+      // Insert payment - matches your payments table
       const [paymentResult] = await connection.query(
-        `INSERT INTO payments (amount, payment_method, card_last_four,card_type, status,transaction_id, created_at) 
+        `INSERT INTO payments (amount, payment_method, card_last_four, card_type, status, transaction_id, created_at) 
          VALUES (?, ?, ?, ?, 'completed', ?, NOW())`,
         [total, 'credit_card', payment_info.card_last4, payment_info.card_type, payment_intent_id]
       );
       const paymentId = paymentResult.insertId;
 
+      // Insert order - matches your orders table (only has user_id, total, status, created_at)
       const [orderResult] = await connection.query(
-        `INSERT INTO orders (user_id, total, status, shipping_address, payment_id, created_at) 
-         VALUES (?, ?, 'pending', ?, ?, NOW())`,
-        [user_id, total, JSON.stringify(shipping_address), paymentId]
+        `INSERT INTO orders (user_id, total, status, created_at) 
+         VALUES (?, ?, 'pending', NOW())`,
+        [user_id, total]
       );
       const orderId = orderResult.insertId;
 
+      // Update payment with order_id
       await connection.query(
         `UPDATE payments SET order_id = ? WHERE id = ?`,
         [orderId, paymentId]
       );
 
+      // Insert order items - matches your order_items table
       for (const item of items) {
         await connection.query(
           `INSERT INTO order_items (order_id, product_id, quantity, price) 
@@ -77,16 +80,16 @@ router.post('/', async (req, res) => {
 
 router.get('/totals', async (req, res) => {
   try {
-    const user_id = 1; 
+    const user_id = 1; // In production: req.user.id
+    
+    // Updated to match your cart_items and products tables
     const [cartItems] = await db.query(`
       SELECT 
         ci.product_id,
         ci.quantity,
         p.name,
-        p.brand,
         p.price,
-        p.image,
-        p.rating
+        p.image
       FROM cart_items ci
       JOIN products p ON ci.product_id = p.id
       WHERE ci.user_id = ?
@@ -111,11 +114,9 @@ router.get('/totals', async (req, res) => {
       return {
         id: item.product_id,
         name: item.name,
-        brand: item.brand,
         price: parseFloat(item.price),
         quantity: item.quantity,
-        image: item.image,
-        rating: item.rating
+        image: item.image
       };
     });
     
@@ -157,18 +158,25 @@ router.get('/:id', async (req, res) => {
       });
     }
     
+    // Updated to match your order_items table (no variant_id)
     const [items] = await db.query(`
-      SELECT oi.*, p.name, p.image, p.brand
+      SELECT oi.*, p.name, p.image
       FROM order_items oi
-      JOIN products p ON oi.product_id = p.id
+      LEFT JOIN products p ON oi.product_id = p.id
       WHERE oi.order_id = ?
+    `, [id]);
+    
+    // Get payment info
+    const [payment] = await db.query(`
+      SELECT * FROM payments WHERE order_id = ?
     `, [id]);
     
     res.json({
       success: true,
       data: {
         order: orders[0],
-        items
+        items: items,
+        payment: payment[0] || null
       }
     });
     

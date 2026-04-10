@@ -1,11 +1,8 @@
-
 exports.createOrder = async (req, res) => {
   try {
     const { 
       items, 
       total, 
-      subtotal,
-      shipping,
       payment_intent_id,
       payment_status,
       shipping_address, 
@@ -22,7 +19,7 @@ exports.createOrder = async (req, res) => {
       throw new Error('payment_info with card_last4 is required');
     }
 
-    const connection = await require('../config/database').getConnection();
+    const connection = await require('../config/db').getConnection();
     await connection.beginTransaction();
 
     try {
@@ -44,20 +41,16 @@ exports.createOrder = async (req, res) => {
       const [paymentResult] = await connection.query(paymentQuery, paymentValues);
       const paymentId = paymentResult.insertId;
 
+      // Modified to match your orders table columns
       const orderQuery = `
-        INSERT INTO orders (user_id, total, subtotal, shipping_cost, status, shipping_address, payment_id, payment_intent_id, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        INSERT INTO orders (user_id, total, status, created_at) 
+        VALUES (?, ?, ?, NOW())
       `;
       
       const orderValues = [
         user_id,
         total,
-        subtotal || total - (shipping || 0),
-        shipping || 0,
-        'pending',
-        JSON.stringify(shipping_address),
-        paymentId,
-        payment_intent_id
+        'pending'
       ];
       
       const [orderResult] = await connection.query(orderQuery, orderValues);
