@@ -22,7 +22,7 @@ exports.createOrder = async (req, res) => {
       throw new Error('payment_info with card_last4 is required');
     }
 
-    const connection = await require('../config/database').getConnection();
+    const connection = await require('../config/database.cjs').getConnection();
     await connection.beginTransaction();
 
     try {

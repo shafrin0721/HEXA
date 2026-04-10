@@ -1,4 +1,4 @@
-const db = require('../config/database');
+const db = require('../config/database.cjs');
 
 class OrderItem {
   static async create(orderId, items) {
