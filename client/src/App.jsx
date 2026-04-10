@@ -1,26 +1,37 @@
-import { Routes, Route, Navigate } from 'react-router-dom'; // Navigate අනිවාර්යයෙන්ම එකතු කරන්න
-import PaymentPage from './components/PaymentPage';
-import ReviewPage from './components/ReviewPage';
-// @ts-ignore
-import Auth from './pages/Auth'; 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import PaymentPage from "./components/PaymentPage";
+import ReviewPage from "./components/ReviewPage";
+import Index from "./pages/Index";
+import Contact from "./pages/Contact";
+import Settings from "./pages/Settings";
+import NotFound from "./pages/NotFound";
 
-function App() {
-  return (
-    <Routes>
-      {/* Root path එක කෙලින්ම Auth එකට redirect කරන්න */}
-      <Route path="/" element={<Navigate to="/auth" replace />} />
-      
-      {/* Auth Page එක */}
-      <Route path="/auth" element={<Auth />} />
-      
-      {/* අනෙකුත් Routes */}
-      <Route path="/payment" element={<PaymentPage />} />
-      <Route path="/review" element={<ReviewPage />} />
-      
-      {/* වැරදි URL එකක් ගැහුවොත් නැවත Auth එකට යවන්න */}
-      <Route path="*" element={<Navigate to="/auth" replace />} />
-    </Routes>
-  );
-}
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="hexal-ui-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/review" element={<ReviewPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
 
 export default App;

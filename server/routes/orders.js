@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const db = require('../config/db');
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { items, total, shipping_address, payment_info, payment_intent_id } = req.body;
     const user_id = 1; // In production: req.user.id
@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
       const [paymentResult] = await connection.query(
         `INSERT INTO payments (amount, payment_method, card_last_four, card_type, status, transaction_id, created_at) 
          VALUES (?, ?, ?, ?, 'completed', ?, NOW())`,
-        [total, 'credit_card', payment_info.card_last4, payment_info.card_type, payment_intent_id]
+        [total, "credit_card", payment_info.card_last4, payment_info.card_type, payment_intent_id],
       );
       const paymentId = paymentResult.insertId;
 
@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
         await connection.query(
           `INSERT INTO order_items (order_id, product_id, quantity, price) 
            VALUES (?, ?, ?, ?)`,
-          [orderId, item.id, item.quantity, item.price]
+          [orderId, item.id, item.quantity, item.price],
         );
       }
 
@@ -46,22 +46,21 @@ router.post('/', async (req, res) => {
 
       res.status(201).json({
         success: true,
-        message: 'Order created successfully',
+        message: "Order created successfully",
         data: {
           order: {
             id: orderId,
             total: total,
-            status: 'pending',
-            created_at: new Date()
+            status: "pending",
+            created_at: new Date(),
           },
           payment: {
             id: paymentId,
             amount: total,
-            status: 'completed'
-          }
-        }
+            status: "completed",
+          },
+        },
       });
-
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -69,16 +68,16 @@ router.post('/', async (req, res) => {
       connection.release();
     }
   } catch (error) {
-    console.error('Create order error:', error);
+    console.error("Create order error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create order',
-      error: error.message
+      message: "Failed to create order",
+      error: error.message,
     });
   }
 });
 
-router.get('/totals', async (req, res) => {
+router.get("/totals", async (req, res) => {
   try {
     const user_id = 1; // In production: req.user.id
     
@@ -92,9 +91,10 @@ router.get('/totals', async (req, res) => {
         p.image
       FROM cart_items ci
       JOIN products p ON ci.product_id = p.id
-      WHERE ci.user_id = ?
-    `, [user_id]);
-    
+    `,
+      [],
+    );
+
     if (cartItems.length === 0) {
       return res.json({
         success: true,
@@ -102,13 +102,13 @@ router.get('/totals', async (req, res) => {
           items: [],
           subtotal: 0,
           shipping: 0,
-          total: 0
-        }
+          total: 0,
+        },
       });
     }
-    
+
     let subtotal = 0;
-    const items = cartItems.map(item => {
+    const items = cartItems.map((item) => {
       const itemTotal = item.quantity * parseFloat(item.price);
       subtotal += itemTotal;
       return {
@@ -119,42 +119,39 @@ router.get('/totals', async (req, res) => {
         image: item.image
       };
     });
-    
+
     const shipping = subtotal > 50 ? 0 : 12.87;
     const total = subtotal + shipping;
-    
+
     res.json({
       success: true,
       data: {
         items,
         subtotal: parseFloat(subtotal.toFixed(2)),
         shipping: parseFloat(shipping.toFixed(2)),
-        total: parseFloat(total.toFixed(2))
-      }
+        total: parseFloat(total.toFixed(2)),
+      },
     });
-    
   } catch (error) {
-    console.error('Error fetching order totals:', error);
+    console.error("Error fetching order totals:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch order totals',
-      error: error.message
+      message: "Failed to fetch order totals",
+      error: error.message,
     });
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const [orders] = await db.query(`
-      SELECT * FROM orders WHERE id = ?
-    `, [id]);
-    
+
+    const [orders] = await db.query(`SELECT * FROM orders WHERE id = ?`, [id]);
+
     if (orders.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Order not found'
+        message: "Order not found",
       });
     }
     
@@ -179,13 +176,12 @@ router.get('/:id', async (req, res) => {
         payment: payment[0] || null
       }
     });
-    
   } catch (error) {
-    console.error('Error fetching order:', error);
+    console.error("Error fetching order:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch order',
-      error: error.message
+      message: "Failed to fetch order",
+      error: error.message,
     });
   }
 });
