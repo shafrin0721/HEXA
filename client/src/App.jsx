@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes ,Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Contact from "./pages/Contact";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Auth from './pages/Auth';
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/" element={<Navigate to="/auth" replace />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/payment" element={<PaymentPage />} />
