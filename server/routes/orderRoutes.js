@@ -1,7 +1,7 @@
 
 const express = require("express");
 const router = express.Router();
-const db = require("../db"); // make sure db.js exists
+const db = require("../config/db"); // make sure db.js exists
 
 // GET order by ID
 router.get("/:id", (req, res) => {
