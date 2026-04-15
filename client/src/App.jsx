@@ -72,8 +72,6 @@ const App = () => (
             <Route path="/admin/customers" element={<AdminCustomers />} />
             <Route path="/admin/charts" element={<AdminCharts />} />
             <Route path="/admin/inventory" element={<AdminInventory />} />
-            
-            {/* 404 Route - Must be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
