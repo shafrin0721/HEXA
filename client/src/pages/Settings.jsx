@@ -1,5 +1,4 @@
 import { jsx, jsxs } from "react/jsx-runtime";
-import { Layout } from "@/components/Layout";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { User, Eye, Bell, Shield, Camera, Trash2, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,18 +19,24 @@ import { toast } from "sonner";
 import { apiUrl } from "@/lib/api";
 import { clampFontSize, isValidEmail, isValidPhone, MAX_NAME_LEN } from "@/lib/validation";
 import { useTheme } from "next-themes";
+
 const PROFILE_EMAIL_KEY = "hexal_profile_email";
+
 function avatarStorageKey(email) {
   return `hexal_profile_avatar:${email.trim().toLowerCase()}`;
 }
+
 const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face";
+
 const sidebarItems = [
   { label: "Profile Settings", icon: User, id: "profile" },
   { label: "Accessibility", icon: Eye, id: "accessibility" },
   { label: "Notifications", icon: Bell, id: "notifications" },
   { label: "Security", icon: Shield, id: "security" }
 ];
+
 const LANGUAGE_OPTIONS = ["English (US)", "English (UK)", "Spanish", "French"];
+
 function readAndCompressImage(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -73,6 +78,7 @@ function readAndCompressImage(file) {
     reader.readAsDataURL(file);
   });
 }
+
 function Settings() {
   const { setTheme } = useTheme();
   const fileInputRef = useRef(null);
@@ -97,14 +103,17 @@ function Settings() {
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   useEffect(() => {
     setTheme(darkMode ? "dark" : "light");
   }, [darkMode, setTheme]);
+
   useEffect(() => {
     const v = fontSize[0] ?? 50;
     const px = 14 + v / 100 * 10;
     document.documentElement.style.fontSize = `${px}px`;
   }, [fontSize]);
+
   const applyAvatarFromProfile = useCallback((email, serverAvatar) => {
     const key = avatarStorageKey(email);
     const local = localStorage.getItem(key);
@@ -116,6 +125,7 @@ function Settings() {
       setAvatarSrc(null);
     }
   }, []);
+
   async function fetchProfileForEmail(email) {
     setLoadingProfile(true);
     const trimmed = email.trim();
@@ -158,9 +168,11 @@ function Settings() {
       setLoadingProfile(false);
     }
   }
+
   useEffect(() => {
     void fetchProfileForEmail(profileEmail);
   }, []);
+
   async function saveProfile() {
     const email = profileEmail.trim();
     if (!email) {
@@ -178,7 +190,7 @@ function Settings() {
       return;
     }
     if (!isValidPhone(phone)) {
-      toast.error("Phone must include 7\u201315 digits, or leave the field empty.");
+      toast.error("Phone must include 7–15 digits, or leave the field empty.");
       return;
     }
     const fontSizeValue = clampFontSize(fontSize[0] ?? 50);
@@ -216,9 +228,11 @@ function Settings() {
       setSaving(false);
     }
   }
+
   function handleAvatarButtonClick() {
     fileInputRef.current?.click();
   }
+
   async function handleAvatarFileChange(e) {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -230,11 +244,12 @@ function Settings() {
       const dataUrl = await readAndCompressImage(file);
       setAvatarSrc(dataUrl);
       localStorage.setItem(avatarStorageKey(profileEmail), dataUrl);
-      toast.success("Photo updated \u2014 save your profile to keep other changes.");
+      toast.success("Photo updated — save your profile to keep other changes.");
     } catch {
       toast.error("Could not process that image.");
     }
   }
+
   function handleRemoveAvatar() {
     const email = profileEmail.trim();
     setAvatarSrc(null);
@@ -243,6 +258,7 @@ function Settings() {
     }
     toast.success("Photo removed");
   }
+
   function handlePasswordSubmit(e) {
     e.preventDefault();
     if (newPassword.length < 8) {
@@ -253,13 +269,15 @@ function Settings() {
       toast.error("Passwords do not match.");
       return;
     }
-    toast.success("Password updated (demo \u2014 not sent to a server).");
+    toast.success("Password updated (demo — not sent to a server).");
     setPasswordDialogOpen(false);
     setNewPassword("");
     setConfirmPassword("");
   }
+
   const cardClass = "bg-white dark:bg-card rounded-xl p-6 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-border";
-  return /* @__PURE__ */ jsx(Layout, { children: /* @__PURE__ */ jsx("div", { className: "container py-12 flex justify-center", children: /* @__PURE__ */ jsxs("div", { className: "flex gap-8 max-w-5xl w-full mx-auto", children: [
+
+  return /* @__PURE__ */ jsx("div", { className: "container py-12 flex justify-center", children: /* @__PURE__ */ jsxs("div", { className: "flex gap-8 max-w-5xl w-full mx-auto", children: [
     /* @__PURE__ */ jsx("aside", { className: "w-56 shrink-0", children: /* @__PURE__ */ jsx("nav", { className: "space-y-1 bg-white dark:bg-card rounded-xl p-4 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-border", children: sidebarItems.map((item) => /* @__PURE__ */ jsxs(
       "button",
       {
@@ -401,7 +419,7 @@ function Settings() {
             }
           )
         ] }),
-        /* @__PURE__ */ jsx(Button, { type: "button", onClick: saveProfile, disabled: saving || loadingProfile, className: "w-full sm:w-auto", children: saving ? "Saving\u2026" : "Save profile to database" })
+        /* @__PURE__ */ jsx(Button, { type: "button", onClick: saveProfile, disabled: saving || loadingProfile, className: "w-full sm:w-auto", children: saving ? "Saving…" : "Save profile to database" })
       ] }),
       activeTab === "accessibility" && /* @__PURE__ */ jsxs("section", { className: cardClass, children: [
         /* @__PURE__ */ jsx("h2", { className: "text-lg font-semibold text-[#111318] dark:text-foreground mb-6", children: "Accessibility Options" }),
@@ -548,8 +566,7 @@ function Settings() {
         ] })
       ] })
     ] })
-  ] }) }) });
+  ] }) });
 }
-export {
-  Settings as default
-};
+
+export default Settings;

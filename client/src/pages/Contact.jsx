@@ -1,16 +1,17 @@
 import { jsx, jsxs } from "react/jsx-runtime";
-import { Layout } from "@/components/Layout";
 import { Phone, Mail, MapPin, Facebook, Instagram, HelpCircle, Send, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
 import { apiUrl } from "@/lib/api";
 import { MESSAGE_MAX_LEN, MESSAGE_MIN_LEN, MAX_NAME_LEN, validateContactForm } from "@/lib/validation";
+
 function Contact() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+
   async function handleSubmit(e) {
     e.preventDefault();
     const validationError = validateContactForm(name, email, message);
@@ -44,7 +45,8 @@ function Contact() {
       setSending(false);
     }
   }
-  return /* @__PURE__ */ jsx(Layout, { children: /* @__PURE__ */ jsx("div", { className: "container py-16 flex items-center justify-center min-h-[calc(100vh-200px)]", children: /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-0 max-w-4xl w-full mx-auto rounded-2xl overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,0.55)]", children: [
+
+  return /* @__PURE__ */ jsx("div", { className: "container py-16 flex items-center justify-center min-h-[calc(100vh-200px)]", children: /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-0 max-w-4xl w-full mx-auto rounded-2xl overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,0.55)]", children: [
     /* @__PURE__ */ jsxs("div", { className: "bg-gradient-to-br from-[#1a1e2b] via-[#12151d] to-[#0a0c12] p-8 md:p-10 flex flex-col justify-between relative overflow-hidden", children: [
       /* @__PURE__ */ jsx("div", { className: "absolute -top-20 -right-20 w-52 h-52 rounded-full bg-primary/5 blur-2xl pointer-events-none" }),
       /* @__PURE__ */ jsx("div", { className: "absolute -bottom-16 -left-16 w-40 h-40 rounded-full bg-blue-500/5 blur-2xl pointer-events-none" }),
@@ -223,14 +225,13 @@ function Contact() {
             disabled: sending,
             children: [
               /* @__PURE__ */ jsx(Send, { className: "h-4 w-4" }),
-              sending ? "Sending\u2026" : "Send Message"
+              sending ? "Sending…" : "Send Message"
             ]
           }
         )
       ] })
     ] })
-  ] }) }) });
+  ] }) });
 }
-export {
-  Contact as default
-};
+
+export default Contact;

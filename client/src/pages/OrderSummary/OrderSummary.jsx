@@ -1,32 +1,30 @@
-import "./OrderSummary.css";
-import avatar from "../assets/avatar.jpg";
-import logo from "../assets/logo.png";
-import productImg  from "../assets/t- 6.jpg";
-import productImg1 from "../assets/t-12.jpg";
-import { useEffect, useState } from "react";
 
+import { useState } from "react";
+import orderMock from "../../data/OrderMock";
+import { useNavigate } from "react-router-dom";
 
 function OrderSummary() {
-    const [orders, setOrders] = useState([]);
+  const [order] = useState(orderMock);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("http://localhost:5001/api/orders/1")
-      .then(res => res.json())
-      .then(data => setOrders(data));
-  }, []);
+  if (!order) return <p>Loading...</p>;
+
+
 
   return (
   
   <div className="page"> 
 
-  {/* Navbar */}
-  <nav className="navbar">
+      {order.items.map((item, i) => (
+        <div key={i}>
+          <img src={item.image} width="50" alt={item.name} />
+          <p>{item.name}</p>
+          <p>Qty: {item.quantity}</p>
+          <p>Rs. {item.price}</p>
 
-  {/* LEFT SIDE */}
-   <div className="nav-left">
-    <img src={logo} className="logo" />
-  </div>
-
+          <button onClick={() => navigate("/order-success")}>Place Order</button>
+        </div>
+      ))}
 
   {/* CENTER */}
   <div className="nav-center">
@@ -41,7 +39,7 @@ function OrderSummary() {
     <span className="cart">🛒</span>
     <img src = {avatar} alt="avatar" className="icon"/>
   </div>
-</nav>
+
 
   
 
