@@ -1,0 +1,177 @@
+.page {
+  background: black;
+  color: white;
+  padding: 20px;
+  font-family: Arial;
+}
+
+/* Navbar */
+.navbar {
+   display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icon {
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Center items */
+.nav-center {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+/* Right side */
+.nav-right {
+  display: flex;
+  gap: 20px;
+}
+
+/* Left */
+.logo {
+  width: 60px;
+  height: 60px; ;
+}
+
+/* Title */
+
+.order-container {
+  border: 1px solid gray;
+  padding: 20px;
+  margin: 20px;
+}
+.title {
+  text-align: center;
+  margin-top: 20px;
+  color: whitesmoke;
+  
+}
+
+/* Table */
+.table {
+  border: 1px solid ghostwhite;
+  padding: 0px;
+  margin-left: 2cm;
+  margin-right: 2cm;
+}
+
+.table-header{
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 10px 0; /* smaller */
+  border-bottom: 1px solid ghostwhite;
+  font-weight: bold; 
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 40px 0px;
+  border-bottom: 1px solid ghostwhite;
+  padding: 50px 0;
+  align-items: center;
+}
+
+.product-img {
+  width: 70px;          /*  bigger size */
+  height: 70px;         /*  same = perfect square */
+  object-fit: cover;    /*  prevents distortion */
+  border-radius: 0px;   /* slight curve (optional) */
+}
+
+.item-cell {
+  display: flex;
+  align-items: center;  /* vertical center */
+  gap: 15px;
+  padding-left: 20px;
+}
+.item-cell span {
+  white-space: nowrap;
+}
+
+
+/* Total */
+
+
+.order-total {
+  
+  grid-template-columns: 2fr 1fr 1fr 1fr; /* SAME as table */
+  align-items: right;
+  margin-top: 15px;
+  font-weight: bold;
+  display: grid;
+  border: none;
+}
+
+.order-total .label {
+  grid-column: 0.75/ 4; /* spans first 3 columns */
+}
+
+.order-total .value {
+  grid-column: 4 / 5; /* last column */
+  text-align: center;
+}
+
+/* Button */
+.btn-container {
+  display: flex;
+  justify-content: flex-end; /*  move to right */
+  margin-top: 20px;
+}
+
+.btn {
+  background: gold;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  cursor: pointer;
+}
+
+/* Footer */
+.back-to-top {
+  width: 100%;              /* full row */
+  background: white;
+  color: black;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.footer {
+  margin-top: 40px;
+  background: black;
+  color: white;
+}
+
+/* 4-column layout */
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /*  4 equal parts */
+  gap: 40px; /* equal spacing */
+  padding: 30px 20px;
+}
+
+.footer-box h4 {
+  margin-bottom: 10px;
+  font-size: 16px; /* heading */
+}
+
+.footer-box p {
+  margin: 5px 0;
+  font-size: 13px; /*  smaller text */
+}
+
+.footer-box {
+  text-align: left; /*  align text properly */
+}
+
+.footer-box p {
+  margin: 6px 0;
+  font-size: 13px;
+  color: #ccc; /* softer text */
+}
