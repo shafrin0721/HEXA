@@ -3,11 +3,20 @@ import avatar from "../assets/avatar.jpg";
 import logo from "../assets/logo.png";
 import productImg  from "../assets/t- 6.jpg";
 import productImg1 from "../assets/t-12.jpg";
+import { useEffect, useState } from "react";
 
 
 function OrderSummary() {
-  return (
+    const [orders, setOrders] = useState([]);
 
+  useEffect(() => {
+    fetch("http://localhost:5000/api/orders/1")
+      .then(res => res.json())
+      .then(data => setOrders(data));
+  }, []);
+
+  return (
+  
   <div className="page"> 
 
   {/* Navbar */}
@@ -37,41 +46,28 @@ function OrderSummary() {
   
 
  {/* Title */}
- 
+    <div className="order-container">
       <h2 className="title">Order Summary</h2>
 
       {/* Table */}
-      <div className="table">
-        <div className="table-header">
-          <span>Items</span>
-          <span>Price</span>
-          <span>Quantity</span>
-          <span>Total</span>
-        </div>
+      <div className="table"> 
+      <div className="table-header"></div>
+          {orders.map((item) => (
+  <div className="table-row" key={item.id}>
+    
+    <div className="item-cell">
+      <img src={productImg} className="product-img" />
+      <span>{item.name}</span>
+    </div>
 
-{/*row1*/}
- <div className="table-row">
-  <div className="item-cell">
-    <img src={productImg} className="product-img" />
-    <span>Hexa Classic Tee</span>
+    <span>${item.price}</span>
+    <span>{item.quantity}</span>
+    <span>${(item.price * item.quantity).toFixed(2)}</span>
+  </div>
+  
+  ))}
   </div>
 
-  <span>$19.99</span>
-  <span>01</span>
-  <span>$19.99</span>
-</div>
-
-{/*row2*/}
-<div className="table-row">
-  <div className="item-cell">
-    <img src={productImg1} className="product-img" />
-    <span>Hexa Classic Tee</span>
-  </div>
-
- <span>$19.99</span>
-  <span>01</span>
-  <span>$19.99</span>
-</div>
        
 
       {/* Total */}

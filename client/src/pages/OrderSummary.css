@@ -79,9 +79,9 @@
 }
 
 .product-img {
-  width: 70px;          /* 👈 bigger size */
-  height: 70px;         /* 👈 same = perfect square */
-  object-fit: cover;    /* 👈 prevents distortion */
+  width: 70px;          /*  bigger size */
+  height: 70px;         /*  same = perfect square */
+  object-fit: cover;    /*  prevents distortion */
   border-radius: 0px;   /* slight curve (optional) */
 }
 
@@ -100,11 +100,13 @@
 
 
 .order-total {
-  display: grid;
+  
   grid-template-columns: 2fr 1fr 1fr 1fr; /* SAME as table */
   align-items: right;
   margin-top: 15px;
   font-weight: bold;
+  display: grid;
+  border: none;
 }
 
 .order-total .label {
@@ -119,7 +121,7 @@
 /* Button */
 .btn-container {
   display: flex;
-  justify-content: flex-end; /* 👈 move to right */
+  justify-content: flex-end; /*  move to right */
   margin-top: 20px;
 }
 
@@ -149,7 +151,7 @@
 /* 4-column layout */
 .footer-content {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 👈 4 equal parts */
+  grid-template-columns: repeat(4, 1fr); /*  4 equal parts */
   gap: 40px; /* equal spacing */
   padding: 30px 20px;
 }
@@ -161,11 +163,11 @@
 
 .footer-box p {
   margin: 5px 0;
-  font-size: 13px; /* 👈 smaller text */
+  font-size: 13px; /*  smaller text */
 }
 
 .footer-box {
-  text-align: left; /* 👈 align text properly */
+  text-align: left; /*  align text properly */
 }
 
 .footer-box p {
