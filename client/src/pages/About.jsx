@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 
 export default function About() {
   const team = [
-    { name: 'Alex Kim', role: 'Founder', image: '/images/team1_new.jpg' },
-    { name: 'Sophia Lin', role: 'Lead Designer', image: '/images/team2_new.jpg' },
-    { name: 'Ryan Patel', role: 'Production Lead', image: '/images/team3_new.jpg' },
+    { name: 'Shafrin', role: 'Founder', image: '/images/team1_new.jpg' },
+    { name: 'Shavindi', role: 'Lead Designer', image: '/images/team2_new.jpg' },
+    { name: 'Heli', role: 'Production Lead', image: '/images/team3_new.jpg' },
   ];
 
   return (
@@ -40,10 +40,14 @@ export default function About() {
       {/* Our Story */}
       <section className="py-24 px-8 border-b border-gray-800">
         <div className="max-w-6xl mx-auto text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">Our Story</h1>
-          <p className="text-gray-300 max-w-2xl mx-auto text-lg">
-            At Hexa, we believe style is personal. We design premium-quality, minimalist t-shirts that blend comfort, durability, and intelligent minimalism.
-          </p>
+          <h3 className="text-2xl font-bold text-center mb-4">
+  Our Story
+</h3>
+          <p className="text-gray-300 max-w-xl mx-auto text-lg text-center leading-relaxed">
+  At Hexa, we believe style is personal. We design premium-quality,
+  minimalist t-shirts that blend comfort, durability, and intelligent
+  minimalism.
+</p>
         </div>
 
         {/* Story Cards Grid */}
@@ -81,11 +85,14 @@ export default function About() {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16">
           {/* Left: Team Members */}
           <div>
-            <h2 className="text-4xl font-bold mb-6">Meet the Team</h2>
-            <p className="text-gray-400 mb-12 max-w-lg">
+            <h2 className="text-text-5xl font-bold text-left mb-6">
+  Meet the Team
+</h2>
+<br></br>
+            <p className="text-gray-400 mb-12 text-left max-w-lg">
               Hexa is powered by a small, passionate team of designers, makers, and creatives who share a love for premium fashion and functional design. Together, we're building a brand that values authenticity, quality, and the people who wear our essentials.
             </p>
-
+<br></br>
             {/* Team Member Circles */}
             <div className="flex gap-8 flex-wrap">
               {team.map((member, i) => (
