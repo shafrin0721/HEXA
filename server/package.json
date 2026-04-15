@@ -15,9 +15,6 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
-<<<<<<< HEAD
-    "mysql2": "^3.20.0"
-=======
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.20.0",
     "nodemailer": "^8.0.5",
@@ -25,6 +22,5 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
->>>>>>> c9e1987fbacd03873143ae7c13629f7fc46a3982
   }
 }

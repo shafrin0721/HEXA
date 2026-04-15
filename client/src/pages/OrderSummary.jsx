@@ -10,7 +10,7 @@ function OrderSummary() {
     const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/orders/1")
+    fetch("http://localhost:5001/api/orders/1")
       .then(res => res.json())
       .then(data => setOrders(data));
   }, []);

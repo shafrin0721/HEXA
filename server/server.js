@@ -1,24 +1,7 @@
-<<<<<<< HEAD
-const express = require("express");
-const cors = require("cors");
-
-const orderRoutes = require("./routes/orderRoutes");
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-app.use("/api/orders", orderRoutes);
-
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
-});
-=======
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const ordersRoutes = require('./routes/orders');
+const orderRoutes = require('./routes/orderRoutes');
 const paymentsRoutes = require('./routes/payments');
 const authRoutes = require('./routes/authRoutes');
 const contactRoutes = require('./routes/contactRoutes');
@@ -35,7 +18,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 
 // Routes - IMPORTANT: Order matters
-app.use('/api/orders', ordersRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api', paymentsRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/profile", profileRoutes);
@@ -56,4 +39,3 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📝 API available at http://localhost:${PORT}/api`);
 });
->>>>>>> c9e1987fbacd03873143ae7c13629f7fc46a3982
