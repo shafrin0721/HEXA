@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { getCart } from '../../services/cartService';
 import './shipping.css';
 
 export default function ShippingStep() {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(2);
+  const location = useLocation();
   const [selectedShipping, setSelectedShipping] = useState('standard');
+  const [orderItems, setOrderItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [cartTotal, setCartTotal] = useState(0);
+  
   const [formData, setFormData] = useState({
     email: 'john@example.com',
     firstName: 'John',
@@ -16,13 +21,6 @@ export default function ShippingStep() {
     zipCode: '10001',
     phone: '+1 (555) 000-0000',
   });
-
-  const steps = [
-    { number: 1, label: 'Address' },
-    { number: 2, label: 'Shipping' },
-    { number: 3, label: 'Payment' },
-    { number: 4, label: 'Review' },
-  ];
 
   const shippingOptions = [
     {
@@ -39,84 +37,134 @@ export default function ShippingStep() {
     },
   ];
 
-  const orderItems = [
-    {
-      id: 1,
-      name: 'Hexa Classic Tee',
-      brand: 'Hexa',
-      price: 19.99,
-      rating: 5,
-      image: '🧥',
-    },
-    {
-      id: 2,
-      name: 'Hexa Classic Tee',
-      brand: 'Hexa',
-      price: 19.99,
-      rating: 5,
-      image: '👕',
-    },
-  ];
+  // Fetch cart items from backend using your existing cart API
+  useEffect(() => {
+    const fetchCartData = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          const savedCart = localStorage.getItem('cartItems');
+          if (savedCart) {
+            const parsedCart = JSON.parse(savedCart);
+            setOrderItems(parsedCart);
+            calculateTotal(parsedCart);
+          }
+          setLoading(false);
+          return;
+        }
+        
+        const response = await getCart();
+        
+        if (response.data && response.data.items) {
+          const items = response.data.items.map(item => ({
+            id: item.product_id || item.id,
+            name: item.name,
+            price: parseFloat(item.price),
+            quantity: item.quantity,
+            image: item.image || '📦',
+            brand: item.brand || 'Hexa',
+            rating: item.rating || 5
+          }));
+          setOrderItems(items);
+          setCartTotal(parseFloat(response.data.total) || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching cart:', error);
+        const savedCart = localStorage.getItem('cartItems');
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart);
+          setOrderItems(parsedCart);
+          calculateTotal(parsedCart);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const subtotal = 39.98;
+    if (location.state?.cartItems) {
+      setOrderItems(location.state.cartItems);
+      calculateTotal(location.state.cartItems);
+      setLoading(false);
+    } else if (location.state?.orderData) {
+      setOrderItems(location.state.orderData.items);
+      setCartTotal(location.state.orderData.total);
+      setLoading(false);
+    } else {
+      fetchCartData();
+    }
+  }, [location.state]);
+
+  const calculateTotal = (items) => {
+    const total = items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+    setCartTotal(total);
+  };
+
+  const subtotal = cartTotal;
   const shippingCost = selectedShipping === 'standard' ? 12.87 : 15;
   const total = subtotal + shippingCost;
 
   const handleContinue = () => {
-    if (currentStep < 4) {
-      if (currentStep === 2) {
-        setCurrentStep(3);
-      } else if (currentStep === 3) {
-        setCurrentStep(4);
+    localStorage.setItem('shippingData', JSON.stringify(formData));
+    localStorage.setItem('selectedShipping', selectedShipping);
+    localStorage.setItem('shippingCost', shippingCost.toString());
+    
+    navigate('/payment', { 
+      state: { 
+        shippingData: formData,
+        selectedShipping: selectedShipping,
+        shippingCost: shippingCost,
+        orderItems: orderItems,
+        subtotal: subtotal,
+        total: total
       }
-    }
+    });
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
-      if (currentStep === 2) {
-        navigate('/checkout');
-      } else {
-        setCurrentStep(currentStep - 1);
-      }
-    }
+    navigate('/checkout');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <p>Loading your order...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold mb-8">Checkout</h1>
-
-          <div className="flex items-center gap-8 overflow-x-auto pb-4">
-            {steps.map((step, index) => (
-              <div key={step.number} className="flex items-center gap-3 whitespace-nowrap">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors cursor-pointer ${
-                    step.number <= currentStep
-                      ? 'bg-gray-600 text-white'
-                      : 'bg-gray-800 text-gray-500'
-                  }`}
-                >
-                  {step.number}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Progress Steps - Labels on the right side of numbers (Increased Size) */}
+        <div className="flex items-center justify-center gap-6 mb-12">
+          {['Address', 'Shipping', 'Payment', 'Review'].map((label, index) => (
+            <React.Fragment key={index}>
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-base font-bold ${
+                  index < 1 ? 'bg-white text-black' :
+                  index === 1 ? 'bg-gray-500 text-white ring-4 ring-gray-500/50' :
+                  'bg-gray-800 text-gray-400'
+                }`}>
+                  {index + 1}
                 </div>
-                <span
-                  className={`text-sm transition-colors ${
-                    step.number <= currentStep ? 'text-white' : 'text-gray-500'
-                  }`}
-                >
-                  {step.label}
+                <span className={`text-base ${
+                  index === 1 ? 'text-white font-semibold' : 'text-gray-300'
+                }`}>
+                  {label}
                 </span>
-                {index < steps.length - 1 && (
-                  <span className="text-gray-600 text-lg ml-2">--------</span>
-                )}
               </div>
-            ))}
-          </div>
+              {index < 3 && (
+                <span className="text-gray-500 text-base font-medium">---</span>
+              )}
+            </React.Fragment>
+          ))}
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2">
             <div className="space-y-8">
@@ -178,26 +226,37 @@ export default function ShippingStep() {
               <div>
                 <h3 className="text-xl font-bold mb-4">Order Summary</h3>
                 <div className="border-b border-gray-700 pb-4 mb-4">
-                  <p className="text-sm text-gray-400 mb-4">{orderItems.length} Item</p>
+                  <p className="text-sm text-gray-400 mb-4">{orderItems.length} Items</p>
 
                   {orderItems.map((item) => (
                     <div key={item.id} className="flex gap-4 mb-6 pb-6 border-b border-gray-700 last:border-b-0 last:mb-0 last:pb-0">
                       <div className="w-20 h-20 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img
-                          src={`data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23333' width='100' height='100'/%3E%3Ctext x='50' y='50' font-size='60' text-anchor='middle' dy='0.3em' fill='%23666'%3E${item.image}%3C/text%3E%3C/svg%3E`}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-3xl">{item.icon || '📦'}</span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-sm mb-1">{item.name}</h4>
-                        <p className="text-xs text-gray-400 mb-2">Brand: {item.brand}</p>
-                        <div className="flex items-center gap-1 mb-2">
-                          {[...Array(item.rating)].map((_, i) => (
-                            <span key={i} className="text-yellow-400 text-xs">★</span>
-                          ))}
-                        </div>
-                        <p className="font-semibold text-sm">${item.price.toFixed(2)}</p>
+                        <p className="text-xs text-gray-400 mb-2">Brand: {item.brand || 'Hexa'}</p>
+                        {item.rating && (
+                          <div className="flex items-center gap-1 mb-2">
+                            {[...Array(item.rating)].map((_, i) => (
+                              <span key={i} className="text-yellow-400 text-xs">★</span>
+                            ))}
+                          </div>
+                        )}
+                        {item.quantity && item.quantity > 1 && (
+                          <p className="text-xs text-gray-400 mb-1">Quantity: {item.quantity}</p>
+                        )}
+                        <p className="font-semibold text-sm">
+                          ${(item.price * (item.quantity || 1)).toFixed(2)}
+                        </p>
                       </div>
                     </div>
                   ))}

@@ -6,6 +6,7 @@ const paymentsRoutes = require('./routes/payments');
 const authRoutes = require('./routes/authRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const profileRoutes = require('./routes/profileRoutes');
+const cartRoutes = require('./routes/cart')
 
 dotenv.config();
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes);
 
 // Routes - IMPORTANT: Order matters
 app.use('/api/orders', ordersRoutes);

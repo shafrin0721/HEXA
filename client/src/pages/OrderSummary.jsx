@@ -1,10 +1,16 @@
-import { useState } from "react";
-import orderMock from "../../data/OrderMock";
+import { useEffect, useState } from "react";
+import orderMock from "../data/OrderMock";
 import { useNavigate } from "react-router-dom";
 
 function OrderSummary() {
-  const [order] = useState(orderMock);
+  const [order, setOrder] = useState(null);
+
   const navigate = useNavigate();
+
+
+
+  useState(orderMock);
+ 
 
   if (!order) return <p>Loading...</p>;
 
@@ -14,12 +20,15 @@ function OrderSummary() {
 
       {order.items.map((item, i) => (
         <div key={i}>
-          <img src={item.image} width="50" alt={item.name} />
+          <img src={item.image} width="50" />
           <p>{item.name}</p>
           <p>Qty: {item.quantity}</p>
           <p>Rs. {item.price}</p>
 
-          <button onClick={() => navigate("/order-success")}>Place Order</button>
+        <button onClick={() => navigate("/success")}>
+         Place Order
+        </button>
+
         </div>
       ))}
 
