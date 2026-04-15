@@ -1,22 +1,14 @@
-const db = require('../config/database');
+const db = require('../config/db');
 
 class Order {
   static async create(orderData) {
-    const { 
-      user_id, 
-      total, 
-      subtotal,
-      shipping_cost,
-      status, 
-      shipping_address, 
-      payment_id,
-      payment_intent_id 
-    } = orderData;
+    const { user_id, total, status } = orderData;
     
+    // Updated to match your orders table columns
     const [result] = await db.query(
-      `INSERT INTO orders (user_id, total, subtotal, shipping_cost, status, shipping_address, payment_id, payment_intent_id, created_at) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [user_id, total, subtotal || total, shipping_cost || 0, status, JSON.stringify(shipping_address), payment_id, payment_intent_id]
+      `INSERT INTO orders (user_id, total, status, created_at) 
+       VALUES (?, ?, ?, NOW())`,
+      [user_id, total, status || 'pending']
     );
     return result.insertId;
   }
@@ -26,9 +18,6 @@ class Order {
       `SELECT * FROM orders WHERE id = ?`,
       [orderId]
     );
-    if (rows[0] && rows[0].shipping_address) {
-      rows[0].shipping_address = JSON.parse(rows[0].shipping_address);
-    }
     return rows[0];
   }
 
@@ -37,11 +26,6 @@ class Order {
       `SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC`,
       [userId]
     );
-    rows.forEach(row => {
-      if (row.shipping_address) {
-        row.shipping_address = JSON.parse(row.shipping_address);
-      }
-    });
     return rows;
   }
 
@@ -60,12 +44,33 @@ class Order {
        LEFT JOIN users u ON o.user_id = u.id 
        ORDER BY o.created_at DESC`
     );
-    rows.forEach(row => {
-      if (row.shipping_address) {
-        row.shipping_address = JSON.parse(row.shipping_address);
-      }
-    });
     return rows;
+  }
+
+  static async getOrderWithDetails(orderId) {
+    const [order] = await db.query(
+      `SELECT * FROM orders WHERE id = ?`,
+      [orderId]
+    );
+    
+    const [items] = await db.query(
+      `SELECT oi.*, p.name as product_name, p.image 
+       FROM order_items oi 
+       LEFT JOIN products p ON oi.product_id = p.id 
+       WHERE oi.order_id = ?`,
+      [orderId]
+    );
+    
+    const [payment] = await db.query(
+      `SELECT * FROM payments WHERE order_id = ?`,
+      [orderId]
+    );
+    
+    return {
+      ...order[0],
+      items,
+      payment: payment[0]
+    };
   }
 }
 

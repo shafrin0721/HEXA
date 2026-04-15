@@ -1,4 +1,4 @@
-const db = require('../config/database');
+const db = require('../config/db');
 
 class OrderItem {
   static async create(orderId, items) {
@@ -19,7 +19,7 @@ class OrderItem {
 
   static async findByOrderId(orderId) {
     const [rows] = await db.query(
-      `SELECT oi.*, p.name, p.image, p.brand 
+      `SELECT oi.*, p.name, p.image 
        FROM order_items oi 
        LEFT JOIN products p ON oi.product_id = p.id 
        WHERE oi.order_id = ?`,
