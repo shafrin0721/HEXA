@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom';
 
 export default function About() {
   const team = [
-    { name: 'Shafrin', role: 'Founder', image: '/images/team1_new.jpg' },
-    { name: 'Shavindi', role: 'Lead Designer', image: '/images/team2_new.jpg' },
-    { name: 'Heli', role: 'Production Lead', image: '/images/team3_new.jpg' },
+    { name: 'Shafrin',  image: '/images/Member1.jpeg' },
+    { name: 'Shavindi',  image: '/images/team2_new.jpg' },
+    { name: 'Thushalini',  image: '/images/Member3.jpeg' },
+    { name: 'Heli',  image: '/images/Member4 (1).jpg' },
+    { name: 'Vithush',  image: '/images/Member5.jpeg' },
+    { name: 'Piyula', image: '/images/team3_new.jpg' },
   ];
 
   return (
@@ -85,7 +88,7 @@ export default function About() {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16">
           {/* Left: Team Members */}
           <div>
-            <h2 className="text-text-5xl font-bold text-left mb-6">
+            <h2 className="text-4xl font-bold text-left mb-6">
   Meet the Team
 </h2>
 <br></br>
@@ -108,7 +111,7 @@ export default function About() {
           </div>
 
           {/* Right: Workspace Image */}
-          <div className="rounded-3xl overflow-hidden border border-gray-800 h-96">
+          <div className="rounded-3xl overflow-hidden border border-gray-800 h-64">
             <img src="/images/hero.svg" alt="Workspace" className="w-full h-full object-cover" />
           </div>
         </div>
