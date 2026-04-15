@@ -6,17 +6,23 @@ exports.getCart = async (req, res) => {
         const userId = req.user.id;
 
         const [cartItems] = await pool.query(
-            `SELECT ci.id, ci.productId, ci.quantity, p.name, p.price, p.image
-             FROM cartItems ci
-             JOIN products p ON ci.productId = p.id
-             WHERE ci.userId = ?`,
+            `SELECT 
+                ci.id, 
+                ci.product_id, 
+                ci.variant_id,
+                ci.quantity, 
+                p.name, 
+                p.price
+             FROM cart_items ci
+             JOIN products p ON ci.product_id = p.id
+             WHERE ci.user_id = ?`,
             [userId]
         );
 
-        // Calculate total
-        const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const total = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
 
         res.json({
+            success: true,
             message: 'Cart retrieved',
             data: {
                 items: cartItems,
@@ -25,7 +31,12 @@ exports.getCart = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching cart', error: error.message });
+        console.error('Error fetching cart:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Error fetching cart', 
+            error: error.message 
+        });
     }
 };
 
@@ -33,42 +44,52 @@ exports.getCart = async (req, res) => {
 exports.addToCart = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { productId, quantity = 1 } = req.body;
+        const { productId, variantId, quantity = 1 } = req.body;
 
         if (!productId || quantity < 1) {
-            return res.status(400).json({ message: 'Invalid product or quantity' });
+            return res.status(400).json({ 
+                success: false,
+                message: 'Invalid product or quantity' 
+            });
         }
 
-        // Check if product exists
         const [product] = await pool.query('SELECT id FROM products WHERE id = ?', [productId]);
 
         if (product.length === 0) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ 
+                success: false,
+                message: 'Product not found' 
+            });
         }
 
-        // Check if item already in cart
         const [existingItem] = await pool.query(
-            'SELECT id, quantity FROM cartItems WHERE userId = ? AND productId = ?',
-            [userId, productId]
+            'SELECT id, quantity FROM cart_items WHERE user_id = ? AND product_id = ? AND (variant_id = ? OR (variant_id IS NULL AND ? IS NULL))',
+            [userId, productId, variantId || null, variantId || null]
         );
 
         if (existingItem.length > 0) {
-            // Update quantity
             await pool.query(
-                'UPDATE cartItems SET quantity = quantity + ? WHERE id = ?',
+                'UPDATE cart_items SET quantity = quantity + ? WHERE id = ?',
                 [quantity, existingItem[0].id]
             );
         } else {
-            // Add new item
             await pool.query(
-                'INSERT INTO cartItems (userId, productId, quantity) VALUES (?, ?, ?)',
-                [userId, productId, quantity]
+                'INSERT INTO cart_items (user_id, product_id, variant_id, quantity) VALUES (?, ?, ?, ?)',
+                [userId, productId, variantId || null, quantity]
             );
         }
 
-        res.status(201).json({ message: 'Item added to cart' });
+        res.status(201).json({ 
+            success: true,
+            message: 'Item added to cart' 
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Error adding to cart', error: error.message });
+        console.error('Error adding to cart:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Error adding to cart', 
+            error: error.message 
+        });
     }
 };
 
@@ -80,27 +101,40 @@ exports.updateCartItem = async (req, res) => {
         const { quantity } = req.body;
 
         if (quantity < 1) {
-            return res.status(400).json({ message: 'Quantity must be at least 1' });
+            return res.status(400).json({ 
+                success: false,
+                message: 'Quantity must be at least 1' 
+            });
         }
 
-        // Verify cart item belongs to user
         const [cartItem] = await pool.query(
-            'SELECT id FROM cartItems WHERE id = ? AND userId = ?',
+            'SELECT id FROM cart_items WHERE id = ? AND user_id = ?',
             [itemId, userId]
         );
 
         if (cartItem.length === 0) {
-            return res.status(404).json({ message: 'Cart item not found' });
+            return res.status(404).json({ 
+                success: false,
+                message: 'Cart item not found' 
+            });
         }
 
         await pool.query(
-            'UPDATE cartItems SET quantity = ? WHERE id = ?',
+            'UPDATE cart_items SET quantity = ? WHERE id = ?',
             [quantity, itemId]
         );
 
-        res.json({ message: 'Cart item updated' });
+        res.json({ 
+            success: true,
+            message: 'Cart item updated' 
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Error updating cart item', error: error.message });
+        console.error('Error updating cart item:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Error updating cart item', 
+            error: error.message 
+        });
     }
 };
 
@@ -110,21 +144,31 @@ exports.removeFromCart = async (req, res) => {
         const userId = req.user.id;
         const { itemId } = req.params;
 
-        // Verify cart item belongs to user
         const [cartItem] = await pool.query(
-            'SELECT id FROM cartItems WHERE id = ? AND userId = ?',
+            'SELECT id FROM cart_items WHERE id = ? AND user_id = ?',
             [itemId, userId]
         );
 
         if (cartItem.length === 0) {
-            return res.status(404).json({ message: 'Cart item not found' });
+            return res.status(404).json({ 
+                success: false,
+                message: 'Cart item not found' 
+            });
         }
 
-        await pool.query('DELETE FROM cartItems WHERE id = ?', [itemId]);
+        await pool.query('DELETE FROM cart_items WHERE id = ?', [itemId]);
 
-        res.json({ message: 'Item removed from cart' });
+        res.json({ 
+            success: true,
+            message: 'Item removed from cart' 
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Error removing from cart', error: error.message });
+        console.error('Error removing from cart:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Error removing from cart', 
+            error: error.message 
+        });
     }
 };
 
@@ -132,10 +176,18 @@ exports.removeFromCart = async (req, res) => {
 exports.clearCart = async (req, res) => {
     try {
         const userId = req.user.id;
-        await pool.query('DELETE FROM cartItems WHERE userId = ?', [userId]);
+        await pool.query('DELETE FROM cart_items WHERE user_id = ?', [userId]);
 
-        res.json({ message: 'Cart cleared' });
+        res.json({ 
+            success: true,
+            message: 'Cart cleared' 
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Error clearing cart', error: error.message });
+        console.error('Error clearing cart:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Error clearing cart', 
+            error: error.message 
+        });
     }
 };
