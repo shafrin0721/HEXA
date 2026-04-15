@@ -16,7 +16,7 @@ import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CheckoutPage from "./pages/Checkout";
-import ShippingStep from "./pages/ShippingStep";
+import ShippingStep from "./pages/ShippingStep/ShippingStep";
 import OrderSummary from "./pages/OrderSummary";
 import OrderSuccess from "./pages/OrderSuccess";
 import About from "./pages/About";
