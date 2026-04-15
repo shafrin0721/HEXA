@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes ,Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom"; // Remove Navigate import
 import { ThemeProvider } from "next-themes";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -29,6 +29,8 @@ import AdminCustomers from "./pages/AdminCustomers";
 import AdminCharts from "./pages/AdminCharts";
 import AdminInventory from "./pages/AdminInventory";
 
+import Layout from "./components/Layout";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -37,34 +39,42 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+         <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <Routes>
-             {/* Customer Routes */}
-            <Route path="/" element={<HexaHomePage />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/checkout/shipping" element={<ShippingStep />} />
-            <Route path="/order-summary" element={<OrderSummary />} />
-            <Route path="/order-success" element={<OrderSuccess />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/" element={<Navigate to="/auth" replace />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/payment" element={<PaymentPage />} />
-            <Route path="/review" element={<ReviewPage />} />
-            <Route path="*" element={<NotFound />} />
+            {/* Customer Routes with Layout */}
+            <Route element={<Layout />}>
+              <Route path="/" element={<HexaHomePage />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/checkout/shipping" element={<ShippingStep />} />
+              <Route path="/order-summary" element={<OrderSummary />} />
+              <Route path="/order-success" element={<OrderSuccess />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/payment" element={<PaymentPage />} />
+              <Route path="/review" element={<ReviewPage />} />
+            </Route>
               
-              {/* Admin Routes */}
-           <Route path="/admin" element={<AdminDashboard />} />
-           <Route path="/admin/logistics" element={<AdminLogistics />} />
-           <Route path="/admin/sales" element={<AdminSales />} />
-           <Route path="/admin/customers" element={<AdminCustomers />} />
-           <Route path="/admin/charts" element={<AdminCharts />} />
-           <Route path="/admin/inventory" element={<AdminInventory />} />
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/logistics" element={<AdminLogistics />} />
+            <Route path="/admin/sales" element={<AdminSales />} />
+            <Route path="/admin/customers" element={<AdminCustomers />} />
+            <Route path="/admin/charts" element={<AdminCharts />} />
+            <Route path="/admin/inventory" element={<AdminInventory />} />
+            
+            {/* 404 Route - Must be last */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
