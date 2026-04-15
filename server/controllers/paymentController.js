@@ -1,21 +1,7 @@
-const catchAsyncError = require("../middleware/catchAsyncError.js");
-const Stripe = require("stripe");
-
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) return null;
-  return Stripe(key);
-}
+const catchAsyncError = require('../middleware/catchAsyncError');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy');
 
 exports.processPayment = catchAsyncError(async (req, res, next) => {
-  const stripe = getStripe();
-  if (!stripe) {
-    return res.status(503).json({
-      success: false,
-      message: "Payment service not configured (set STRIPE_SECRET_KEY)",
-    });
-  }
-
   const { amount, billing_address, email, name, payment_method_token } = req.body;
 
   const amountInCents = Math.round(amount * 100);

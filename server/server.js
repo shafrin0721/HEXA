@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const ordersRoutes = require('./routes/orders');
 const paymentsRoutes = require('./routes/payments');
+const productsRoutes = require('./routes/products');
 const authRoutes = require('./routes/authRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const profileRoutes = require('./routes/profileRoutes');
@@ -16,13 +17,11 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
-
-// Routes - IMPORTANT: Order matters
 app.use('/api/orders', ordersRoutes);
-app.use('/api', paymentsRoutes);
+app.use('/api/products', productsRoutes);
+app.use('/api/payments', paymentsRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/profile", profileRoutes);
-
 
 // Error handling middleware
 app.use((err, req, res, next) => {

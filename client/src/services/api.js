@@ -15,6 +15,11 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
+export const productsAPI = {
+  getProducts: (params) => API.get('/products', { params }),
+  searchProducts: (params) => API.get('/products/search', { params }),
+};
+
 export const orderAPI = {
   getOrderTotals: () => API.get('/orders/totals'),
   createOrder: (orderData) => API.post('/orders', orderData),
@@ -26,3 +31,4 @@ export const paymentAPI = {
 };
 
 export default API;
+

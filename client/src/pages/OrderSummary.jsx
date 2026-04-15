@@ -1,40 +1,11 @@
-import { useEffect, useState } from "react";
-import orderMock from "../data/OrderMock";
-import { useNavigate } from "react-router-dom";
-
-function OrderSummary() {
-  const [order, setOrder] = useState(null);
-
-  const navigate = useNavigate();
-
-
-
-  useState(orderMock);
- 
-
-  if (!order) return <p>Loading...</p>;
-
+const OrderSummary = () => {
   return (
-    <div>
-      <h1>Order Summary</h1>
-
-      {order.items.map((item, i) => (
-        <div key={i}>
-          <img src={item.image} width="50" />
-          <p>{item.name}</p>
-          <p>Qty: {item.quantity}</p>
-          <p>Rs. {item.price}</p>
-
-        <button onClick={() => navigate("/success")}>
-         Place Order
-        </button>
-
-        </div>
-      ))}
-
-      <h3>Total: Rs. {order.total}</h3>
+    <div className="container mx-auto p-8">
+      <h1 className="text-3xl font-bold mb-4">Order Summary</h1>
+      <p>Your order details will appear here.</p>
+      <a href="/payment" className="bg-blue-500 text-white px-4 py-2 rounded mt-4 inline-block">Proceed to Payment</a>
     </div>
   );
-}
+};
 
 export default OrderSummary;
