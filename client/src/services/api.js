@@ -1,41 +1,28 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
-
-const api = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+const API = axios.create({
+  baseURL: 'http://localhost:5001/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// Add token to requests
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+API.interceptors.request.use((req) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    req.headers.Authorization = `Bearer ${token}`;
+  }
+  return req;
 });
 
-// Auth APIs
-export const authAPI = {
-    register: (userData) => api.post('/auth/register', userData),
-    login: (credentials) => api.post('/auth/login', credentials),
+export const orderAPI = {
+  getOrderTotals: () => API.get('/orders/totals'),
+  createOrder: (orderData) => API.post('/orders', orderData),
 };
 
-// Product APIs
-export const productAPI = {
-    getAll: () => api.get('/products'),
-    getById: (id) => api.get(`/products/${id}`),
+export const paymentAPI = {
+  processPayment: (paymentData) => API.post('/payment/process', paymentData),
+  getStripeKey: () => API.get('/stripeapi'),
 };
 
-// Cart APIs
-export const cartAPI = {
-    getCart: () => api.get('/cart'),
-    addToCart: (productId, quantity = 1) => api.post('/cart/add', { productId, quantity }),
-    updateQuantity: (productId, quantity) => api.put(`/cart/update/${productId}`, { quantity }),
-    removeFromCart: (productId) => api.delete(`/cart/remove/${productId}`),
-};
-
-export default api;
+export default API;
