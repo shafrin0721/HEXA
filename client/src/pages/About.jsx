@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 export default function About() {
   const team = [
     { name: 'Shafrin',  image: '/images/Member1.jpeg' },
-    { name: 'Shavindi',  image: '/images/team2_new.jpg' },
+    { name: 'Shavindi',  image: '/images/Member2.png' },
     { name: 'Thushalini',  image: '/images/Member3.jpeg' },
     { name: 'Heli',  image: '/images/Member4 (1).jpg' },
     { name: 'Vithush',  image: '/images/Member5.jpeg' },
