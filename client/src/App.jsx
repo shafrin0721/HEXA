@@ -4,8 +4,8 @@ import { ThemeProvider } from "next-themes";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import PaymentPage from "./components/PaymentPage";
-import ReviewPage from "./components/ReviewPage";
+import PaymentPage from "./pages/PaymentPage";
+import ReviewPage from "./pages/ReviewPage";
 import Contact from "./pages/Contact";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -16,8 +16,8 @@ import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CheckoutPage from "./pages/Checkout";
-import ShippingStep from "./pages/ShippingStep/ShippingStep";
-import OrderSummary from "./pages/OrderSummary";
+import ShippingStep from "./pages/ShippingStep";
+import OrderSummary1 from "./pages/OrderSummary";
 import OrderSuccess from "./pages/OrderSuccess";
 import About from "./pages/About";
 
@@ -55,7 +55,7 @@ const App = () => (
               <Route path="/register" element={<Register />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/checkout/shipping" element={<ShippingStep />} />
-              <Route path="/order-summary" element={<OrderSummary />} />
+              <Route path="/order-summary" element={<OrderSummary1 />} />
               <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/about" element={<About />} />
               <Route path="/auth" element={<Auth />} />

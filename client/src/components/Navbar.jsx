@@ -21,7 +21,7 @@ const Navbar = () => {
             </svg>
             <span className="absolute -top-2 -right-2 bg-red-500 text-xs w-4 h-4 rounded-full flex items-center justify-center text-white">1</span>
           </Link>
-          <Link to="/login">
+          <Link to="/settings">
             <img src="/images/profile.svg" alt="Profile" className="w-7 h-7 rounded-full" />
           </Link>
         </div>
