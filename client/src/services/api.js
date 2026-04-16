@@ -25,4 +25,12 @@ export const paymentAPI = {
   getStripeKey: () => API.get('/stripeapi'),
 };
 
+export const getProducts = (page = 1, limit = 10) => API.get('/products', { params: { page, limit } });
+export const getProductById = (id) => API.get(`/products/${id}`);
+t
+export const productAPI = {
+  getProducts: (page = 1, limit = 10) => API.get('/products', { params: { page, limit } }),
+  getProductById: (id) => API.get(`/products/${id}`),
+};
+
 export default API;

@@ -128,7 +128,7 @@ const ReviewPage = () => {
       <div className="min-h-screen bg-black flex flex-col">
         <div className="flex-1 flex justify-center items-center">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
             <p className="mt-4 text-gray-400">Loading order details...</p>
           </div>
         </div>
@@ -173,7 +173,7 @@ const ReviewPage = () => {
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-white">Shipping address</h3>
                 <button 
-                  className="text-gray-400 hover:text-orange-500 transition-colors text-sm font-medium px-2 py-1 rounded hover:bg-gray-800"
+                  className="text-gray-400 hover:text-yellow-500 transition-colors text-sm font-medium px-2 py-1 rounded hover:bg-gray-800"
                   onClick={handleEdit}
                 >
                   Edit
@@ -196,7 +196,7 @@ const ReviewPage = () => {
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-white">Payment Information</h3>
                 <button 
-                  className="text-gray-400 hover:text-orange-500 transition-colors text-sm font-medium px-2 py-1 rounded hover:bg-gray-800"
+                  className="text-gray-400 hover:text-yellow-500 transition-colors text-sm font-medium px-2 py-1 rounded hover:bg-gray-800"
                   onClick={handleEdit}
                 >
                   Edit
@@ -224,7 +224,7 @@ const ReviewPage = () => {
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-white">Shipping method</h3>
                 <button 
-                  className="text-gray-400 hover:text-orange-500 transition-colors text-sm font-medium px-2 py-1 rounded hover:bg-gray-800"
+                  className="text-gray-400 hover:text-yellow-500 transition-colors text-sm font-medium px-2 py-1 rounded hover:bg-gray-800"
                   onClick={handleEdit}
                 >
                   Edit
@@ -242,7 +242,7 @@ const ReviewPage = () => {
           {/* Right Column - Order Summary */}
           <div className="lg:w-96">
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 sticky top-4">
-              <h2 className="text-xl font-semibold text-orange-500 mb-2 border-b border-gray-800 pb-3">
+              <h2 className="text-xl font-semibold text-yellow-500 mb-2 border-b border-gray-800 pb-3">
                 Order Summary
               </h2>
               
@@ -258,11 +258,11 @@ const ReviewPage = () => {
                       <h4 className="font-medium text-white text-sm mb-1">{item.name}</h4>
                       <p className="text-xs text-gray-400 mb-1">Brand: {item.brand || 'Hexa'}</p>
                       {item.rating && (
-                        <div className="text-orange-500 text-xs mb-1">
+                        <div className="text-yellow-500 text-xs mb-1">
                           {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}
                         </div>
                       )}
-                      <p className="text-sm font-semibold text-orange-500">
+                      <p className="text-sm font-semibold text-yellow-500">
                         ${(item.price || 0).toFixed(2)} x {item.quantity || 1}
                       </p>
                     </div>
@@ -286,7 +286,7 @@ const ReviewPage = () => {
               </div>
 
               <button 
-                className="w-full mt-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="w-full mt-6 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-3 rounded-lg font-semibold hover:from-yellow-600 hover:to-yellow-600 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 onClick={handlePlaceOrder}
                 disabled={placingOrder}
               >
@@ -296,15 +296,15 @@ const ReviewPage = () => {
 
             {/* Help Links */}
             <div className="mt-4 flex justify-center gap-6">
-              <a href="#" className="text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium">RETURN POLICY</a>
-              <a href="#" className="text-sm text-gray-400 hover:text-orange-500 transition-colors font-medium">HELP</a>
+              <a href="#" className="text-sm text-gray-400 hover:text-yellow-500 transition-colors font-medium">RETURN POLICY</a>
+              <a href="#" className="text-sm text-gray-400 hover:text-yellow-500 transition-colors font-medium">HELP</a>
             </div>
           </div>
         </div>
 
         {/* Back to Top Button */}
         <button 
-          className="w-full mt-8 mb-8 py-3 bg-white text-black border-2 border-gray-600 rounded-lg font-bold hover:bg-orange-500 hover:text-black hover:border-orange-500 transition-all transform hover:-translate-y-1"
+          className="w-full mt-8 mb-8 py-3 bg-white text-black border-2 border-gray-600 rounded-lg font-bold hover:bg-yellow-500 hover:text-black hover:border-yellow-500 transition-all transform hover:-translate-y-1"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
           Back to top

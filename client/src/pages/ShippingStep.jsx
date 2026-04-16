@@ -171,7 +171,7 @@ export default function ShippingStep() {
       <div className="min-h-screen bg-black flex flex-col">
         <div className="flex-1 flex justify-center items-center">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
             <p className="mt-4 text-gray-400">Loading order summary...</p>
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function ShippingStep() {
             <p className="text-red-500 mb-4">Failed to load order summary</p>
             <button 
               onClick={() => fetchOrderTotals()}
-              className="px-4 py-2 bg-orange-500 text-white rounded-lg"
+              className="px-4 py-2 bg-yellow-500 text-white rounded-lg"
             >
               Try Again
             </button>
@@ -273,7 +273,7 @@ export default function ShippingStep() {
                 </button>
                 <button
                   onClick={handleContinue}
-                  className="flex-1 py-3 px-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition-all transform hover:scale-[1.02]"
+                  className="flex-1 py-3 px-6 bg-gradient-to-r from-yellow-500 to-yellow-500 text-white rounded-lg font-semibold hover:from-yellow-600 hover:to-yellow-600 transition-all transform hover:scale-[1.02]"
                 >
                   Continue
                 </button>
@@ -284,7 +284,7 @@ export default function ShippingStep() {
           {/* Right Side - Order Summary (Same as Payment Page) */}
           <div className="lg:col-span-1">
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 sticky top-6">
-              <h2 className="text-xl font-semibold text-orange-500 mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold text-yellow-500 mb-4">Order Summary</h2>
               
               <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
                 {orderSummary.items.map((item, index) => (
@@ -301,7 +301,7 @@ export default function ShippingStep() {
                     <div className="flex-1">
                       <h4 className="font-medium text-white text-sm">{item.name}</h4>
                       <p className="text-xs text-gray-400 mt-1">Brand: {item.brand || 'Hexa'}</p>
-                      <p className="text-sm font-semibold text-orange-500 mt-1">
+                      <p className="text-sm font-semibold text-yellow-500 mt-1">
                         ${item.price.toFixed(2)} x {item.quantity}
                       </p>
                     </div>
@@ -326,8 +326,8 @@ export default function ShippingStep() {
             </div>
 
             <div className="mt-4 flex justify-center gap-6">
-              <a href="#" className="text-sm text-gray-400 hover:text-orange-500 transition-colors">RETURN POLICY</a>
-              <a href="#" className="text-sm text-gray-400 hover:text-orange-500 transition-colors">HELP</a>
+              <a href="#" className="text-sm text-gray-400 hover:text-yellow-500 transition-colors">RETURN POLICY</a>
+              <a href="#" className="text-sm text-gray-400 hover:text-yellow-500 transition-colors">HELP</a>
             </div>
           </div>
         </div>
