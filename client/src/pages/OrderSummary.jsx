@@ -2,48 +2,86 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import avatar from "../assets/avatar.jpg";
 import logo from "../assets/logo.png";
-import productImg from "../assets/t- 6.jpg";
-import productImg1 from "../assets/t-12.jpg";
+import productImg from "../assets/t-6.jpg";
 
 function OrderSummary1() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [orderSummary, setOrderSummary] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/orders/1")
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-        if (Array.isArray(data)) {
-          setOrders(data);
-        } else if (data && typeof data === 'object') {
-          if (Array.isArray(data.orders)) {
-            setOrders(data.orders);
-          } else if (Array.isArray(data.items)) {
-            setOrders(data.items);
-          } else if (Array.isArray(data.data)) {
-            setOrders(data.data);
-          } else {
-            setOrders([data]);
-          }
-        } else {
-          setOrders([]);
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching orders:", err);
-        setError(err.message);
-        setLoading(false);
-        setOrders([]);
-      });
+    fetchOrderTotals();
   }, []);
+
+  const fetchOrderTotals = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:5001/api/orders/totals");
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        setOrderSummary(data.data);
+        // Set orders array for the existing mapping logic
+        setOrders(data.data.items || []);
+      } else {
+        setOrders([]);
+      }
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      setError(err.message);
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePlaceOrder = async (item) => {
+    try {
+      // Create order payload with all items
+      const payload = {
+        items: orders.map(order => ({
+          id: order.id,
+          name: order.name,
+          price: order.price,
+          quantity: order.quantity,
+          image: order.image
+        })),
+        total: orderSummary ? orderSummary.total : orders.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        payment_intent_id: `pi_${Date.now()}`,
+        payment_status: "completed",
+        payment_info: {
+          card_last4: "4242",
+          card_type: "visa"
+        }
+      };
+
+      const response = await fetch("http://localhost:5001/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        navigate("/order-success");
+      } else {
+        setError(data.message || "Failed to place order");
+      }
+    } catch (err) {
+      console.error("Error placing order:", err);
+      setError(err.message);
+    }
+  };
 
   if (loading) {
     return (
@@ -78,32 +116,21 @@ function OrderSummary1() {
   return (
     <div className="bg-black text-white p-5 font-sans min-h-screen">
 
-
-      {/* Order Items Mapping */}
-      {Array.isArray(orders) && orders.length > 0 ? (
-        orders.map((item, i) => (
-          <div key={i} className="mb-4 p-4 border border-gray-700 rounded max-w-2xl mx-auto">
-            <div className="flex gap-4 items-center">
-              <img src={item.image || productImg} width="50" alt={item.name} className="mb-2" />
-              <div className="flex-1">
-                <p className="font-semibold">{item.name}</p>
-                <p>Qty: {item.quantity || 1}</p>
-                <p>Rs. {item.price || 0}</p>
-              </div>
-              <button 
-                onClick={() => navigate("/order-success")}
-                className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition"
-              >
-                Place Order
-              </button>
-            </div>
-          </div>
-        ))
-      ) : (
-        <div className="text-center py-8 text-gray-400">
-          <p>No items in your order.</p>
-        </div>
-      )}
+      {/*Showing item count */}
+{Array.isArray(orders) && orders.length > 0 ? (
+  <>
+    {/* Header showing total items */}
+    <div className="max-w-2xl mx-auto mb-4 p-3 bg-gray-900 rounded border border-gray-700">
+      <p className="text-gray-300">
+        Total Items: <span className="text-yellow-500 font-bold">{orders.length}</span>
+      </p>
+    </div>
+  </>
+) : (
+  <div className="text-center py-8 text-gray-400">
+    <p>No items in your order.</p>
+  </div>
+)}
 
       {/* Order Summary Container */}
       <div className="border border-gray-500 p-5 m-5">
@@ -124,7 +151,7 @@ function OrderSummary1() {
             orders.map((item) => (
               <div className="grid grid-cols-[2fr_1fr_1fr_1fr] py-12 border-b border-gray-300 items-center" key={item.id}>
                 <div className="flex items-center gap-4 pl-5">
-                  <img src={productImg} className="w-[70px] h-[70px] object-cover" alt={item.name} />
+                  <img src={item.image || productImg} className="w-[70px] h-[70px] object-cover" alt={item.name} />
                   <span className="whitespace-nowrap">{item.name}</span>
                 </div>
                 <span>${item.price}</span>
@@ -158,8 +185,6 @@ function OrderSummary1() {
             Continue Shopping
           </button>
         </div>
-
-        
       </div>
     </div>
   );

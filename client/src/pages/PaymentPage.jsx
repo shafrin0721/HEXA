@@ -401,7 +401,7 @@ const PaymentPage = () => {
        
         <div className="flex-1 flex justify-center items-center">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
             <p className="mt-4 text-gray-400">Loading order summary...</p>
           </div>
         </div>
@@ -476,7 +476,7 @@ const PaymentPage = () => {
                     value={formData.cardNumber}
                     onChange={handleChange}
                     maxLength="19"
-                    className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
                       errors.cardNumber ? 'border-red-500' : 'border-gray-700'
                     }`}
                   />
@@ -500,7 +500,7 @@ const PaymentPage = () => {
                       maxLength="5"
                       value={formData.expiryDate}
                       onChange={handleChange}
-                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
                         errors.expiryDate ? 'border-red-500' : 'border-gray-700'
                       }`}
                     />
@@ -516,7 +516,7 @@ const PaymentPage = () => {
                       maxLength="3"
                       value={formData.cvv}
                       onChange={handleChange}
-                      className={`w-full px-2 py-1 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono tracking-wider h-10  ${
+                      className={`w-full px-2 py-1 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono tracking-wider h-10  ${
                         errors.cvv ? 'border-red-500' : 'border-gray-700'
                       }`}
                     />
@@ -542,7 +542,7 @@ const PaymentPage = () => {
                     placeholder="your@email.com" 
                     value={formData.email} 
                     onChange={handleChange} 
-                    className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
                       errors.email ? 'border-red-500' : 'border-gray-700'
                     }`} 
                   />
@@ -558,7 +558,7 @@ const PaymentPage = () => {
                       placeholder="John" 
                       value={formData.firstName} 
                       onChange={handleChange} 
-                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
                         errors.firstName ? 'border-red-500' : 'border-gray-700'
                       }`} 
                     />
@@ -572,7 +572,7 @@ const PaymentPage = () => {
                       placeholder="Doe" 
                       value={formData.lastName} 
                       onChange={handleChange} 
-                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
                         errors.lastName ? 'border-red-500' : 'border-gray-700'
                       }`} 
                     />
@@ -588,7 +588,7 @@ const PaymentPage = () => {
                     placeholder="123 Main St" 
                     value={formData.address} 
                     onChange={handleChange} 
-                    className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
                       errors.address ? 'border-red-500' : 'border-gray-700'
                     }`} 
                   />
@@ -604,7 +604,7 @@ const PaymentPage = () => {
                       placeholder="San Francisco" 
                       value={formData.city} 
                       onChange={handleChange} 
-                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
                         errors.city ? 'border-red-500' : 'border-gray-700'
                       }`} 
                     />
@@ -618,7 +618,7 @@ const PaymentPage = () => {
                       placeholder="CA" 
                       value={formData.state} 
                       onChange={handleChange} 
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                     />
                   </div>
                 </div>
@@ -632,7 +632,7 @@ const PaymentPage = () => {
                       placeholder="94105" 
                       value={formData.zipCode} 
                       onChange={handleChange} 
-                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
                         errors.zipCode ? 'border-red-500' : 'border-gray-700'
                       }`} 
                     />
@@ -646,7 +646,7 @@ const PaymentPage = () => {
                       placeholder="+1 555-555-5555" 
                       value={formData.phoneNumber} 
                       onChange={handleChange} 
-                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
                         errors.phoneNumber ? 'border-red-500' : 'border-gray-700'
                       }`} 
                     />
@@ -660,7 +660,7 @@ const PaymentPage = () => {
           {/* Right Side - Order Summary */}
           <div className="lg:w-96">
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 sticky top-4">
-              <h2 className="text-xl font-semibold text-orange-500 mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold text-yellow-500 mb-4">Order Summary</h2>
               
               <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
                 {orderSummary.items.map((item, index) => (
@@ -669,7 +669,7 @@ const PaymentPage = () => {
                     <div className="flex-1">
                       <h4 className="font-medium text-white text-sm">{item.name}</h4>
                       <p className="text-xs text-gray-400 mt-1">Brand: {item.brand}</p>
-                      <p className="text-sm font-semibold text-orange-500 mt-1">
+                      <p className="text-sm font-semibold text-yellow-500 mt-1">
                         ${item.price.toFixed(2)} x {item.quantity}
                       </p>
                     </div>
@@ -693,7 +693,7 @@ const PaymentPage = () => {
               </div>
 
               <button 
-                className="w-full mt-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="w-full mt-6 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white py-3 rounded-lg font-semibold hover:from-yellow-600 hover:to-yellow-600 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 onClick={handleSubmit} 
                 disabled={isSubmitting}
               >
@@ -702,8 +702,8 @@ const PaymentPage = () => {
             </div>
 
             <div className="mt-4 flex justify-center gap-6">
-              <a href="#" className="text-sm text-gray-400 hover:text-orange-500 transition-colors">RETURN POLICY</a>
-              <a href="#" className="text-sm text-gray-400 hover:text-orange-500 transition-colors">HELP</a>
+              <a href="#" className="text-sm text-gray-400 hover:text-yellow-500 transition-colors">RETURN POLICY</a>
+              <a href="#" className="text-sm text-gray-400 hover:text-yellow-500 transition-colors">HELP</a>
             </div>
           </div>
         </div>

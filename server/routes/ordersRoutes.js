@@ -5,7 +5,7 @@ const db = require('../config/db');
 router.post("/", async (req, res) => {
   try {
     const { items, total, shipping_address, payment_info, payment_intent_id } = req.body;
-    const user_id = 1; // In production: req.user.id
+    const user_id = 2; // In production: req.user.id
 
     const connection = await db.getConnection();
     await connection.beginTransaction();
@@ -79,9 +79,9 @@ router.post("/", async (req, res) => {
 
 router.get("/totals", async (req, res) => {
   try {
-    const user_id = 1; // In production: req.user.id
+    // Get user_id from authentication (assuming you have auth middleware)
+    const user_id = req.user?.id || 2; // Fallback to 2 for testing
     
-    // Updated to match your cart_items and products tables
     const [cartItems] = await db.query(`
       SELECT 
         ci.product_id,
@@ -91,8 +91,9 @@ router.get("/totals", async (req, res) => {
         p.image
       FROM cart_items ci
       JOIN products p ON ci.product_id = p.id
+      WHERE ci.user_id = ?
     `,
-      [],
+      [user_id],
     );
 
     if (cartItems.length === 0) {
@@ -130,6 +131,7 @@ router.get("/totals", async (req, res) => {
         subtotal: parseFloat(subtotal.toFixed(2)),
         shipping: parseFloat(shipping.toFixed(2)),
         total: parseFloat(total.toFixed(2)),
+        user_id: user_id, // Optional: return user_id for debugging
       },
     });
   } catch (error) {
