@@ -17,8 +17,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CheckoutPage from "./pages/Checkout";
 import ShippingStep from "./pages/ShippingStep/ShippingStep";
-import OrderSummary from "./pages/OrderSummary";
-import OrderSuccess from "./pages/OrderSuccess";
+import OrderSummary from "./pages/OrderSummary/OrderSummary";
+import OrderSuccess from "./pages/OrderSuccess/OrderSuccess";
+import OrderSummary1 from "./pages/OrderSummary1";
 import About from "./pages/About";
 
 // Admin Pages
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="/checkout/shipping" element={<ShippingStep />} />
               <Route path="/order-summary" element={<OrderSummary />} />
               <Route path="/order-success" element={<OrderSuccess />} />
+              <Route path="/order-summary1" element={<OrderSummary1 />} />
               <Route path="/about" element={<About />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/contact" element={<Contact />} />
