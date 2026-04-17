@@ -1,32 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getCart } from '../services/cartService';
-import { orderAPI } from '../services/api';
+import { useCart } from '../context/CartContext';
 
 export default function ShippingStep() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [selectedShipping, setSelectedShipping] = useState('standard');
-  const [orderSummary, setOrderSummary] = useState({
-    items: [],
-    subtotal: 0,
-    shipping: 12.87, // Default standard shipping value
-    total: 0
-  });
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState(false);
+  const { cart } = useCart(); // Get cart data from context
   
-  const [formData, setFormData] = useState({
-    email: 'john@example.com',
-    firstName: 'John',
-    lastName: 'Doe',
-    address: '123 Main Street',
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10001',
-    phone: '+1 (555) 000-0000',
-  });
-
+  const [selectedShipping, setSelectedShipping] = useState('standard');
+  
+  // Calculate totals from cart
+  const subtotal = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
+  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  
   const shippingOptions = [
     {
       id: 'standard',
@@ -42,121 +28,69 @@ export default function ShippingStep() {
     },
   ];
 
-  // Fetch order totals from backend (same as payment page)
-  const fetchOrderTotals = async () => {
-    try {
-      setLoading(true);
-      const response = await orderAPI.getOrderTotals();
-      if (response.data.success) {
-        const orderData = response.data.data;
-        // Use selected shipping or default to standard
-        const shippingCost = selectedShipping === 'standard' ? 12.87 : 15;
-        setOrderSummary({
-          ...orderData,
-          shipping: shippingCost,
-          total: orderData.subtotal + shippingCost
-        });
-      } else {
-        console.warn('No valid order data available');
-        setFetchError(true);
-        // Fallback to cart data if order totals fail
-        await fetchCartData();
-      }
-    } catch (error) {
-      console.error('Error fetching order totals:', error);
-      setFetchError(true);
-      // Fallback to cart data
-      await fetchCartData();
-    } finally {
-      setLoading(false);
-    }
+  // Get current shipping cost based on selection
+  const getShippingCost = () => {
+    const option = shippingOptions.find(opt => opt.id === selectedShipping);
+    return option ? option.price : 12.87;
   };
 
-  // Fallback: Fetch cart items directly
-  const fetchCartData = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        const savedCart = localStorage.getItem('cartItems');
-        if (savedCart) {
-          const parsedCart = JSON.parse(savedCart);
-          const items = parsedCart.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: parseFloat(item.price),
-            quantity: item.quantity || 1,
-            image: item.image || '📦',
-            brand: item.brand || 'Hexa'
-          }));
-          const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-          const shippingCost = selectedShipping === 'standard' ? 12.87 : 15;
-          setOrderSummary({
-            items: items,
-            subtotal: subtotal,
-            shipping: shippingCost,
-            total: subtotal + shippingCost
-          });
-        }
-        return;
-      }
-      
-      const response = await getCart();
-      
-      if (response.data && response.data.items) {
-        const items = response.data.items.map(item => ({
-          id: item.product_id || item.id,
-          name: item.name,
-          price: parseFloat(item.price),
-          quantity: item.quantity,
-          image: item.image || '📦',
-          brand: item.brand || 'Hexa'
-        }));
-        const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const shippingCost = selectedShipping === 'standard' ? 12.87 : 15;
-        setOrderSummary({
-          items: items,
-          subtotal: subtotal,
-          shipping: shippingCost,
-          total: subtotal + shippingCost
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching cart:', error);
-    }
-  };
+  const shippingCost = getShippingCost();
+  const total = subtotal + shippingCost;
 
+  // Load saved shipping data from localStorage if returning from payment/review
   useEffect(() => {
-    // Try to fetch from orderAPI first (like payment page)
-    fetchOrderTotals();
+    const savedSelectedShipping = localStorage.getItem('selectedShipping');
+    if (savedSelectedShipping) {
+      setSelectedShipping(savedSelectedShipping);
+    }
   }, []);
 
-  // Update total when shipping changes
-  useEffect(() => {
-    const shippingCost = selectedShipping === 'standard' ? 12.87 : 15;
-    setOrderSummary(prev => ({
-      ...prev,
-      shipping: shippingCost,
-      total: prev.subtotal + shippingCost
-    }));
-  }, [selectedShipping]);
+  // Redirect if cart is empty
+  if (cart.length === 0) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col">
+        <div className="flex-1 flex justify-center items-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Your cart is empty</h2>
+            <p className="text-gray-400 mb-6">Please add items to your cart before proceeding to checkout.</p>
+            <button 
+              onClick={() => navigate("/products")}
+              className="bg-yellow-500 text-white px-8 py-3 rounded hover:bg-yellow-600 transition"
+            >
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleContinue = () => {
-    // Ensure shipping cost is saved with default value
-    const shippingCost = selectedShipping === 'standard' ? 12.87 : 15;
+    // Get address data from localStorage (saved in CheckoutAddress)
+    const addressData = localStorage.getItem('addressData');
+    let shippingData = {};
     
-    localStorage.setItem('shippingData', JSON.stringify(formData));
+    if (addressData) {
+      try {
+        shippingData = JSON.parse(addressData);
+      } catch (error) {
+        console.error('Error parsing address data:', error);
+      }
+    }
+    
+    // Save shipping selection
     localStorage.setItem('selectedShipping', selectedShipping);
     localStorage.setItem('shippingCost', shippingCost.toString());
+    localStorage.setItem('shippingData', JSON.stringify(shippingData));
     
     navigate('/payment', { 
       state: { 
-        shippingData: formData,
+        shippingData: shippingData,
         selectedShipping: selectedShipping,
         shippingCost: shippingCost,
-        orderItems: orderSummary.items,
-        subtotal: orderSummary.subtotal,
-        total: orderSummary.subtotal + shippingCost,
+        orderItems: cart,
+        subtotal: subtotal,
+        total: total,
         fromReview: false
       }
     });
@@ -166,41 +100,10 @@ export default function ShippingStep() {
     navigate('/checkout');
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col">
-        <div className="flex-1 flex justify-center items-center">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
-            <p className="mt-4 text-gray-400">Loading order summary...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (fetchError && orderSummary.items.length === 0) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col">
-        <div className="flex-1 flex justify-center items-center">
-          <div className="text-center">
-            <p className="text-red-500 mb-4">Failed to load order summary</p>
-            <button 
-              onClick={() => fetchOrderTotals()}
-              className="px-4 py-2 bg-yellow-500 text-white rounded-lg"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Progress Steps - Labels on the right side of numbers (Increased Size) */}
+        {/* Progress Steps */}
         <div className="flex items-center justify-center gap-6 mb-12">
           {['Address', 'Shipping', 'Payment', 'Review'].map((label, index) => (
             <React.Fragment key={index}>
@@ -281,28 +184,30 @@ export default function ShippingStep() {
             </div>
           </div>
 
-          {/* Right Side - Order Summary (Same as Payment Page) */}
+          {/* Right Side - Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 sticky top-6">
-              <h2 className="text-xl font-semibold text-yellow-500 mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold text-yellow-500 mb-4">Order Summary ({cartItemCount} items)</h2>
               
               <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
-                {orderSummary.items.map((item, index) => (
+                {cart.map((item, index) => (
                   <div key={index} className="flex gap-3 pb-4 border-b border-gray-800">
                     <img 
-                      src={item.image && item.image !== '📦' ? item.image : 'https://via.placeholder.com/64'} 
+                      src={item.image} 
                       alt={item.name} 
                       className="w-16 h-16 object-cover rounded-lg" 
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/64';
+                        e.target.src = 'https://via.placeholder.com/64?text=Product';
                       }}
                     />
                     <div className="flex-1">
                       <h4 className="font-medium text-white text-sm">{item.name}</h4>
-                      <p className="text-xs text-gray-400 mt-1">Brand: {item.brand || 'Hexa'}</p>
+                      {item.variant && (
+                        <p className="text-xs text-gray-400 mt-1">{item.variant}</p>
+                      )}
                       <p className="text-sm font-semibold text-yellow-500 mt-1">
-                        ${item.price.toFixed(2)} x {item.quantity}
+                        ${Number(item.price).toFixed(2)} x {item.quantity}
                       </p>
                     </div>
                   </div>
@@ -312,15 +217,15 @@ export default function ShippingStep() {
               <div className="border-t border-gray-800 pt-4 mt-4 space-y-2">
                 <div className="flex justify-between text-sm text-gray-300">
                   <span>SUBTOTAL</span>
-                  <span>${orderSummary.subtotal.toFixed(2)}</span>
+                  <span>${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-300">
                   <span>Shipping</span>
-                  <span>${orderSummary.shipping.toFixed(2)}</span>
+                  <span>${shippingCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-white pt-2 border-t border-gray-800">
                   <span>Order total</span>
-                  <span>${orderSummary.total.toFixed(2)}</span>
+                  <span>${total.toFixed(2)}</span>
                 </div>
               </div>
             </div>

@@ -1,4 +1,3 @@
-// productController.js
 const pool = require('../config/db');
 
 const getAllProducts = async (_req, res) => {
@@ -12,52 +11,60 @@ const getAllProducts = async (_req, res) => {
         p.price,
         p.image,
         p.stock,
-        c.name AS category,
-        COALESCE(AVG(r.rating), 0) AS avg_rating,
-        COUNT(r.id) AS review_count
+        c.name AS category
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN reviews r ON p.id = r.product_id
-      GROUP BY p.id, p.category_id, p.name, p.description, p.price, p.image, p.stock, c.name
       ORDER BY p.id
     `);
 
-    const [variantRows] = await pool.query(`
-      SELECT product_id, size, color, stock
-      FROM product_variants
-      ORDER BY product_id
-    `);
-
-    const variantsByProduct = variantRows.reduce((acc, variant) => {
-      if (!acc[variant.product_id]) acc[variant.product_id] = [];
-      acc[variant.product_id].push({
-        size: variant.size,
-        color: variant.color,
-        stock: variant.stock
-      });
-      return acc;
-    }, {});
-
     const products = rows.map(product => ({
       ...product,
-      variants: variantsByProduct[product.id] || [],
-      avg_rating: parseFloat(product.avg_rating).toFixed(1)
+      variants: [], // Empty array since no variants table
+      avg_rating: "0.0", // Default rating since no reviews table
+      review_count: 0
     }));
 
     res.json(products);
   } catch (error) {
+    console.error('Database error:', error);
     res.status(500).json({ message: 'Failed to fetch products', error: error.message });
   }
 };
 
 const getProductById = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [req.params.id]);
+    const [rows] = await pool.query(`
+      SELECT 
+        p.*, 
+        c.name AS category 
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+      WHERE p.id = ?
+    `, [req.params.id]);
+    
     if (!rows.length) {
       return res.status(404).json({ message: 'Product not found' });
     }
-    res.json(rows[0]);
+    
+    // Get variants if table exists
+    let variants = [];
+    try {
+      const [variantRows] = await pool.query(
+        'SELECT size, color, stock FROM product_variants WHERE product_id = ?',
+        [req.params.id]
+      );
+      variants = variantRows;
+    } catch (err) {
+      // Variants table doesn't exist, just use empty array
+      console.log('Variants table not found, skipping');
+    }
+    
+    res.json({
+      ...rows[0],
+      variants
+    });
   } catch (error) {
+    console.error('Error fetching product:', error);
     res.status(500).json({ message: 'Failed to fetch product', error: error.message });
   }
 };

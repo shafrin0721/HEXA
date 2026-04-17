@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { orderAPI, paymentAPI } from '../services/api';
+import { useCart } from '../context/CartContext';
+import { paymentAPI } from '../services/api';
 
 const PaymentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { cart } = useCart(); // Get cart data from context
   
   const getEmptyFormData = () => ({
     cardNumber: '',
@@ -22,15 +24,23 @@ const PaymentPage = () => {
   });
 
   const [formData, setFormData] = useState(getEmptyFormData());
-  const [orderSummary, setOrderSummary] = useState({
-    items: [],
-    subtotal: 0,
-    shipping: 0,
-    total: 0
-  });
   
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState(false);
+  // Calculate order summary from cart (same as CartPage and OrderSummary1)
+  const subtotal = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
+  const shipping = 12.87;
+  const total = subtotal + shipping;
+  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  
+  const orderSummary = {
+    items: cart.map(item => ({
+      ...item,
+      price: Number(item.price)
+    })),
+    subtotal: subtotal,
+    shipping: shipping,
+    total: total
+  };
+  
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
@@ -96,8 +106,6 @@ const PaymentPage = () => {
       setFormData(getEmptyFormData());
       setErrors({});
     }
-
-    fetchOrderTotals();
   }, [location.state]);
 
   useEffect(() => {
@@ -106,23 +114,25 @@ const PaymentPage = () => {
     }
   }, [formData]);
 
-  const fetchOrderTotals = async () => {
-    try {
-      setLoading(true);
-      const response = await orderAPI.getOrderTotals();
-      if (response.data.success) {
-        setOrderSummary(response.data.data);
-      } else {
-        console.warn('No valid order data available');
-        setFetchError(true);
-      }
-    } catch (error) {
-      console.error('Error fetching order totals:', error);
-      setFetchError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Redirect if cart is empty
+  if (cart.length === 0) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col">
+        <div className="flex-1 flex justify-center items-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Your cart is empty</h2>
+            <p className="text-gray-400 mb-6">Please add items to your cart before proceeding to checkout.</p>
+            <button 
+              onClick={() => navigate("/products")}
+              className="bg-yellow-500 text-white px-8 py-3 rounded hover:bg-yellow-600 transition"
+            >
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const validateForm = () => {
     const newErrors = {};
@@ -329,116 +339,99 @@ const PaymentPage = () => {
   };
 
   const CardTypeDropdown = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setIsOpen(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
-  const selectedCardType = cardTypeOptions.find(opt => opt.value === formData.cardType);
+    const selectedCardType = cardTypeOptions.find(opt => opt.value === formData.cardType);
 
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <div 
-        className={`w-[90%] h-10 px-3 border rounded-lg bg-gray-300 cursor-pointer flex items-center justify-between ${
-          errors.cardType ? 'border-red-500' : 'border-gray-700'
-        } hover:border-gray-500 transition-colors`}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <div className="flex-1 h-full flex items-center justify-center">
-          {selectedCardType ? (
-            <img 
-              src={selectedCardType.logo} 
-              alt={selectedCardType.label} 
-              className="h-full w-auto max-w-full object-contain" 
-            />
-          ) : (
-            <span className="text-gray-500 text-sm">Select card type</span>
-          )}
-        </div>
-        <span className="text-gray-600 text-xs ml-2">{isOpen ? '▲' : '▼'}</span>
-      </div>
-      
-      {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-gray-300 border border-gray-700 rounded-lg shadow-lg z-10">
-          {cardTypeOptions.map(option => (
-            <div
-              key={option.value}
-              className={`h-10 px-3 cursor-pointer flex items-center justify-center hover:bg-gray-400 transition-colors relative ${
-                formData.cardType === option.value ? 'bg-gray-700' : ''
-              }`}
-              onClick={() => {
-                handleChange({ target: { name: 'cardType', value: option.value } });
-                setIsOpen(false);
-              }}
-            >
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div 
+          className={`w-[90%] h-10 px-3 border rounded-lg bg-gray-300 cursor-pointer flex items-center justify-between ${
+            errors.cardType ? 'border-red-500' : 'border-gray-700'
+          } hover:border-gray-500 transition-colors`}
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <div className="flex-1 h-full flex items-center justify-center">
+            {selectedCardType ? (
               <img 
-                src={option.logo} 
-                alt={option.label} 
+                src={selectedCardType.logo} 
+                alt={selectedCardType.label} 
                 className="h-full w-auto max-w-full object-contain" 
               />
-              {formData.cardType === option.value && (
-                <span className="text-green-500 absolute right-3">✓</span>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col">
-       
-        <div className="flex-1 flex justify-center items-center">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
-            <p className="mt-4 text-gray-400">Loading order summary...</p>
+            ) : (
+              <span className="text-gray-500 text-sm">Select card type</span>
+            )}
           </div>
+          <span className="text-gray-600 text-xs ml-2">{isOpen ? '▲' : '▼'}</span>
         </div>
         
+        {isOpen && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-gray-300 border border-gray-700 rounded-lg shadow-lg z-10">
+            {cardTypeOptions.map(option => (
+              <div
+                key={option.value}
+                className={`h-10 px-3 cursor-pointer flex items-center justify-center hover:bg-gray-400 transition-colors relative ${
+                  formData.cardType === option.value ? 'bg-gray-700' : ''
+                }`}
+                onClick={() => {
+                  handleChange({ target: { name: 'cardType', value: option.value } });
+                  setIsOpen(false);
+                }}
+              >
+                <img 
+                  src={option.logo} 
+                  alt={option.label} 
+                  className="h-full w-auto max-w-full object-contain" 
+                />
+                {formData.cardType === option.value && (
+                  <span className="text-green-500 absolute right-3">✓</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
-  }
+  };
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
-      
       <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  {/* Progress Steps - Labels on the right side of numbers (Increased Size) */}
-<div className="flex items-center justify-center gap-6 mb-12">
-  {['Address', 'Shipping', 'Payment', 'Review'].map((label, index) => (
-    <React.Fragment key={index}>
-      <div className="flex items-center gap-3">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-base font-bold ${
-          index < 2 ? 'bg-white text-black' :
-          index === 2 ? 'bg-gray-500 text-white ring-4 ring-gray-500/50' :
-          'bg-gray-800 text-gray-400'
-        }`}>
-          {index + 1}
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center gap-6 mb-12">
+          {['Address', 'Shipping', 'Payment', 'Review'].map((label, index) => (
+            <React.Fragment key={index}>
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-base font-bold ${
+                  index < 2 ? 'bg-white text-black' :
+                  index === 2 ? 'bg-gray-500 text-white ring-4 ring-gray-500/50' :
+                  'bg-gray-800 text-gray-400'
+                }`}>
+                  {index + 1}
+                </div>
+                <span className={`text-base ${
+                  index === 2 ? 'text-white font-semibold' : 'text-gray-300'
+                }`}>
+                  {label}
+                </span>
+              </div>
+              {index < 3 && (
+                <span className="text-gray-500 text-base font-medium">---</span>
+              )}
+            </React.Fragment>
+          ))}
         </div>
-        <span className={`text-base ${
-          index === 2 ? 'text-white font-semibold' : 'text-gray-300'
-        }`}>
-          {label}
-        </span>
-      </div>
-      {/* Add separator between steps */}
-      {index < 3 && (
-        <span className="text-gray-500 text-base font-medium">---</span>
-      )}
-    </React.Fragment>
-  ))}
-</div>
 
         {/* Payment Status Message */}
         {paymentStatus && (
@@ -516,7 +509,7 @@ const PaymentPage = () => {
                       maxLength="3"
                       value={formData.cvv}
                       onChange={handleChange}
-                      className={`w-full px-2 py-1 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono tracking-wider h-10  ${
+                      className={`w-full px-2 py-1 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 font-mono tracking-wider h-10 ${
                         errors.cvv ? 'border-red-500' : 'border-gray-700'
                       }`}
                     />
@@ -660,7 +653,7 @@ const PaymentPage = () => {
           {/* Right Side - Order Summary */}
           <div className="lg:w-96">
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 sticky top-4">
-              <h2 className="text-xl font-semibold text-yellow-500 mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold text-yellow-500 mb-4">Order Summary ({cartItemCount} items)</h2>
               
               <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
                 {orderSummary.items.map((item, index) => (
@@ -668,9 +661,11 @@ const PaymentPage = () => {
                     <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg" />
                     <div className="flex-1">
                       <h4 className="font-medium text-white text-sm">{item.name}</h4>
-                      <p className="text-xs text-gray-400 mt-1">Brand: {item.brand}</p>
+                      {item.variant && (
+                        <p className="text-xs text-gray-400 mt-1">{item.variant}</p>
+                      )}
                       <p className="text-sm font-semibold text-yellow-500 mt-1">
-                        ${item.price.toFixed(2)} x {item.quantity}
+                        ${Number(item.price).toFixed(2)} x {item.quantity}
                       </p>
                     </div>
                   </div>
@@ -687,7 +682,7 @@ const PaymentPage = () => {
                   <span>${orderSummary.shipping.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-white pt-2 border-t border-gray-800">
-                  <span>Order total</span>
+                  <span>ORDER TOTAL</span>
                   <span>${orderSummary.total.toFixed(2)}</span>
                 </div>
               </div>

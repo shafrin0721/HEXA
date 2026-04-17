@@ -1,4 +1,3 @@
-// App.jsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
@@ -14,10 +13,10 @@ import Auth from './pages/Auth';
 import HexaHomePage from "./pages/Home";
 import ProductsPage from "./pages/ProductsPage";
 import ProductPage from './pages/Productpage';
-import CartPage from "./pages/Cart";  // Remove duplicate import
+import CartPage from "./pages/Cart";  
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import CheckoutPage from "./pages/Checkout";
+import CheckoutAddress from "./pages/CheckoutAddress";
 import ShippingStep from "./pages/ShippingStep";
 import OrderSummary1 from "./pages/OrderSummary";
 import OrderSuccess from "./pages/OrderSuccess";
@@ -52,7 +51,6 @@ const App = () => (
           <CartProvider>
             <ProductProvider>
               <Routes>
-                {/* Customer Routes - these will be rendered inside Layout */}
                 <Route element={<Layout />}>
                   <Route path="/" element={<HexaHomePage />} />
                   <Route path="/products" element={<ProductsPage />} />
@@ -60,7 +58,7 @@ const App = () => (
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
-                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/address" element={<CheckoutAddress />} />
                   <Route path="/checkout/shipping" element={<ShippingStep />} />
                   <Route path="/order-summary" element={<OrderSummary1 />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
@@ -72,7 +70,7 @@ const App = () => (
                   <Route path="/review" element={<ReviewPage />} />
                 </Route>
                 
-                {/* Admin Routes - no Layout wrapper */}
+    
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/logistics" element={<AdminLogistics />} />
                 <Route path="/admin/sales" element={<AdminSales />} />
@@ -80,7 +78,6 @@ const App = () => (
                 <Route path="/admin/charts" element={<AdminCharts />} />
                 <Route path="/admin/inventory" element={<AdminInventory />} />
                 
-                {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </ProductProvider>
