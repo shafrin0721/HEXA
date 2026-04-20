@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import './Home.css';
 import { Link } from 'react-router-dom';
 
 const products = [
@@ -6,6 +7,18 @@ const products = [
   { id: 2, name: 'Chorale Noir Tee', image: '/images/product2_new.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
   { id: 3, name: 'Élan Focus Tee', image: '/images/product3_new.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
   { id: 4, name: 'Divinus Path Tee', image: '/images/product4_new.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
+  { id: 5, name: 'Nexus Vitality Tee', image: '/images/product5_new.jpg', desc: 'Premium blend fabric with enhanced breathability and comfort.', price: '$24.99' },
+  { id: 6, name: 'Solaris Elite Tee', image: '/images/product6_new.jpg', desc: 'High-performance athletic tee designed for maximum movement.', price: '$29.99' },
+  { id: 7, name: 'Lunar Echo Tee', image: '/images/product7_new.jpg', desc: 'Minimalist design with premium organic cotton construction.', price: '$22.99' },
+  { id: 8, name: 'Quantum Flow Tee', image: '/images/product8_new.jpg', desc: 'Advanced moisture-wicking technology for active lifestyles.', price: '$26.99' },
+  { id: 9, name: 'Apex Prime Tee', image: '/images/product9_new.jpg', desc: 'Luxury cotton blend with anti-wrinkle properties.', price: '$32.99' },
+  { id: 10, name: 'Zenith Core Tee', image: '/images/product10_new.jpg', desc: 'Ergonomic fit with sustainable bamboo fabric blend.', price: '$28.99' },
+  { id: 11, name: 'Vortex Dynamic Tee', image: '/images/product11_new.jpg', desc: 'Bold graphic design with reinforced stitching.', price: '$21.99' },
+  { id: 12, name: 'Celestial Grace Tee', image: '/images/product12_new.jpg', desc: 'Elegant silhouette with pearlized finish details.', price: '$25.99' },
+  { id: 13, name: 'Titan Force Tee', image: '/images/product13_new.jpg', desc: 'Heavy-duty construction built for durability and style.', price: '$27.99' },
+  { id: 14, name: 'Aurora Bliss Tee', image: '/images/product14_new.jpg', desc: 'Lightweight fabric with UV protection and quick-dry technology.', price: '$23.99' },
+  { id: 15, name: 'Odyssey Quest Tee', image: '/images/product15_new.jpg', desc: 'Adventure-ready design with multiple utility pockets.', price: '$31.99' },
+  { id: 16, name: 'Infinity Loop Tee', image: '/images/product16_new.jpg', desc: 'Timeless classic with modern sustainable materials.', price: '$20.99' },
 ];
 
 export default function Home() {
@@ -28,82 +41,84 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div>
 
       {/* Hero Section */}
-      <section className="relative h-96 bg-black overflow-hidden">
-        <img src="/images/Tshirtbrand.png" alt="Hero" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/40"></div>
-        <div className="relative max-w-7xl mx-auto h-full flex items-center px-8">
-          <div>
-            <h1 className="text-7xl font-bold mb-4 leading-tight text-white">Welcome to HEXA</h1>
-            <p className="text-2xl text-gray-200 mb-8">Discover Your Perfect Style</p>
-            <Link to="/products" className="inline-block bg-black text-white px-12 py-3 rounded font-semibold hover:bg-gray-900">Shop Now</Link>
+      <section id="home" className="hero-section">
+        <div className="hero-background"></div>
+        <div className="hero-container">
+          <div className="hero-content">
+            <div className="hero-badge">NEW COLLECTION 2026</div>
+            <h1 className="title">Welcome to HEXA</h1>
+            <p className="subtitle">Discover Your Perfect Style</p><br></br>
+            <div className="hero-buttons">
+              <Link to="/products" className="btn btn-primary">Shop Now</Link>
+              <Link to="/about" className="btn btn-secondary">Learn More</Link>
+            </div>
+          </div>
+          <div className="hero-image">
+            <div className="hero-image-wrapper">
+              <img src="/images/Tshirtbrand.png" alt="Hero" />
+              <div className="hero-glow"></div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-8 bg-black border-b border-gray-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">Features</p>
-            <h2 className="text-4xl font-bold mb-2">Everything you need to purchase</h2>
+      <section className="features-section">
+        <div className="container">
+          <div className="section-header">
+            <p className="section-label">Features</p>
+            <h2 className="title">Everything you need to purchase</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="w-10 h-10 text-black" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+          <div className="grid-3">
+            <div className="feature-item">
+              <div className="feature-icon">
+                <img src="/images/Member1.jpg" alt="Secure Payments" width="60" height="60" style={{borderRadius: '50%', objectFit: 'cover'}} />
               </div>
-              <h3 className="text-lg font-bold mb-2">Secure Payments</h3>
-              <p className="text-gray-400 text-sm">Safe and reliable payment processing for all transactions</p>
+              <h3>Secure Payments</h3>
+              <p>Safe and reliable payment processing for all transactions</p>
             </div>
-            <div className="text-center">
-              <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="w-10 h-10 text-black" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <div className="feature-item">
+              <div className="feature-icon">
+                 <img src="/images/9422848.png" alt="Secure Payments" width="60" height="60" style={{borderRadius: '50%', objectFit: 'cover'}} />
+                  
               </div>
-              <h3 className="text-lg font-bold mb-2">Order Tracking</h3>
-              <p className="text-gray-400 text-sm">Real-time updates on your order status and location</p>
+              <h3>Order Tracking</h3>
+              <p>Real-time updates on your order status and location</p>
             </div>
-            <div className="text-center">
-              <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="w-10 h-10 text-black" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <div className="feature-item">
+              <div className="feature-icon">
+                  <img src="/images/quality-verified-glyph-blue-and-black-icon-vector.jpg" alt="Secure Payments" width="60" height="60" style={{borderRadius: '50%', objectFit: 'cover'}} />
               </div>
-              <h3 className="text-lg font-bold mb-2">Quality Verification</h3>
-              <p className="text-gray-400 text-sm">Strict quality control measures for all products</p>
+              <h3>Quality Verification</h3>
+              <p>Strict quality control measures for all products</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 px-8 bg-black border-b border-gray-800">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12">Featured Products</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section id="products" className="products-section">
+        <div className="container">
+          <h2 className="title text-center">Featured Products</h2>
+          <div className="grid-4">
             {products.map((product) => (
-              <div key={product.id} className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
-                <div className="h-64 overflow-hidden">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-base mb-2">{product.name}</h3>
-                  <p className="text-gray-400 text-xs mb-3">{product.desc}</p>
-                  <div className="flex gap-1 mb-3">
+              <div key={product.id} className="product-card">
+                <img src={product.image} alt={product.name} className="product-img" />
+                <div className="product-info">
+                  <h3>{product.name}</h3>
+                  <p>{product.desc}</p>
+                  <div className="rating">
                     {[...Array(5)].map((_, i) => (
-                      <span key={i} className="text-yellow-400">★</span>
+                      <span key={i} className="star">★</span>
                     ))}
                   </div>
-                  <p className="text-lg font-bold mb-4">{product.price}</p>
-                  <div className="flex gap-2">
-                    <button className="flex-1 bg-white text-black py-2 rounded text-sm font-semibold hover:bg-gray-100">Add Cart</button>
-                    <button className="flex-1 bg-yellow-500 text-black py-2 rounded text-sm font-semibold hover:bg-yellow-400">Buy Now</button>
+                  <p className="price">{product.price}</p>
+                  <div className="product-buttons">
+                    <button className="btn btn-white">Add Cart</button>
+                    <button className="btn btn-yellow">Buy Now</button>
                   </div>
                 </div>
               </div>
@@ -112,67 +127,84 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section className="py-16 px-8 bg-black border-b border-gray-800">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12">
-          <div>
-            <h2 className="text-3xl font-bold mb-6">Get in Touch</h2>
-            <p className="text-gray-400 mb-4">Have any questions or need assistance?</p>
-            <p className="text-gray-400 mb-8">Our friendly customer support team is here to help. Reach out to us via the following methods:</p>
-            <div className="space-y-4 text-gray-400">
-              <p><span className="font-semibold">Phone:</span> +44 20 7946 0123</p>
-              <p><span className="font-semibold">Email:</span> support@hexa.com</p>
-              <p><span className="font-semibold">Address:</span> 123 Northern Park Lane, West London, W1A 4ZZ, United Kingdom</p>
+      {/* About Section */}
+      <section id="about" className="about-section">
+        <div className="container">
+          <div className="about-content">
+            <div className="about-text">
+              <h2 className="title">About HEXA</h2>
+              <p className="about-description">
+                At HEXA, we believe style is personal. We design premium-quality, minimalist clothing that blends comfort, durability, and intelligent minimalism. Our mission is to empower self-expression through essential pieces that make a subtle statement.
+              </p>
+              <div className="about-values">
+                <div className="value-item">
+                  <h3>Quality First</h3>
+                  <p>Premium materials and strict quality control ensure every piece meets our high standards.</p>
+                </div>
+                <div className="value-item">
+                  <h3>Sustainable Design</h3>
+                  <p>We prioritize eco-friendly materials and ethical production practices in our supply chain.</p>
+                </div>
+                <div className="value-item">
+                  <h3>Timeless Style</h3>
+                  <p>Our minimalist designs transcend trends, offering pieces that remain relevant season after season.</p>
+                </div>
+              </div>
+            </div>
+            <div className="about-image">
+              <img src="/images/Tshirtbrand.png" alt="About HEXA" />
             </div>
           </div>
+        </div>
+      </section>
 
-          <form onSubmit={handleSubmit} className="bg-gray-800 p-8 rounded-lg border border-gray-700">
-            <div className="mb-4">
-              <label className="block text-sm font-semibold mb-2">Name</label>
+      {/* Contact Section */}
+      <section id="contact" className="contact-section">
+        <div className="container">
+          <div className="grid-2">
+            <div className="contact-info">
+              <h2 className="title">Get in Touch</h2>
+              <p>Have any questions or need assistance?</p>
+              <p>Our friendly customer support team is here to help. Reach out to us via the following methods:</p>
+              <div className="contact-details">
+                <p><strong>Phone:</strong> +44 20 7946 0123</p>
+                <p><strong>Email:</strong> support@hexa.com</p>
+                <p><strong>Address:</strong> 123 Northern Park Lane, West London, W1A 4ZZ, United Kingdom</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="contact-form">
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="Name"
-                className="w-full bg-white text-black px-4 py-2 rounded border border-gray-300 focus:outline-none"
               />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-semibold mb-2">Surname</label>
               <input
                 type="text"
                 name="surname"
                 value={formData.surname}
                 onChange={handleInputChange}
                 placeholder="Surname"
-                className="w-full bg-white text-black px-4 py-2 rounded border border-gray-300 focus:outline-none"
               />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-semibold mb-2">Email</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Email"
-                className="w-full bg-white text-black px-4 py-2 rounded border border-gray-300 focus:outline-none"
               />
-            </div>
-            <div className="mb-6">
-              <label className="block text-sm font-semibold mb-2">Inquiry</label>
               <textarea
                 name="inquiry"
                 value={formData.inquiry}
                 onChange={handleInputChange}
                 placeholder="Inquiry"
                 rows="4"
-                className="w-full bg-white text-black px-4 py-2 rounded border border-gray-300 focus:outline-none"
               ></textarea>
-            </div>
-            <button type="submit" className="w-full bg-white text-black py-2 rounded font-semibold hover:bg-gray-100">Submit</button>
-          </form>
+              <button type="submit">Submit</button>
+            </form>
+          </div>
         </div>
       </section>
     </div>

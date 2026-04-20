@@ -1,14 +1,15 @@
 // Layout.jsx
 import { Outlet } from "react-router-dom";
-import Navbar from "./Navbar";
-import Footer from "./Footer"
+import Navbar from "./layout/Navbar";
+import Footer from "./layout/Footer";
+import "./Layout.css";
 
-const Layout = () => {  // Remove children prop
+const Layout = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="app-layout">
       <Navbar />
-      <main className="flex-grow">
-        <Outlet />  {/* This will render the matched child route */}
+      <main className="main-content">
+        <Outlet />
       </main>
       <Footer />
     </div>
