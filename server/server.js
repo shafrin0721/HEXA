@@ -1,12 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const ordersRoutes = require('./routes/orders');
-const paymentsRoutes = require('./routes/payments');
+const ordersRoutes = require('./routes/ordersRoutes');
+const paymentsRoutes = require('./routes/paymentsRoutes');
 const authRoutes = require('./routes/authRoutes');
+const contactRoutes = require('./routes/contactRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const cartRoutes = require('./routes/cartRoutes')
+const productRoutes = require('./routes/productRoutes');
 
 dotenv.config();
-
 const app = express();
 
 // Middleware
@@ -15,20 +18,14 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes);
 
 // Routes - IMPORTANT: Order matters
 app.use('/api/orders', ordersRoutes);
 app.use('/api', paymentsRoutes);
-
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
-});
-
-// Test endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'API is working' });
-});
+app.use("/api/contact", contactRoutes);
+app.use("/api/profile", profileRoutes);
+app.use('/api/products', productRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
