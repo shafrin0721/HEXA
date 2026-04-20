@@ -47,7 +47,7 @@ const Auth = () => {
                 setTimeout(() => {
                     // Admin හෝ Customer මත පදනම්ව අදාළ පිටුවට යොමු කිරීම [cite: 10, 36]
                     if (response.data.user?.role === 'admin') {
-                        navigate('/admin-dashboard'); 
+                        navigate('/admin'); 
                     } else {
                         navigate('/'); 
                     }
