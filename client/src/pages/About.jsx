@@ -3,9 +3,13 @@ import { Link } from 'react-router-dom';
 
 export default function About() {
   const team = [
-    { name: 'Alex Kim', role: 'Founder', image: '/images/team1_new.jpg' },
-    { name: 'Sophia Lin', role: 'Lead Designer', image: '/images/team2_new.jpg' },
-    { name: 'Ryan Patel', role: 'Production Lead', image: '/images/team3_new.jpg' },
+    { name: 'Shafrin',  image: '/images/Member1.jpeg' },
+    { name: 'Shavindi',  image: '/images/Member2.png' },
+    { name: 'Thushalini',  image: '/images/Member3.jpeg' },
+    { name: 'Heli',  image: '/images/Member4 (1).jpg' },
+    { name: 'Vithush',  image: '/images/Member5.jpeg' },
+    { name: 'Sara', image: '/images/Member6.jpeg' },
+    { name: 'Piyula', image: '/images/team3_new.jpg' },
   ];
 
   return (
@@ -13,37 +17,36 @@ export default function About() {
 
       {/* Our Story */}
       <section className="py-24 px-8 border-b border-gray-800">
-        <div className="max-w-6xl mx-auto text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">Our Story</h1>
-          <p className="text-gray-300 max-w-2xl mx-auto text-lg">
+        <div className="max-w-6xl mx-auto text-center mb-16 px-8">
+          <h3 className="text-2xl font-bold text-center mb-4">
+            Our Story
+          </h3>
+          <p className="text-gray-300 max-w-4xl mx-auto text-lg text-center leading-relaxed">
             At Hexa, we believe style is personal. We design premium-quality, minimalist t-shirts that blend comfort, durability, and intelligent minimalism.
           </p>
         </div>
 
         {/* Story Cards Grid */}
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 px-8">
           {/* Left: Story Illustration */}
-          <div className="bg-white rounded-3xl p-8 flex items-center justify-center min-h-80">
-            <div className="text-center">
-              <div className="text-6xl mb-4">💡</div>
-              <p className="text-gray-700 font-semibold">Our Vision</p>
-            </div>
+          <div className="bg-gray-300 rounded-3xl p-8 flex items-center justify-center min-h-80 overflow-hidden">
+            <img src="/images/vision.png" alt="Vision" className="w-full h-full object-cover" />
           </div>
 
           {/* Middle: Mission */}
-          <div className="bg-white text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
+          <div className="bg-gray-300 text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
             <div className="text-4xl mb-4 text-center">🎯</div>
             <h3 className="text-2xl font-bold text-center mb-4">Our Mission</h3>
-            <p className="text-gray-700 text-center text-sm leading-relaxed">
-              To empower self-expression through premium, minimalist essentials—crafted for comfort, built for longevity, and designed to make a subtle statement.
+            <p className="text-gray-900 text-center text-sm leading-relaxed">
+              To empower self-expression through premium, minimalist essentials crafted for comfort, built for longevity, and designed to make a subtle statement.
             </p>
           </div>
 
           {/* Right: Vision */}
-          <div className="bg-white text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
+          <div className="bg-gray-300 text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
             <div className="text-4xl mb-4 text-center">👁️</div>
             <h3 className="text-2xl font-bold text-center mb-4">Our Vision</h3>
-            <p className="text-gray-700 text-center text-sm leading-relaxed">
+            <p className="text-gray-900 text-center text-sm leading-relaxed">
               To be the go-to brand for those who value simplicity, comfort, and enduring style in their everyday wardrobe.
             </p>
           </div>
@@ -52,14 +55,17 @@ export default function About() {
 
       {/* Meet the Team */}
       <section className="py-24 px-8 border-b border-gray-800">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 px-8">
           {/* Left: Team Members */}
           <div>
-            <h2 className="text-4xl font-bold mb-6">Meet the Team</h2>
-            <p className="text-gray-400 mb-12 max-w-lg">
+            <h2 className="text-4xl font-bold text-left mb-6">
+  Meet the Team
+</h2>
+<br></br>
+            <p className="text-gray-400 mb-12 text-left max-w-lg">
               Hexa is powered by a small, passionate team of designers, makers, and creatives who share a love for premium fashion and functional design. Together, we're building a brand that values authenticity, quality, and the people who wear our essentials.
             </p>
-
+<br></br>
             {/* Team Member Circles */}
             <div className="flex gap-8 flex-wrap">
               {team.map((member, i) => (
@@ -75,12 +81,11 @@ export default function About() {
           </div>
 
           {/* Right: Workspace Image */}
-          <div className="rounded-3xl overflow-hidden border border-gray-800 h-96">
-            <img src="/images/hero.svg" alt="Workspace" className="w-full h-full object-cover" />
+          <div className="rounded-3xl overflow-hidden border border-gray-800 h-64">
+            <img src="/images/workplace.jpeg" alt="Workspace" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
-
     </div>
   );
 }
