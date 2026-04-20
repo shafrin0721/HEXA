@@ -1,25 +1,48 @@
-const ErrorHandler = require("../utils/errorHandler");
-const User = require('../models/userModel')
-const catchAsyncError = require("./catchAsyncError.js");
 const jwt = require('jsonwebtoken');
+const pool = require('../config/db');
 
-exports.isAuthenticatedUser = catchAsyncError( async (req, res, next) => {
-   const { token  }  = req.cookies;
-   
-   if( !token ){
-        return next(new ErrorHandler('Login first to handle this resource', 401))
-   }
-
-   const decoded = jwt.verify(token, process.env.JWT_SECRET)
-   req.user = await User.findById(decoded.id)
-   next();
-})
-
-exports.authorizeRoles = (...roles) => {
-   return  (req, res, next) => {
-        if(!roles.includes(req.user.role)){
-            return next(new ErrorHandler(`Role ${req.user.role} is not allowed`, 401))
-        }
-        next()
+const auth = async (req, res, next) => {
+  try {
+    let token;
+    
+    // Check for token in cookies (for web app)
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
     }
-}   
+    // Check for token in Authorization header (for mobile/API)
+    else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'No authentication token, access denied'
+      });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
+    
+    // Get user from database
+    const [users] = await pool.query('SELECT id, email, role FROM users WHERE id = ?', [decoded.id]);
+    
+    if (users.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    req.user = users[0];
+    next();
+  } catch (error) {
+    console.error('Auth error:', error);
+    res.status(401).json({
+      success: false,
+      message: 'Token verification failed, authorization denied'
+    });
+  }
+};
+
+module.exports = auth;

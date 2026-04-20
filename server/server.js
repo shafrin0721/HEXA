@@ -1,12 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const ordersRoutes = require('./routes/orders');
-const paymentsRoutes = require('./routes/payments');
+const ordersRoutes = require('./routes/ordersRoutes');
+const paymentsRoutes = require('./routes/paymentsRoutes');
 const authRoutes = require('./routes/authRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const profileRoutes = require('./routes/profileRoutes');
-const cartRoutes = require('./routes/cart')
+const cartRoutes = require('./routes/cartRoutes')
+const productRoutes = require('./routes/productRoutes');
 
 dotenv.config();
 const app = express();
@@ -24,7 +25,7 @@ app.use('/api/orders', ordersRoutes);
 app.use('/api', paymentsRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/profile", profileRoutes);
-
+app.use('/api/products', productRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

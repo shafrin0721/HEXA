@@ -1,84 +1,72 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { cartAPI } from '../services/api';
-import { useAuth } from './AuthContext';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 
 const CartContext = createContext();
 
-export const useCart = () => useContext(CartContext);
+const cartReducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD_ITEM':
+      const existing = state.find(item => item.id === action.payload.id);
+      if (existing) {
+        return state.map(item =>
+          item.id === action.payload.id
+            ? { ...item, quantity: item.quantity + action.payload.quantity }
+            : item
+        );
+      }
+      return [...state, action.payload];
+    case 'INCREMENT':
+      return state.map(item =>
+        item.id === action.payload
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      );
+    case 'DECREMENT':
+      return state.map(item =>
+        item.id === action.payload && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      );
+    case 'REMOVE_ITEM':
+      return state.filter(item => item.id !== action.payload);
+    case 'UPDATE_QUANTITY':
+      return state.map(item =>
+        item.id === action.payload.id
+          ? { ...item, quantity: action.payload.quantity }
+          : item
+      );
+    case 'CLEAR_CART':
+      return [];
+    case 'LOAD_CART':
+      return action.payload || [];
+    default:
+      return state;
+  }
+};
 
-export const CartProvider = ({ children }) => {
-    const [cartItems, setCartItems] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const { user } = useAuth();
+export function CartProvider({ children }) {
+  const [cart, dispatch] = useReducer(cartReducer, [], () => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('hexa-cart');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
 
-    useEffect(() => {
-        if (user) {
-            loadCart();
-        } else {
-            setCartItems([]);
-        }
-    }, [user]);
+  useEffect(() => {
+    localStorage.setItem('hexa-cart', JSON.stringify(cart));
+  }, [cart]);
 
-    const loadCart = async () => {
-        setLoading(true);
-        try {
-            const response = await cartAPI.getCart();
-            setCartItems(response.data);
-        } catch (error) {
-            console.error('Error loading cart:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  return (
+    <CartContext.Provider value={{ cart, dispatch }}>
+      {children}
+    </CartContext.Provider>
+  );
+}
 
-    const addToCart = async (productId, quantity = 1) => {
-        try {
-            await cartAPI.addToCart(productId, quantity);
-            await loadCart();
-            return { success: true };
-        } catch (error) {
-            return { success: false, error: error.response?.data?.message };
-        }
-    };
-
-    const updateQuantity = async (productId, quantity) => {
-        try {
-            await cartAPI.updateQuantity(productId, quantity);
-            await loadCart();
-        } catch (error) {
-            console.error('Error updating quantity:', error);
-        }
-    };
-
-    const removeFromCart = async (productId) => {
-        try {
-            await cartAPI.removeFromCart(productId);
-            await loadCart();
-        } catch (error) {
-            console.error('Error removing from cart:', error);
-        }
-    };
-
-    const getCartTotal = () => {
-        return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-    };
-
-    const getItemCount = () => {
-        return cartItems.reduce((count, item) => count + item.quantity, 0);
-    };
-
-    return (
-        <CartContext.Provider value={{
-            cartItems,
-            loading,
-            addToCart,
-            updateQuantity,
-            removeFromCart,
-            getCartTotal,
-            getItemCount,
-            loadCart
-        }}>
-            {children}
-        </CartContext.Provider>
-    );
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error('useCart must be used within CartProvider');
+  }
+  return context;
 };

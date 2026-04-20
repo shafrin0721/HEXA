@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from '../context/CartContext';
 import avatar from "../assets/avatar.jpg";
 import logo from "../assets/logo.png";
+<<<<<<< HEAD
 import productImg from "../assets/t- 6.jpg";
+=======
+import productImg from "../assets/t-6.jpg";
+>>>>>>> 86d2863c6906941107115a59baed94cc8f797951
 
 function OrderSummary1() {
   const { cart } = useCart(); // Get cart data from context

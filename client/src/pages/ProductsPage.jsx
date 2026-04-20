@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-
-
+import ProductCard from '../components/ProductCard';
+import { useProducts } from '../context/ProductContext';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function ProductsPage() {

@@ -84,35 +84,6 @@ exports.getOrderById = async (req, res) => {
     }
 };
 
-// Create new order
-exports.createOrder = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const { totalAmount, shippingAddress, paymentMethod, items } = req.body;
-
-        // Validate input
-        if (!totalAmount || !shippingAddress || !items || items.length === 0) {
-            return res.status(400).json({ message: 'Missing required fields' });
-        }
-
-        // Create order
-        const [result] = await pool.query('INSERT INTO orders (userId, totalAmount, shippingAddress, paymentMethod) VALUES (?, ?, ?, ?)', 
-            [userId, totalAmount, shippingAddress, paymentMethod]);
-
-        const orderId = result.insertId;
-
-        // Add order items
-        for (const item of items) {
-            await pool.query('INSERT INTO orderItems (orderId, productId, quantity, price) VALUES (?, ?, ?, ?)',
-                [orderId, item.productId, item.quantity, item.price]);
-        }
-
-        res.status(201).json({ message: 'Order created successfully', data: { orderId } });
-    } catch (error) {
-        res.status(500).json({ message: 'Error creating order', error: error.message });
-    }
-};
-
 // Update order status
 exports.updateOrderStatus = async (req, res) => {
     try {
@@ -157,7 +128,11 @@ exports.deleteOrder = async (req, res) => {
         res.status(500).json({ message: 'Error deleting order', error: error.message });
     }
 };
+<<<<<<< HEAD
 >>>>>>> b98b82deb166e0de0658e790c74377b906552853
+=======
+
+>>>>>>> 86d2863c6906941107115a59baed94cc8f797951
 exports.createOrder = async (req, res) => {
   try {
     const { 

@@ -32,6 +32,10 @@ export const productAPI = {
   getProductById: (id) => API.get(`/products/${id}`),
 };
 
+<<<<<<< HEAD
 export default API;
 
 
+=======
+export default API;
+>>>>>>> 86d2863c6906941107115a59baed94cc8f797951
