@@ -28,7 +28,9 @@ export default function AdminDashboard() {
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold">Dashboard Overview</h1>
+          <h1 className="text-4xl font-bold text-black !text-black">
+  Dashboard Overview
+</h1>
         </div>
 
         {/* Stats Cards */}

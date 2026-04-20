@@ -11,10 +11,8 @@ client/dist/
 
 # OS files
 .DS_Store
-Thumbs.db
-.env
+Thumb.db
 .env.*
-/dist
 logs
 *.log
 .vscode/

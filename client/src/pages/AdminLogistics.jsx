@@ -33,7 +33,9 @@ export default function LogisticsDashboard() {
   return (
     <AdminLayout>
       <div className="space-y-8">
-        <h1 className="text-4xl font-bold">Logistics Dashboard</h1>
+        <h1 className="text-4xl font-bold !text-black">
+  Logistics Dashboard
+</h1>
 
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
