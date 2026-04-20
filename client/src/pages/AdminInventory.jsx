@@ -13,7 +13,9 @@ export default function AdminInventory() {
   return (
     <AdminLayout>
       <div className="space-y-8">
-        <h1 className="text-4xl font-bold">Inventory Management</h1>
+        <h1 className="text-4xl font-bold !text-black">
+  Inventory Management
+</h1>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

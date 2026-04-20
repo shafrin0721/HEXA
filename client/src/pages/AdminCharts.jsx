@@ -65,7 +65,9 @@ export default function AdminCharts() {
     <AdminLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-4xl font-bold">Charts and Tables</h1>
+          <h1 className="text-4xl font-bold !text-black">
+  Charts and Tables
+</h1>
         </div>
 
         {/* Main Content Grid */}

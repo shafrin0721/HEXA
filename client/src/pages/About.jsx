@@ -43,38 +43,36 @@ export default function About() {
 
       {/* Our Story */}
       <section className="py-24 px-8 border-b border-gray-800">
-        <div className="max-w-6xl mx-auto text-center mb-16">
+        <div className="max-w-6xl mx-auto text-center mb-16 px-8">
           <h3 className="text-2xl font-bold text-center mb-4">
-  Our Story
-</h3>
-          <p className="text-gray-300 max-w-xl mx-auto text-lg text-center leading-relaxed">
-  At Hexa, we believe style is personal. We design premium-quality,
-  minimalist t-shirts that blend comfort, durability, and intelligent
-  minimalism.
-</p>
+            Our Story
+          </h3>
+          <p className="text-gray-300 max-w-4xl mx-auto text-lg text-center leading-relaxed">
+            At Hexa, we believe style is personal. We design premium-quality, minimalist t-shirts that blend comfort, durability, and intelligent minimalism.
+          </p>
         </div>
 
         {/* Story Cards Grid */}
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 px-8">
           {/* Left: Story Illustration */}
-          <div className="bg-white rounded-3xl p-8 flex items-center justify-center min-h-80 overflow-hidden">
+          <div className="bg-gray-300 rounded-3xl p-8 flex items-center justify-center min-h-80 overflow-hidden">
             <img src="/images/vision.png" alt="Vision" className="w-full h-full object-cover" />
           </div>
 
           {/* Middle: Mission */}
-          <div className="bg-white text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
+          <div className="bg-gray-300 text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
             <div className="text-4xl mb-4 text-center">🎯</div>
             <h3 className="text-2xl font-bold text-center mb-4">Our Mission</h3>
-            <p className="text-gray-700 text-center text-sm leading-relaxed">
-              To empower self-expression through premium, minimalist essentials—crafted for comfort, built for longevity, and designed to make a subtle statement.
+            <p className="text-gray-900 text-center text-sm leading-relaxed">
+              To empower self-expression through premium, minimalist essentials crafted for comfort, built for longevity, and designed to make a subtle statement.
             </p>
           </div>
 
           {/* Right: Vision */}
-          <div className="bg-white text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
+          <div className="bg-gray-300 text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
             <div className="text-4xl mb-4 text-center">👁️</div>
             <h3 className="text-2xl font-bold text-center mb-4">Our Vision</h3>
-            <p className="text-gray-700 text-center text-sm leading-relaxed">
+            <p className="text-gray-900 text-center text-sm leading-relaxed">
               To be the go-to brand for those who value simplicity, comfort, and enduring style in their everyday wardrobe.
             </p>
           </div>
@@ -83,7 +81,7 @@ export default function About() {
 
       {/* Meet the Team */}
       <section className="py-24 px-8 border-b border-gray-800">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 px-8">
           {/* Left: Team Members */}
           <div>
             <h2 className="text-4xl font-bold text-left mb-6">
@@ -116,8 +114,8 @@ export default function About() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 border-t border-gray-800 py-16 px-8">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 mb-12">
+      <footer className="bg-gray-900 border-t border-gray-800 py-16">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 mb-12 px-8">
           <div>
             <h4 className="font-bold text-lg mb-4">Get to Know Us</h4>
             <ul className="space-y-2 text-sm text-gray-400">
@@ -151,7 +149,7 @@ export default function About() {
             <p className="text-sm text-gray-400">Address: 123 Northern Park Lane, West London, W4 4Z, United Kingdom</p>
           </div>
         </div>
-        <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+        <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500 px-8">
           <p>&copy; 2024 HEXA. All rights reserved.</p>
         </div>
       </footer>
