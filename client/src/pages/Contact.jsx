@@ -57,14 +57,14 @@ function Contact() {
           /* @__PURE__ */ jsxs(
             "a",
             {
-              href: "tel:+94771234567",
+              href: "tel:+442079460123",
               id: "contact-phone-link",
               className: "group flex items-start gap-4 p-3 -mx-3 rounded-xl transition-all duration-300 hover:bg-white/5",
               children: [
                 /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300 shrink-0 mt-0.5", children: /* @__PURE__ */ jsx(Phone, { className: "h-5 w-5 text-primary" }) }),
                 /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
                   /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 uppercase tracking-wider font-medium mb-1", children: "Phone" }),
-                  /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-white group-hover:text-primary transition-colors duration-300", children: "+94 77 123 4567" }),
+                  /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-white group-hover:text-primary transition-colors duration-300", children: "+44 20 7946 0123" }),
                   /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 mt-0.5", children: "Tap to call" })
                 ] })
               ]
@@ -73,7 +73,7 @@ function Contact() {
           /* @__PURE__ */ jsxs(
             "a",
             {
-              href: "https://wa.me/94771234567",
+              href: "https://wa.me/442079460123",
               target: "_blank",
               rel: "noopener noreferrer",
               id: "contact-whatsapp-link",
@@ -82,7 +82,7 @@ function Contact() {
                 /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center w-10 h-10 rounded-lg bg-green-500/10 group-hover:bg-green-500/20 transition-colors duration-300 shrink-0 mt-0.5", children: /* @__PURE__ */ jsx(MessageCircle, { className: "h-5 w-5 text-green-400" }) }),
                 /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
                   /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 uppercase tracking-wider font-medium mb-1", children: "WhatsApp" }),
-                  /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-white group-hover:text-green-400 transition-colors duration-300", children: "+94 77 123 4567" }),
+                  /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-white group-hover:text-green-400 transition-colors duration-300", children: "+44 20 7946 0123" }),
                   /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 mt-0.5", children: "Chat with us on WhatsApp" })
                 ] })
               ]
@@ -91,14 +91,14 @@ function Contact() {
           /* @__PURE__ */ jsxs(
             "a",
             {
-              href: "mailto:support@hexal.com",
+              href: "mailto:support@hexa.com",
               id: "contact-email-link",
               className: "group flex items-start gap-4 p-3 -mx-3 rounded-xl transition-all duration-300 hover:bg-white/5",
               children: [
                 /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300 shrink-0 mt-0.5", children: /* @__PURE__ */ jsx(Mail, { className: "h-5 w-5 text-primary" }) }),
                 /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
                   /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 uppercase tracking-wider font-medium mb-1", children: "Email" }),
-                  /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-white group-hover:text-primary transition-colors duration-300", children: "support@hexal.com" }),
+                  /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-white group-hover:text-primary transition-colors duration-300", children: "support@hexa.com" }),
                   /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 mt-0.5", children: "Open your email client" })
                 ] })
               ]
@@ -107,7 +107,7 @@ function Contact() {
           /* @__PURE__ */ jsxs(
             "a",
             {
-              href: "https://www.google.com/maps?q=123+Galle+Road+Colombo+03",
+              href: "https://www.google.com/maps?q=123+Northern+Park+Lane+West+London+W4+4Z+United+Kingdom",
               target: "_blank",
               rel: "noopener noreferrer",
               id: "contact-address-link",
@@ -117,9 +117,9 @@ function Contact() {
                 /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
                   /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 uppercase tracking-wider font-medium mb-1", children: "Address" }),
                   /* @__PURE__ */ jsxs("p", { className: "text-sm font-semibold text-white group-hover:text-primary transition-colors duration-300", children: [
-                    "123 Galle Road,",
+                    "123 Northern Park Lane,",
                     /* @__PURE__ */ jsx("br", {}),
-                    "Colombo 03, Sri Lanka"
+                    "West London, W4 4Z, United Kingdom"
                   ] }),
                   /* @__PURE__ */ jsx("p", { className: "text-xs text-gray-500 mt-0.5", children: "View on Google Maps" })
                 ] })
