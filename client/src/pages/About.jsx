@@ -8,6 +8,7 @@ export default function About() {
     { name: 'Thushalini',  image: '/images/Member3.jpeg' },
     { name: 'Heli',  image: '/images/Member4 (1).jpg' },
     { name: 'Vithush',  image: '/images/Member5.jpeg' },
+    { name: 'Sara', image: '/images/Member6.jpeg' },
     { name: 'Piyula', image: '/images/team3_new.jpg' },
   ];
 
@@ -56,11 +57,8 @@ export default function About() {
         {/* Story Cards Grid */}
         <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
           {/* Left: Story Illustration */}
-          <div className="bg-white rounded-3xl p-8 flex items-center justify-center min-h-80">
-            <div className="text-center">
-              <div className="text-6xl mb-4">💡</div>
-              <p className="text-gray-700 font-semibold">Our Vision</p>
-            </div>
+          <div className="bg-white rounded-3xl p-8 flex items-center justify-center min-h-80 overflow-hidden">
+            <img src="/images/vision.png" alt="Vision" className="w-full h-full object-cover" />
           </div>
 
           {/* Middle: Mission */}
@@ -112,7 +110,7 @@ export default function About() {
 
           {/* Right: Workspace Image */}
           <div className="rounded-3xl overflow-hidden border border-gray-800 h-64">
-            <img src="/images/hero.svg" alt="Workspace" className="w-full h-full object-cover" />
+            <img src="/images/workplace.jpeg" alt="Workspace" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
