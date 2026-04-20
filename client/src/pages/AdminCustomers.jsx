@@ -35,7 +35,9 @@ export default function AdminCustomers() {
     <AdminLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-4xl font-bold">Customer Management</h1>
+          <h1 className="text-4xl font-bold !text-black">
+  Customer Management
+</h1>
           <p className="text-gray-600 mt-2">Welcome 👋</p>
           <p className="text-2xl font-bold">Swetha Aiyar</p>
         </div>

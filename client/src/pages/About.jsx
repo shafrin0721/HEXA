@@ -8,6 +8,7 @@ export default function About() {
     { name: 'Thushalini',  image: '/images/Member3.jpeg' },
     { name: 'Heli',  image: '/images/Member4 (1).jpg' },
     { name: 'Vithush',  image: '/images/Member5.jpeg' },
+    { name: 'Sara', image: '/images/Member6.jpeg' },
     { name: 'Piyula', image: '/images/team3_new.jpg' },
   ];
 
@@ -16,41 +17,36 @@ export default function About() {
 
       {/* Our Story */}
       <section className="py-24 px-8 border-b border-gray-800">
-        <div className="max-w-6xl mx-auto text-center mb-16">
+        <div className="max-w-6xl mx-auto text-center mb-16 px-8">
           <h3 className="text-2xl font-bold text-center mb-4">
-  Our Story
-</h3>
-          <p className="text-gray-300 max-w-xl mx-auto text-lg text-center leading-relaxed">
-  At Hexa, we believe style is personal. We design premium-quality,
-  minimalist t-shirts that blend comfort, durability, and intelligent
-  minimalism.
-</p>
+            Our Story
+          </h3>
+          <p className="text-gray-300 max-w-4xl mx-auto text-lg text-center leading-relaxed">
+            At Hexa, we believe style is personal. We design premium-quality, minimalist t-shirts that blend comfort, durability, and intelligent minimalism.
+          </p>
         </div>
 
         {/* Story Cards Grid */}
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8 px-8">
           {/* Left: Story Illustration */}
-          <div className="bg-white rounded-3xl p-8 flex items-center justify-center min-h-80">
-            <div className="text-center">
-              <div className="text-6xl mb-4">💡</div>
-              <p className="text-gray-700 font-semibold">Our Vision</p>
-            </div>
+          <div className="bg-gray-300 rounded-3xl p-8 flex items-center justify-center min-h-80 overflow-hidden">
+            <img src="/images/vision.png" alt="Vision" className="w-full h-full object-cover" />
           </div>
 
           {/* Middle: Mission */}
-          <div className="bg-white text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
+          <div className="bg-gray-300 text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
             <div className="text-4xl mb-4 text-center">🎯</div>
             <h3 className="text-2xl font-bold text-center mb-4">Our Mission</h3>
-            <p className="text-gray-700 text-center text-sm leading-relaxed">
-              To empower self-expression through premium, minimalist essentials—crafted for comfort, built for longevity, and designed to make a subtle statement.
+            <p className="text-gray-900 text-center text-sm leading-relaxed">
+              To empower self-expression through premium, minimalist essentials crafted for comfort, built for longevity, and designed to make a subtle statement.
             </p>
           </div>
 
           {/* Right: Vision */}
-          <div className="bg-white text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
+          <div className="bg-gray-300 text-black rounded-3xl p-8 min-h-80 flex flex-col justify-center">
             <div className="text-4xl mb-4 text-center">👁️</div>
             <h3 className="text-2xl font-bold text-center mb-4">Our Vision</h3>
-            <p className="text-gray-700 text-center text-sm leading-relaxed">
+            <p className="text-gray-900 text-center text-sm leading-relaxed">
               To be the go-to brand for those who value simplicity, comfort, and enduring style in their everyday wardrobe.
             </p>
           </div>
@@ -59,7 +55,7 @@ export default function About() {
 
       {/* Meet the Team */}
       <section className="py-24 px-8 border-b border-gray-800">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 px-8">
           {/* Left: Team Members */}
           <div>
             <h2 className="text-4xl font-bold text-left mb-6">
@@ -86,11 +82,51 @@ export default function About() {
 
           {/* Right: Workspace Image */}
           <div className="rounded-3xl overflow-hidden border border-gray-800 h-64">
-            <img src="/images/hero.svg" alt="Workspace" className="w-full h-full object-cover" />
+            <img src="/images/workplace.jpeg" alt="Workspace" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
 
+      {/* Footer */}
+      <footer className="bg-gray-900 border-t border-gray-800 py-16">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 mb-12 px-8">
+          <div>
+            <h4 className="font-bold text-lg mb-4">Get to Know Us</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><Link to="/about" className="hover:text-white">About</Link></li>
+              <li><Link to="/contact" className="hover:text-white">Contact</Link></li>
+              <li><a href="#" className="hover:text-white">Cart</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-lg mb-4">Make Money with Us</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><a href="#" className="hover:text-white">Sell products</a></li>
+              <li><a href="#" className="hover:text-white">Advertise Your Products</a></li>
+              <li><a href="#" className="hover:text-white">Self-Publish with Us</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-lg mb-4">Let Us Help You</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><a href="#" className="hover:text-white">Your Account</a></li>
+              <li><a href="#" className="hover:text-white">Your Orders</a></li>
+              <li><a href="#" className="hover:text-white">Returns & Replacements</a></li>
+              <li><a href="#" className="hover:text-white">Manage Your Content and Devices</a></li>
+              <li><a href="#" className="hover:text-white">Help</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-lg mb-4">Contact Info</h4>
+            <p className="text-sm text-gray-400 mb-2">Phone: +44 20 7946 0123</p>
+            <p className="text-sm text-gray-400 mb-2">Email: support@hexa.com</p>
+            <p className="text-sm text-gray-400">Address: 123 Northern Park Lane, West London, W4 4Z, United Kingdom</p>
+          </div>
+        </div>
+        <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500 px-8">
+          <p>&copy; 2024 HEXA. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
