@@ -30,12 +30,7 @@ export const getProductById = (id) => API.get(`/products/${id}`);
 export const productAPI = {
   getProducts: (page = 1, limit = 10) => API.get('/products', { params: { page, limit } }),
   getProductById: (id) => API.get(`/products/${id}`),
+
 };
 
-<<<<<<< HEAD
 export default API;
-
-
-=======
-export default API;
->>>>>>> 86d2863c6906941107115a59baed94cc8f797951
