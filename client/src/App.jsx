@@ -11,15 +11,15 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Auth from './pages/Auth';
 import HexaHomePage from "./pages/Home";
-import Products from "./pages/Products";
+import ProductsPage from "./pages/ProductsPage";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CheckoutPage from "./pages/Checkout";
-import ShippingStep from "./pages/ShippingStep/ShippingStep";
-import OrderSummary from "./pages/OrderSummary/OrderSummary";
-import OrderSuccess from "./pages/OrderSuccess/OrderSuccess";
-import OrderSummary1 from "./pages/OrderSummary1";
+import ShippingStep from "./pages/ShippingStep";
+import OrderSummary from "./pages/OrderSummary";
+import OrderSuccess from "./pages/OrderSuccess";
+import OrderSummary1 from "./pages/OrderSummary";
 import About from "./pages/About";
 
 // Admin Pages
