@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HexaHomePage from "./pages/Home";
 import Products from "./pages/Products";
@@ -50,19 +49,3 @@ function App() {
 }
 
 export default App;
-=======
-import { Routes, Route } from 'react-router-dom';
-import PaymentPage from './components/PaymentPage';
-import ReviewPage from './components/ReviewPage';
-
-function App() {
-  return (
-    <Routes>
-      <Route path="/payment" element={<PaymentPage />} />
-      <Route path="/review" element={<ReviewPage />} />
-    </Routes>
-  );
-}
-
-export default App;
->>>>>>> main
