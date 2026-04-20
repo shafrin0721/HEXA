@@ -1,1 +1,24 @@
+<<<<<<< HEAD
 node_modules
+=======
+node_modules/
+client/node_modules/
+server/node_modules/
+
+.env
+server/.env
+
+# Build files
+dist/
+client/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+.env
+.env.*
+/dist
+logs
+*.log
+.vscode/
+>>>>>>> 7709036a198ec0ec0ac3afe22cfb830850a4773e
