@@ -44,13 +44,13 @@ export default function Home() {
     <div>
 
       {/* Hero Section */}
-      <section className="hero-section">
+      <section id="home" className="hero-section">
         <div className="hero-background"></div>
         <div className="hero-container">
           <div className="hero-content">
             <div className="hero-badge">NEW COLLECTION 2026</div>
             <h1 className="title">Welcome to HEXA</h1>
-            <p className="subtitle">Discover Your Perfect Style</p>
+            <p className="subtitle">Discover Your Perfect Style</p><br></br>
             <div className="hero-buttons">
               <Link to="/products" className="btn btn-primary">Shop Now</Link>
               <Link to="/about" className="btn btn-secondary">Learn More</Link>
@@ -105,7 +105,7 @@ export default function Home() {
       </section>
 
       {/* Featured Products Section */}
-      <section className="products-section">
+      <section id="products" className="products-section">
         <div className="container">
           <h2 className="title text-center">Featured Products</h2>
           <div className="grid-4">
@@ -133,7 +133,7 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section className="contact-section">
+      <section id="contact" className="contact-section">
         <div className="container">
           <div className="grid-2">
             <div className="contact-info">

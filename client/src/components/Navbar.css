@@ -16,6 +16,7 @@
   font-size: 24px;
   font-weight: bold;
   letter-spacing: 2px;
+  color: #fff;
 }
 
 /* Links */
@@ -28,17 +29,37 @@
 
 .nav-links li {
   cursor: pointer;
-  color: #ccc;
+  color: #fff;
   transition: 0.3s;
 }
 
 .nav-links li:hover {
+  color: #d4af37;
+}
+
+.nav-links li a {
   color: #fff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-links li a:hover {
+  color: #d4af37;
 }
 
 .nav-links li a.active {
   color: #d4af37;
   font-weight: bold;
+}
+
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #facc15;
 }
 
 /* Mobile Menu Toggle */
@@ -123,7 +144,7 @@
 
 .mobile-cart:hover,
 .mobile-profile:hover {
-  color: #d4af37;
+  color: #facc15;
 }
 
 /* Responsive Design */
@@ -191,6 +212,8 @@
   display: flex;
   align-items: center;
   gap: 30px;
+  margin-left: auto;
+  padding-right: 40px;
 }
 
 /* Cart */
@@ -198,14 +221,20 @@
   position: relative;
   font-size: 22px;
   cursor: pointer;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.cart:hover {
+  color: #facc15;
 }
 
 .cart-badge {
   position: absolute;
   top: -8px;
   right: -10px;
-  background: red;
-  color: white;
+  background: #fff;
+  color: #000;
   font-size: 10px;
   width: 16px;
   height: 16px;
@@ -222,4 +251,14 @@
   border-radius: 50%;
   border: 2px solid #fff;
   cursor: pointer;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.profile:hover {
+  color: #facc15;
+  border-color: #facc15;
 }

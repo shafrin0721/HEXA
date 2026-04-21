@@ -17,11 +17,11 @@ const Navbar = () => {
             <div className="nav-container">
                 
                 <ul className="nav-links">
-                    <li><Link to="/dashboard" className={location.pathname === "/dashboard" ? "active" : ""}>HEXA</Link></li>
-                    <li style={{marginLeft: '30px'}}><Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
-                    <li><Link to="/products" className={location.pathname === "/products" ? "active" : ""}>Products</Link></li>
-                    <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""}>About</Link></li>
-                    <li><Link to="/contact" className={location.pathname === "/contact" ? "active" : ""}>Contact</Link></li>
+                    <li><Link to="/" className={location.pathname === "/" ? "active" : ""}>HEXA</Link></li>
+                    <li style={{marginLeft: '30px'}}><a href="#home" className="nav-link">Home</a></li>
+                    <li><a href="#products" className="nav-link">Products</a></li>
+                    <li><a href="#about" className="nav-link">About</a></li>
+                    <li><a href="#contact" className="nav-link">Contact</a></li>
                       <Link to="/cart" className="cart">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M9 21a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -64,10 +64,10 @@ const Navbar = () => {
             {/* Mobile Menu */}
             <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
                 <ul className="mobile-nav-links">
-                    <li><Link to="/" className={location.pathname === "/" ? "active" : ""} onClick={() => setIsMenuOpen(false)}>Home</Link></li>
-                    <li><Link to="/products" className={location.pathname === "/products" ? "active" : ""} onClick={() => setIsMenuOpen(false)}>Products</Link></li>
-                    <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""} onClick={() => setIsMenuOpen(false)}>About</Link></li>
-                    <li><Link to="/contact" className={location.pathname === "/contact" ? "active" : ""} onClick={() => setIsMenuOpen(false)}>Contact</Link></li>
+                    <li><a href="#home" className="nav-link" onClick={() => setIsMenuOpen(false)}>Home</a></li>
+                    <li><a href="#products" className="nav-link" onClick={() => setIsMenuOpen(false)}>Products</a></li>
+                    <li><a href="#about" className="nav-link" onClick={() => setIsMenuOpen(false)}>About</a></li>
+                    <li><a href="#contact" className="nav-link" onClick={() => setIsMenuOpen(false)}>Contact</a></li>
                 </ul>
                 <div className="mobile-nav-icons">
                     <Link to="/cart" className="mobile-cart" onClick={() => setIsMenuOpen(false)}>
