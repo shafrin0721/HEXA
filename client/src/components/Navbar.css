@@ -21,7 +21,7 @@
 /* Links */
 .nav-links {
   display: flex;
-  gap: 30px;
+  gap: 150px;
   list-style: none;
   align-items: center;
 }
@@ -109,7 +109,7 @@
 .mobile-nav-icons {
   display: flex;
   justify-content: center;
-  gap: 30px;
+  gap: 25px;
   padding: 20px 60px;
 }
 
@@ -150,10 +150,11 @@
   
   .mobile-nav-icons {
     padding: 20px;
+    gap: 45px;
   }
   
   .nav-right {
-    gap: 15px;
+    gap: 30px;
   }
 }
 
@@ -189,7 +190,7 @@
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 30px;
 }
 
 /* Cart */

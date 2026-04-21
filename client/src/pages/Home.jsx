@@ -45,15 +45,22 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="hero-section">
+        <div className="hero-background"></div>
         <div className="hero-container">
           <div className="hero-content">
-            <h1 className="title">Welcome to HEXA</h1><br></br>
+            <div className="hero-badge">NEW COLLECTION 2026</div>
+            <h1 className="title">Welcome to HEXA</h1>
             <p className="subtitle">Discover Your Perfect Style</p>
-            <br></br><br></br><br></br>
-            <Link to="/products" className="btn btn-white">Shop Now</Link>
+            <div className="hero-buttons">
+              <Link to="/products" className="btn btn-primary">Shop Now</Link>
+              <Link to="/about" className="btn btn-secondary">Learn More</Link>
+            </div>
           </div>
           <div className="hero-image">
-            <img src="/images/Tshirtbrand.png" alt="Hero" />
+            <div className="hero-image-wrapper">
+              <img src="/images/Tshirtbrand.png" alt="Hero" />
+              <div className="hero-glow"></div>
+            </div>
           </div>
         </div>
       </section>

@@ -15,23 +15,14 @@ const Navbar = () => {
     return (
         <nav className="navbar">
             <div className="nav-container">
-                {/* Logo */}
-                <Link to="/" className="logo">
-                    HEXA
-                </Link>
-
-                {/* Desktop Navigation */}
+                
                 <ul className="nav-links">
-                    <li><Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
+                    <li><Link to="/dashboard" className={location.pathname === "/dashboard" ? "active" : ""}>HEXA</Link></li>
+                    <li style={{marginLeft: '30px'}}><Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
                     <li><Link to="/products" className={location.pathname === "/products" ? "active" : ""}>Products</Link></li>
                     <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""}>About</Link></li>
                     <li><Link to="/contact" className={location.pathname === "/contact" ? "active" : ""}>Contact</Link></li>
-                </ul>
-
-                {/* Right Side Icons */}
-                <div className="nav-right">
-                    {/* Cart Icon */}
-                    <Link to="/cart" className="cart">
+                      <Link to="/cart" className="cart">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M9 21a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
@@ -47,6 +38,13 @@ const Navbar = () => {
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
                     </Link>
+                
+                </ul>
+
+                {/* Right Side Icons */}
+                <div className="nav-right">
+                    {/* Cart Icon */}
+                  
 
                     {/* Mobile Menu Toggle */}
                     <button className="mobile-menu-toggle" onClick={toggleMenu}>
