@@ -9,7 +9,7 @@ export default function About() {
     { name: 'Heli',  image: '/images/Member4 (1).jpg' },
     { name: 'Vithush',  image: '/images/Member5.jpeg' },
     { name: 'Sara', image: '/images/Member6.jpeg' },
-    { name: 'Piyula', image: '/images/team3_new.jpg' },
+    { name: 'Piyula', image: '/images/member6.png' },
   ];
 
   return (
