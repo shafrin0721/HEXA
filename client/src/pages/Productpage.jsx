@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
 import { getProductById } from '../services/api';
 
+
 export default function ProductPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -17,7 +18,12 @@ export default function ProductPage() {
   const [selectedSize, setSelectedSize] = useState('S');
   const [quantity, setQuantity] = useState(1);
 
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const productId = Number(searchParams.get('id')) || 1;
+
+  useEffect(() => {
+   setIsLoggedIn(!!localStorage.getItem("token"));
+  }, []);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -63,11 +69,37 @@ export default function ProductPage() {
     });
   };
 
-  const handleAddToCart = () => {
-    if (product) addToCart(product, quantity, selectedSize);
-  };
+  // const handleAddToCart = () => {
+  //   if (product) addToCart(product, quantity, selectedSize);
+  // };
+
+  // const handleBuyNow = () => {
+  //   if (product) {
+  //     addToCart(product, quantity, selectedSize);
+  //     navigate('/order-summary');
+  //   }
+  // };
+
+const handleAddToCart = () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    navigate('/auth'); 
+    return;
+  }
+
+  // Token එක තියෙනවා නම් කෙලින්ම add කරනවා
+  if (product) addToCart(product, quantity, selectedSize);
+};
 
   const handleBuyNow = () => {
+    const isAuthenticated = localStorage.getItem("token");
+
+    if (!isAuthenticated) {
+      navigate('/auth');
+      return;
+    }
+
     if (product) {
       addToCart(product, quantity, selectedSize);
       navigate('/order-summary');
