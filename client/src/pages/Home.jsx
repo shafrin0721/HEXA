@@ -47,8 +47,9 @@ export default function Home() {
       <section className="hero-section">
         <div className="hero-container">
           <div className="hero-content">
-            <h1 className="title">Welcome to HEXA</h1>
+            <h1 className="title">Welcome to HEXA</h1><br></br>
             <p className="subtitle">Discover Your Perfect Style</p>
+            <br></br><br></br><br></br>
             <Link to="/products" className="btn btn-white">Shop Now</Link>
           </div>
           <div className="hero-image">
