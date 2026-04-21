@@ -132,6 +132,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* About Section */}
+      <section id="about" className="about-section">
+        <div className="container">
+          <div className="about-content">
+            <div className="about-text">
+              <h2 className="title">About HEXA</h2>
+              <p className="about-description">
+                At HEXA, we believe style is personal. We design premium-quality, minimalist clothing that blends comfort, durability, and intelligent minimalism. Our mission is to empower self-expression through essential pieces that make a subtle statement.
+              </p>
+              <div className="about-values">
+                <div className="value-item">
+                  <h3>Quality First</h3>
+                  <p>Premium materials and strict quality control ensure every piece meets our high standards.</p>
+                </div>
+                <div className="value-item">
+                  <h3>Sustainable Design</h3>
+                  <p>We prioritize eco-friendly materials and ethical production practices in our supply chain.</p>
+                </div>
+                <div className="value-item">
+                  <h3>Timeless Style</h3>
+                  <p>Our minimalist designs transcend trends, offering pieces that remain relevant season after season.</p>
+                </div>
+              </div>
+            </div>
+            <div className="about-image">
+              <img src="/images/Tshirtbrand.png" alt="About HEXA" />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Section */}
       <section id="contact" className="contact-section">
         <div className="container">
