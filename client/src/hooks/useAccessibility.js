@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 const LANGUAGE_STORAGE_KEY = 'hexal_language_preference';
 const FONT_SIZE_STORAGE_KEY = 'hexal_font_size_preference';
@@ -40,12 +40,12 @@ export function useLanguage() {
 export function useTypography() {
   const [fontScale, setFontScale] = useState(() => {
     const saved = localStorage.getItem(FONT_SIZE_STORAGE_KEY);
-    return saved ? parseInt(saved, 10) : 100;
+    const parsed = saved ? parseInt(saved, 10) : 100;
+    return Number.isFinite(parsed) ? parsed : 100;
   });
 
-  // Apply font scale via CSS variable on mount and when changed
+  // Persist preference only; do not globally resize all app fonts.
   useEffect(() => {
-    document.documentElement.style.setProperty('--font-scale', `${fontScale}%`);
     localStorage.setItem(FONT_SIZE_STORAGE_KEY, String(fontScale));
   }, [fontScale]);
 

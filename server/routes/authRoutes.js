@@ -1,9 +1,11 @@
 const express = require('express');
-const { register, login } = require('../controller/authController');
+const { register, login, verifyTwoFactor, me } = require('../controller/authController');
 
 const router = express.Router();
 
 router.post('/register', register);
 router.post('/login', login);
+router.post('/verify-2fa', verifyTwoFactor);
+router.get('/me', me);
 
 module.exports = router;
