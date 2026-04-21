@@ -1,19 +1,25 @@
-import React, { useState } from 'react';
+// frontend/src/components/CheckoutAddress.jsx
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { checkoutAPI } from '../services/api';
 
 const CheckoutAddress = () => {
   const navigate = useNavigate();
-  const { cart } = useCart(); // Get cart data from context
+  const { cart } = useCart();
   
-  // Calculate totals from cart (same as CartPage and OrderSummary1)
+  // Get user info from localStorage
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userId = user.id;
+  
+  // Calculate totals from cart
   const subtotal = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
   const shipping = 12.87;
   const total = subtotal + shipping;
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   
   const [formData, setFormData] = useState({
-    email: '',
+    email: user.email || '',
     firstName: '',
     lastName: '',
     address: '',
@@ -25,6 +31,9 @@ const CheckoutAddress = () => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [showSavedAddresses, setShowSavedAddresses] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
 
   const states = [
     'Select state',
@@ -40,11 +49,58 @@ const CheckoutAddress = () => {
     'Michigan'
   ];
 
+  // Load saved addresses on component mount
+  useEffect(() => {
+    if (userId) {
+      loadSavedAddresses();
+    }
+  }, [userId]);
+
+  const loadSavedAddresses = async () => {
+    try {
+      const response = await checkoutAPI.getAddress(userId);
+      if (response.data.success && response.data.addresses.length > 0) {
+        setSavedAddresses(response.data.addresses);
+        
+        // Check if there's a default address
+        const defaultAddress = response.data.addresses.find(addr => addr.is_default === 1);
+        if (defaultAddress) {
+          populateFormWithAddress(defaultAddress);
+          setSelectedAddressId(defaultAddress.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading addresses:', error);
+    }
+  };
+
+  const populateFormWithAddress = (address) => {
+    setFormData({
+      email: address.email,
+      firstName: address.first_name,
+      lastName: address.last_name,
+      address: address.address,
+      city: address.city,
+      state: address.state || '',
+      zipCode: address.zipCode,
+      phone: address.phone
+    });
+  };
+
+  const handleAddressSelect = (address) => {
+    populateFormWithAddress(address);
+    setSelectedAddressId(address.id);
+    setShowSavedAddresses(false);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+    if (selectedAddressId) {
+      setSelectedAddressId(null);
     }
   };
 
@@ -82,18 +138,71 @@ const CheckoutAddress = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setIsSubmitting(true);
-      // Save to localStorage to persist data
-      localStorage.setItem('addressData', JSON.stringify(formData));
-      setTimeout(() => {
-        setIsSubmitting(false);
-        navigate('/checkout/shipping');
-      }, 500);
+  // In CheckoutAddress.jsx, update the handleSubmit function:
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!validateForm()) {
+    return;
+  }
+  
+  if (!userId) {
+    localStorage.setItem('redirectAfterLogin', '/checkout/address');
+    navigate('/login');
+    return;
+  }
+  
+  setIsSubmitting(true);
+  
+  try {
+    const addressData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      zipCode: formData.zipCode,
+      phone: formData.phone
+    };
+    
+    let response;
+    
+    if (selectedAddressId) {
+      response = await checkoutAPI.updateAddress(userId, {
+        ...addressData,
+        addressId: selectedAddressId
+      });
+    } else {
+      response = await checkoutAPI.saveAddress(addressData);
     }
-  };
+    
+    if (response.data.success) {
+      // Store address ID separately
+      const addressId = response.data.addressId || selectedAddressId;
+      
+      // Store complete address data with ID
+      const completeAddressData = {
+        id: addressId,
+        ...formData
+      };
+      
+      localStorage.setItem('addressData', JSON.stringify(completeAddressData));
+      localStorage.setItem('addressId', addressId); // Store ID separately
+      
+      navigate('/checkout/shipping');
+    } else {
+      setErrors({ submit: response.data.message || 'Failed to save address' });
+    }
+  } catch (error) {
+    console.error('Error saving address:', error);
+    setErrors({ 
+      submit: error.response?.data?.message || 'Failed to save address. Please try again.' 
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   // Redirect if cart is empty
   if (cart.length === 0) {
@@ -104,7 +213,7 @@ const CheckoutAddress = () => {
             <h2 className="text-2xl font-bold text-white mb-4">Your cart is empty</h2>
             <p className="text-gray-400 mb-6">Please add items to your cart before proceeding to checkout.</p>
             <button 
-              onClick={() => navigate("/checkout/shipping")}
+              onClick={() => navigate("/products")}
               className="bg-yellow-500 text-white px-8 py-3 rounded hover:bg-yellow-600 transition"
             >
               Continue Shopping
@@ -142,6 +251,48 @@ const CheckoutAddress = () => {
           ))}
         </div>
 
+        {/* Saved Addresses Section - Added without changing existing style */}
+        {savedAddresses.length > 0 && (
+          <div className="max-w-2xl mx-auto mb-6">
+            <button
+              onClick={() => setShowSavedAddresses(!showSavedAddresses)}
+              className="text-yellow-500 hover:text-yellow-400 text-sm font-medium"
+            >
+              {showSavedAddresses ? 'Hide saved addresses' : 'Use a saved address'}
+            </button>
+            
+            {showSavedAddresses && (
+              <div className="mt-3 space-y-3">
+                {savedAddresses.map((address) => (
+                  <div
+                    key={address.id}
+                    className="bg-gray-800 border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-yellow-500 transition-colors"
+                    onClick={() => handleAddressSelect(address)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-white font-medium">
+                          {address.first_name} {address.last_name}
+                        </p>
+                        <p className="text-gray-400 text-sm mt-1">{address.address}</p>
+                        <p className="text-gray-400 text-sm">
+                          {address.city}, {address.state} {address.zipCode}
+                        </p>
+                        <p className="text-gray-400 text-sm">{address.phone}</p>
+                      </div>
+                      {address.is_default === 1 && (
+                        <span className="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded">
+                          Default
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Main Content - Two Column Layout */}
         <div className="flex flex-col lg:flex-row gap-8">
           {/* LEFT: Address Form - matching PaymentPage form styling */}
@@ -150,6 +301,13 @@ const CheckoutAddress = () => {
               <h2 className="text-2xl font-semibold text-white mb-6 border-b border-gray-700 pb-3 inline-block">
                 Shipping Address
               </h2>
+
+              {/* Error message display */}
+              {errors.submit && (
+                <div className="mb-4 p-3 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-sm">
+                  {errors.submit}
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-4" id="addressForm">
                 {/* Email Address */}

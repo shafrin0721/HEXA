@@ -100,63 +100,68 @@ export const adminAPI = {
   getOrdersData: () => 
     apiClient.get('/admin/logistics/orders'),
 
-  // Add these to your adminAPI object in src/services/adminApi.js
-
-// User Management APIs
-getAllUsers: () => 
+  // User Management APIs
+  getAllUsers: () => 
     apiClient.get('/admin/users'),
   
-getUserById: (id) => 
+  getUserById: (id) => 
     apiClient.get(`/admin/users/${id}`),
   
-createUser: (userData) => 
+  createUser: (userData) => 
     apiClient.post('/admin/users', userData),
   
-updateUser: (id, userData) => 
+  updateUser: (id, userData) => 
     apiClient.put(`/admin/users/${id}`, userData),
   
-deleteUser: (id) => 
+  deleteUser: (id) => 
     apiClient.delete(`/admin/users/${id}`),
   
-updateUserRole: (id, role) => 
+  updateUserRole: (id, role) => 
     apiClient.patch(`/admin/users/${id}/role`, { role }),
   
-getUserStats: () => 
+  getUserStats: () => 
     apiClient.get('/admin/users/stats/summary'),
 
-// Add these methods to your adminAPI object
+  // Charts & Analytics APIs
+  getRevenueData: (range) => 
+    apiClient.get(`/admin/charts/revenue?range=${range || 'month'}`),
 
-// Charts & Analytics APIs
-getRevenueData: (range) => 
-  apiClient.get(`/admin/charts/revenue?range=${range || 'month'}`),
+  getShipmentStatusData: () => 
+    apiClient.get('/admin/charts/shipment-status'),
 
-getShipmentStatusData: () => 
-  apiClient.get('/admin/charts/shipment-status'),
+  getOrderStatusData: () => 
+    apiClient.get('/admin/charts/order-status'),
 
-getOrderStatusData: () => 
-  apiClient.get('/admin/charts/order-status'),
+  getLocationSalesData: () => 
+    apiClient.get('/admin/charts/location-sales'),
 
-getLocationSalesData: () => 
-  apiClient.get('/admin/charts/location-sales'),
+  getChannelSalesData: () => 
+    apiClient.get('/admin/charts/channel-sales'),
 
-getChannelSalesData: () => 
-  apiClient.get('/admin/charts/channel-sales'),
+  getCustomerTypeData: () => 
+    apiClient.get('/admin/charts/customer-types'),
 
-getCustomerTypeData: () => 
-  apiClient.get('/admin/charts/customer-types'),
+  getRecentOrders: (limit) => 
+    apiClient.get(`/admin/orders/recent?limit=${limit || 10}`),
 
-getRecentOrders: (limit) => 
-  apiClient.get(`/admin/orders/recent?limit=${limit || 10}`),
+  getRecentActivities: (limit) => 
+    apiClient.get(`/admin/activities/recent?limit=${limit || 10}`),
 
-getRecentActivities: (limit) => 
-  apiClient.get(`/admin/activities/recent?limit=${limit || 10}`),
+  getRecentShipments: (limit) => 
+    apiClient.get(`/admin/shipments/recent?limit=${limit || 10}`),
 
-getRecentShipments: (limit) => 
-  apiClient.get(`/admin/shipments/recent?limit=${limit || 10}`),
+  exportData: (type, range) => 
+    apiClient.get(`/admin/export/${type}?range=${range || 'month'}`, { responseType: 'blob' }),
 
-exportData: (type, range) => 
-  apiClient.get(`/admin/export/${type}?range=${range || 'month'}`, { responseType: 'blob' }),
+  // Order Management APIs
+  getOrderById: (orderId) => 
+    apiClient.get(`/admin/orders/${orderId}`),
+
+  updateOrderStatus: (orderId, status) => 
+    apiClient.patch(`/admin/orders/${orderId}/status`, { status }),
+
+  getAllOrders: (params) => 
+    apiClient.get('/admin/orders', { params }),
 };
-
 
 export default adminAPI;

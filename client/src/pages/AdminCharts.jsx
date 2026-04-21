@@ -1,8 +1,8 @@
-// src/pages/AdminCharts.jsx - With Modal for Order Details
+// src/pages/AdminCharts.jsx - With Order Status Change Functionality
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart } from 'recharts';
-import { MapPin, Send, Loader2, Download, Search, Calendar, AlertCircle, RefreshCw, Eye, X } from 'lucide-react';
+import { MapPin, Send, Loader2, Download, Search, Calendar, AlertCircle, RefreshCw, Eye, X, Edit2, Check, ChevronDown } from 'lucide-react';
 import adminAPI from '../services/adminApi';
 
 export default function AdminCharts() {
@@ -12,6 +12,8 @@ export default function AdminCharts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showOrdersModal, setShowOrdersModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [editingOrderStatus, setEditingOrderStatus] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   
   // State for charts data
   const [revenueData, setRevenueData] = useState([]);
@@ -38,6 +40,15 @@ export default function AdminCharts() {
     recentActivities: false,
     recentShipments: false
   });
+
+  const statusOptions = [
+    { value: 'pending', label: 'Pending', color: 'bg-yellow-100 text-yellow-700' },
+    { value: 'processing', label: 'Processing', color: 'bg-blue-100 text-blue-700' },
+    { value: 'shipped', label: 'Shipped', color: 'bg-purple-100 text-purple-700' },
+    { value: 'delivered', label: 'Delivered', color: 'bg-green-100 text-green-700' },
+    { value: 'completed', label: 'Completed', color: 'bg-green-100 text-green-700' },
+    { value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-700' }
+  ];
 
   useEffect(() => {
     fetchAllData();
@@ -158,6 +169,39 @@ export default function AdminCharts() {
     }
   };
 
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    setUpdatingStatus(true);
+    try {
+      const response = await adminAPI.updateOrderStatus(orderId, newStatus);
+      if (response.data.success) {
+        // Update local state
+        setOrdersTable(prevOrders => 
+          prevOrders.map(order => 
+            (order.id === orderId || order.order_id === orderId) 
+              ? { ...order, status: newStatus }
+              : order
+          )
+        );
+        
+        // Also update selectedOrder if it's open
+        if (selectedOrder && (selectedOrder.id === orderId || selectedOrder.order_id === orderId)) {
+          setSelectedOrder(prev => ({ ...prev, status: newStatus }));
+        }
+        
+        // Show success message
+        alert(`Order #${orderId} status updated to ${newStatus}`);
+      } else {
+        alert('Failed to update order status');
+      }
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      alert(err.response?.data?.message || 'Failed to update order status');
+    } finally {
+      setUpdatingStatus(false);
+      setEditingOrderStatus(null);
+    }
+  };
+
   const handleExport = async (type) => {
     try {
       const response = await adminAPI.exportData(type, dateRange);
@@ -198,10 +242,14 @@ export default function AdminCharts() {
     }
   };
 
-  const handleLoadMore = () => {
-    // Show all orders in a modal instead of exporting
-    setShowOrdersModal(true);
-    setSelectedOrder(null); // Show all orders in the modal
+  const getStatusColor = (status) => {
+    const option = statusOptions.find(opt => opt.value === status?.toLowerCase());
+    return option?.color || 'bg-gray-100 text-gray-700';
+  };
+
+  const getStatusLabel = (status) => {
+    const option = statusOptions.find(opt => opt.value === status?.toLowerCase());
+    return option?.label || status || 'Pending';
   };
 
   // Safe filtering with proper type checking
@@ -279,7 +327,7 @@ export default function AdminCharts() {
       <div className="space-y-8 text-black">
         <div className="flex items-center justify-between text-black">
           <div>
-            <h1 className="text-4xl font-bold tect-black">Charts and Tables</h1>
+            <h1 className="text-4xl font-bold">Charts and Tables</h1>
             <p className="text-gray-600 mt-1">Analytics and insights from your data</p>
           </div>
           <div className="flex gap-2">
@@ -371,14 +419,39 @@ export default function AdminCharts() {
                             {order.customer_name || order.user_name || 'Guest'}
                           </td>
                           <td className="py-3 px-4">
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              order.status === 'delivered' || order.status === 'completed' ? 'bg-green-100 text-green-700' :
-                              order.status === 'processing' || order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-gray-100 text-gray-700'
-                            }`}>
-                              {order.status || 'Pending'}
-                            </span>
+                            {editingOrderStatus === (order.id || order.order_id) ? (
+                              <div className="flex items-center gap-1">
+                                <select
+                                  value={order.status?.toLowerCase() || 'pending'}
+                                  onChange={(e) => handleUpdateOrderStatus(order.id || order.order_id, e.target.value)}
+                                  className="px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  disabled={updatingStatus}
+                                >
+                                  {statusOptions.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                  ))}
+                                </select>
+                                <button
+                                  onClick={() => setEditingOrderStatus(null)}
+                                  className="p-1 text-gray-500 hover:text-gray-700"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
+                                  {getStatusLabel(order.status)}
+                                </span>
+                                <button
+                                  onClick={() => setEditingOrderStatus(order.id || order.order_id)}
+                                  className="p-1 text-gray-400 hover:text-blue-600 transition"
+                                  title="Edit Status"
+                                >
+                                  <Edit2 size={12} />
+                                </button>
+                              </div>
+                            )}
                           </td>
                           <td className="py-3 px-4 font-medium">
                             ${(order.total || order.amount || 0).toLocaleString()}
@@ -394,7 +467,7 @@ export default function AdminCharts() {
                             >
                               <Eye size={16} />
                             </button>
-                           </td>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -402,10 +475,10 @@ export default function AdminCharts() {
                 </div>
                 <div className="mt-4 text-center text-sm">
                   <button 
-                    onClick={handleLoadMore}
+                    onClick={() => setShowOrdersModal(true)}
                     className="text-blue-600 hover:underline"
                   >
-                    Load more ↓
+                    View all orders ↓
                   </button>
                 </div>
               </>
@@ -697,6 +770,7 @@ export default function AdminCharts() {
                 onClick={() => {
                   setShowOrdersModal(false);
                   setSelectedOrder(null);
+                  setEditingOrderStatus(null);
                 }}
                 className="p-1 hover:bg-gray-100 rounded transition"
               >
@@ -715,16 +789,41 @@ export default function AdminCharts() {
                     </div>
                     <div>
                       <label className="text-sm text-gray-500">Status</label>
-                      <p>
-                        <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                          selectedOrder.status === 'delivered' || selectedOrder.status === 'completed' ? 'bg-green-100 text-green-700' :
-                          selectedOrder.status === 'processing' || selectedOrder.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                          selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
-                          {selectedOrder.status || 'Pending'}
-                        </span>
-                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        {editingOrderStatus === (selectedOrder.id || selectedOrder.order_id) ? (
+                          <div className="flex items-center gap-1">
+                            <select
+                              value={selectedOrder.status?.toLowerCase() || 'pending'}
+                              onChange={(e) => handleUpdateOrderStatus(selectedOrder.id || selectedOrder.order_id, e.target.value)}
+                              className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              disabled={updatingStatus}
+                            >
+                              {statusOptions.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                              ))}
+                            </select>
+                            <button
+                              onClick={() => setEditingOrderStatus(null)}
+                              className="p-1 text-gray-500 hover:text-gray-700"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(selectedOrder.status)}`}>
+                              {getStatusLabel(selectedOrder.status)}
+                            </span>
+                            <button
+                              onClick={() => setEditingOrderStatus(selectedOrder.id || selectedOrder.order_id)}
+                              className="p-1 text-gray-400 hover:text-blue-600 transition"
+                              title="Edit Status"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <label className="text-sm text-gray-500">Customer Name</label>
@@ -782,7 +881,7 @@ export default function AdminCharts() {
                         <th className="text-left p-3">Amount</th>
                         <th className="text-left p-3">Delivered To</th>
                         <th className="text-left p-3">Date</th>
-                        <th className="text-left p-3">Action</th>
+                        <th className="text-left p-3">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -791,14 +890,18 @@ export default function AdminCharts() {
                           <td className="p-3 text-blue-600 font-mono">#{order.id || order.order_id}</td>
                           <td className="p-3">{order.customer_name || order.user_name || 'Guest'}</td>
                           <td className="p-3">
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              order.status === 'delivered' || order.status === 'completed' ? 'bg-green-100 text-green-700' :
-                              order.status === 'processing' || order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-gray-100 text-gray-700'
-                            }`}>
-                              {order.status || 'Pending'}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
+                                {getStatusLabel(order.status)}
+                              </span>
+                              <button
+                                onClick={() => handleViewOrderDetails(order.id || order.order_id)}
+                                className="p-1 text-gray-400 hover:text-blue-600 transition"
+                                title="Edit Status"
+                              >
+                                <Edit2 size={12} />
+                              </button>
+                            </div>
                           </td>
                           <td className="p-3 font-medium">${(order.total || order.amount || 0).toLocaleString()}</td>
                           <td className="p-3">{order.shipping_country || order.delivered_to || 'N/A'}</td>
@@ -821,13 +924,22 @@ export default function AdminCharts() {
               )}
             </div>
             
-            <div className="p-4 border-t border-gray-200 flex justify-end">
+            <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
+              {selectedOrder && (
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                >
+                  Back to All Orders
+                </button>
+              )}
               <button
                 onClick={() => {
                   setShowOrdersModal(false);
                   setSelectedOrder(null);
+                  setEditingOrderStatus(null);
                 }}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 Close
               </button>
