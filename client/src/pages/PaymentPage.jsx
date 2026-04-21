@@ -232,111 +232,127 @@ const PaymentPage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  
+  if (!validateForm()) {
+    return;
+  }
+  
+  setIsSubmitting(true);
+  setPaymentStatus({ type: 'processing', message: 'Processing payment...' });
+  
+  try {
+    // Get address ID from localStorage
+    const addressId = localStorage.getItem('addressId');
+    const addressData = JSON.parse(localStorage.getItem('addressData') || '{}');
+    const shippingData = JSON.parse(localStorage.getItem('shippingData') || '{}');
     
-    if (!validateForm()) {
-      return;
+    console.log('Address ID from localStorage:', addressId);
+    console.log('Address Data:', addressData);
+    
+    if (!addressId) {
+      throw new Error('No address found. Please go back to address page.');
     }
     
-    setIsSubmitting(true);
-    setPaymentStatus({ type: 'processing', message: 'Processing payment...' });
-    
-    try {
-      const getTestPaymentToken = (cardType) => {
-        const tokens = {
-          'visa': 'pm_card_visa',
-          'mastercard': 'pm_card_mastercard',
-        };
-        return tokens[cardType] || 'pm_card_visa';
+    const getTestPaymentToken = (cardType) => {
+      const tokens = {
+        'visa': 'pm_card_visa',
+        'mastercard': 'pm_card_mastercard',
       };
+      return tokens[cardType] || 'pm_card_visa';
+    };
+    
+    const paymentMethodToken = getTestPaymentToken(formData.cardType);
+    
+    const paymentData = {
+      amount: orderSummary.total,
+      payment_method_token: paymentMethodToken,
+      email: formData.email,
+      name: `${formData.firstName} ${formData.lastName}`,
+      billing_address: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email
+      }
+    };
+    
+    const paymentResponse = await paymentAPI.processPayment(paymentData);
+    
+    if (paymentResponse.data.success && paymentResponse.data.payment_status === 'succeeded') {
+      setPaymentStatus({ type: 'success', message: 'Payment successful! Redirecting to review...' });
+
+      const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
+      const cardLast4 = cleanCardNumber.slice(-4);
       
-      const paymentMethodToken = getTestPaymentToken(formData.cardType);
-      
-      const paymentData = {
-        amount: orderSummary.total,
-        payment_method_token: paymentMethodToken,
-        email: formData.email,
-        name: `${formData.firstName} ${formData.lastName}`,
-        billing_address: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+      const reviewData = {
+        orderSummary: {
+          items: orderSummary.items,
+          subtotal: orderSummary.subtotal,
+          total: orderSummary.total,
+          shipping: orderSummary.shipping
+        },
+        paymentIntentId: paymentResponse.data.payment_intent_id,
+        paymentInfo: {
+          card_last4: cardLast4,
+          card_type: formData.cardType,
+          name: `${formData.firstName} ${formData.lastName}`,
+          accountNumber: `**** **** **** ${cardLast4}`,
+          paidDate: new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })
+        },
+        shippingAddress: {
+          name: `${formData.firstName} ${formData.lastName}`,
           address: formData.address,
           city: formData.city,
           state: formData.state,
           zipCode: formData.zipCode,
-          phoneNumber: formData.phoneNumber,
+          number: formData.phoneNumber,
           email: formData.email
-        }
+        },
+        deliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+        userInfo: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber
+        },
+        // CRITICAL: Add addressId to reviewData
+        addressId: addressId,
+        shippingCost: shippingData.cost || orderSummary.shipping
       };
       
-      const paymentResponse = await paymentAPI.processPayment(paymentData);
+      console.log('Saving review data with addressId:', addressId);
+      localStorage.setItem('reviewOrderData', JSON.stringify(reviewData));
       
-      if (paymentResponse.data.success && paymentResponse.data.payment_status === 'succeeded') {
-        setPaymentStatus({ type: 'success', message: 'Payment successful! Redirecting to review...' });
-
-        const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
-        const cardLast4 = cleanCardNumber.slice(-4);
-        
-        const reviewData = {
-          orderSummary: {
-            items: orderSummary.items,
-            subtotal: orderSummary.subtotal,
-            total: orderSummary.total,
-            shipping: orderSummary.shipping
-          },
-          paymentIntentId: paymentResponse.data.payment_intent_id,
-          paymentInfo: {
-            card_last4: cardLast4,
-            card_type: formData.cardType,
-            name: `${formData.firstName} ${formData.lastName}`,
-            accountNumber: `**** **** **** ${cardLast4}`,
-            paidDate: new Date().toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })
-          },
-          shippingAddress: {
-            name: `${formData.firstName} ${formData.lastName}`,
-            address: formData.address,
-            city: formData.city,
-            state: formData.state,
-            zipCode: formData.zipCode,
-            number: formData.phoneNumber,
-            email: formData.email
-          },
-          deliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            month: 'long', 
-            day: 'numeric' 
-          }),
-          userInfo: {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            phoneNumber: formData.phoneNumber
-          }
-        };
-        
-        localStorage.setItem('reviewOrderData', JSON.stringify(reviewData));
-        
-        setTimeout(() => {
-          navigate('/review');
-        }, 1500);
-      } else {
-        throw new Error('Payment failed');
-      }
-    } catch (error) {
-      console.error('Error processing payment:', error);
-      setPaymentStatus({ 
-        type: 'error', 
-        message: error.response?.data?.message || error.message || 'Payment failed. Please try again.' 
-      });
-      setTimeout(() => setPaymentStatus(null), 5000);
-    } finally {
-      setIsSubmitting(false);
+      setTimeout(() => {
+        navigate('/review');
+      }, 1500);
+    } else {
+      throw new Error('Payment failed');
     }
-  };
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    setPaymentStatus({ 
+      type: 'error', 
+      message: error.response?.data?.message || error.message || 'Payment failed. Please try again.' 
+    });
+    setTimeout(() => setPaymentStatus(null), 5000);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const CardTypeDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);

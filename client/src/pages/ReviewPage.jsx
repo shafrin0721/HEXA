@@ -30,7 +30,8 @@ const ReviewPage = () => {
     subtotal: 0,
     shippingCost: 0,
     total: 0,
-    paymentIntentId: ''
+    paymentIntentId: '',
+    addressId: null // Add addressId to state
   });
 
   const [loading, setLoading] = useState(true);
@@ -38,18 +39,26 @@ const ReviewPage = () => {
 
   useEffect(() => {
     const savedReviewData = localStorage.getItem('reviewOrderData');
+    const addressId = localStorage.getItem('addressId');
+    const addressData = localStorage.getItem('addressData');
+    
+    console.log('Loading review page - addressId from localStorage:', addressId);
+    console.log('addressData from localStorage:', addressData);
     
     if (savedReviewData) {
       const data = JSON.parse(savedReviewData);
       
+      console.log('Review data loaded:', data);
+      console.log('addressId from review data:', data.addressId);
+      
       setOrderDetails({
         shippingAddress: data.shippingAddress || {},
         paymentInfo: {
-          name: data.paymentInfo.name || '',
-          accountNumber: data.paymentInfo.accountNumber || '',
-          paidDate: data.paymentInfo.paidDate || '',
-          cardType: data.paymentInfo.card_type || '',
-          card_last4: data.paymentInfo.card_last4 || '',
+          name: data.paymentInfo?.name || '',
+          accountNumber: data.paymentInfo?.accountNumber || '',
+          paidDate: data.paymentInfo?.paidDate || '',
+          cardType: data.paymentInfo?.card_type || '',
+          card_last4: data.paymentInfo?.card_last4 || '',
           payment_intent_id: data.paymentIntentId || ''
         },
         shipping: {
@@ -58,9 +67,10 @@ const ReviewPage = () => {
         },
         items: data.orderSummary?.items || [],
         subtotal: data.orderSummary?.subtotal || 0,
-        shippingCost: data.orderSummary?.shipping || 0,
+        shippingCost: data.shippingCost || data.orderSummary?.shipping || 0,
         total: data.orderSummary?.total || 0,
-        paymentIntentId: data.paymentIntentId || ''
+        paymentIntentId: data.paymentIntentId || '',
+        addressId: data.addressId || addressId // Use addressId from review data or localStorage
       });
       setLoading(false);
     } else {
@@ -79,19 +89,48 @@ const ReviewPage = () => {
     setPlacingOrder(true);
     
     try {
+      // Get address ID from state or localStorage
+      const addressId = orderDetails.addressId || localStorage.getItem('addressId');
+      const addressData = JSON.parse(localStorage.getItem('addressData') || '{}');
+      
+      console.log('Placing order with addressId:', addressId);
+      console.log('Address data:', addressData);
+      
+      if (!addressId) {
+        alert('Address not found. Please go back to address page.');
+        navigate('/checkout');
+        return;
+      }
+      
+      // Prepare shipping address with the correct ID
+      const shippingAddress = {
+        addressId: parseInt(addressId), // Ensure it's a number
+        firstName: addressData.firstName || orderDetails.shippingAddress.name?.split(' ')[0] || 'Unknown',
+        lastName: addressData.lastName || orderDetails.shippingAddress.name?.split(' ')[1] || 'Unknown',
+        email: addressData.email || orderDetails.shippingAddress.email,
+        address: addressData.address || orderDetails.shippingAddress.address,
+        city: addressData.city || orderDetails.shippingAddress.city,
+        state: addressData.state || orderDetails.shippingAddress.state,
+        zipCode: addressData.zipCode || orderDetails.shippingAddress.zipCode,
+        phone: addressData.phone || orderDetails.shippingAddress.number
+      };
+      
       const orderData = {
-        items: orderDetails.items,
+        items: orderDetails.items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
         total: orderDetails.total,
         subtotal: orderDetails.subtotal,
         shipping: orderDetails.shippingCost,
         payment_intent_id: orderDetails.paymentIntentId,
-        payment_status: 'succeeded',
-        shipping_address: orderDetails.shippingAddress,
         payment_info: {
           card_last4: orderDetails.paymentInfo.card_last4,
-          card_type: orderDetails.paymentInfo.cardType,
-          payment_id: orderDetails.paymentIntentId
-        }
+          card_type: orderDetails.paymentInfo.cardType
+        },
+        shipping_address: shippingAddress
       };
       
       console.log('Creating order with data:', orderData);
@@ -101,11 +140,17 @@ const ReviewPage = () => {
       if (orderResponse.data.success) {
         console.log('Order created successfully:', orderResponse.data);
         
+        // Clear all checkout data
         localStorage.removeItem('reviewOrderData');
         localStorage.removeItem('paymentData');
         localStorage.removeItem('orderSummary');
+        localStorage.removeItem('addressData');
+        localStorage.removeItem('addressId');
+        localStorage.removeItem('shippingData');
+        localStorage.removeItem('selectedShipping');
+        localStorage.removeItem('shippingCost');
         
-        alert('Order placed successfully! Thank you for your purchase.');
+        // Navigate to success page
         navigate('/order-success', { 
           state: { 
             orderId: orderResponse.data.data.order.id,
@@ -113,11 +158,11 @@ const ReviewPage = () => {
           } 
         });
       } else {
-        throw new Error('Order creation failed');
+        throw new Error(orderResponse.data.message || 'Order creation failed');
       }
     } catch (error) {
       console.error('Error placing order:', error);
-      alert('Failed to place order. Please try again.');
+      alert(error.response?.data?.message || 'Failed to place order. Please try again.');
     } finally {
       setPlacingOrder(false);
     }
@@ -139,7 +184,7 @@ const ReviewPage = () => {
   return (
     <div className="min-h-screen bg-black flex flex-col">
       <div className="flex-1 w-full max-w-full mx-auto px-4 sm:px-6 lg:px-48 py-8">
-        {/* Progress Steps - Labels on the right side of numbers */}
+        {/* Progress Steps */}
         <div className="flex items-center justify-center gap-6 mb-12">
           {['Address', 'Shipping', 'Payment', 'Review'].map((label, index) => (
             <React.Fragment key={index}>
@@ -149,7 +194,7 @@ const ReviewPage = () => {
                   index === 3 ? 'bg-gray-500 text-white ring-4 ring-gray-500/50' :
                   'bg-gray-800 text-gray-400'
                 }`}>
-                  { index + 1}
+                  {index + 1}
                 </div>
                 <span className={`text-base ${
                   index === 3 ? 'text-white font-semibold' : 'text-gray-300'

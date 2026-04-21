@@ -1410,4 +1410,268 @@ router.get('/export/:type',  async (req, res) => {
   }
 });
 
+// Update order status
+router.patch('/orders/:orderId/status', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    
+    // Validate status
+    const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status?.toLowerCase())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status. Allowed values: pending, processing, shipped, delivered, completed, cancelled'
+      });
+    }
+    
+    // Check if order exists and get old status
+    const [orderCheck] = await db.query(
+      'SELECT id, status, total, user_id FROM orders WHERE id = ?',
+      [orderId]
+    );
+    
+    if (orderCheck.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+    
+    const oldStatus = orderCheck[0].status;
+    const newStatus = status.toLowerCase();
+    
+    // Update order status
+    await db.query(
+      'UPDATE orders SET status = ? WHERE id = ?',
+      [newStatus, orderId]
+    );
+    
+    // If status is delivered or completed, update payment status too
+    if (newStatus === 'delivered' || newStatus === 'completed') {
+      await db.query(
+        'UPDATE payments SET status = "completed", completed_at = NOW() WHERE order_id = ?',
+        [orderId]
+      );
+    }
+    
+    // Log the activity
+    await db.query(
+      `INSERT INTO activities (user_name, action, text_content, created_at) 
+       VALUES (?, ?, ?, NOW())`,
+      ['Admin', 'order_status_updated', `Order #${orderId} status changed from ${oldStatus} to ${newStatus}`]
+    );
+    
+    res.json({
+      success: true,
+      message: 'Order status updated successfully',
+      data: {
+        orderId: parseInt(orderId),
+        oldStatus: oldStatus,
+        newStatus: newStatus
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update order status',
+      error: error.message
+    });
+  }
+});
+
+// Get single order with full details
+router.get('/orders/:orderId', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    // Get order details
+    const [orders] = await db.query(
+      `SELECT 
+        o.*,
+        u.full_name as customer_name,
+        u.email as customer_email,
+        a.first_name,
+        a.last_name,
+        a.address_line_1,
+        a.city,
+        a.state,
+        a.postal_code,
+        a.country as shipping_country,
+        a.phone
+      FROM orders o
+      LEFT JOIN users u ON o.user_id = u.id
+      LEFT JOIN addresses a ON o.address_id = a.id
+      WHERE o.id = ?`,
+      [orderId]
+    );
+    
+    if (orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+    
+    // Get order items with product details
+    const [items] = await db.query(
+      `SELECT 
+        oi.*,
+        p.name as product_name,
+        p.image,
+        p.description
+      FROM order_items oi
+      LEFT JOIN products p ON oi.product_id = p.id
+      WHERE oi.order_id = ?`,
+      [orderId]
+    );
+    
+    // Get payment info
+    const [payment] = await db.query(
+      `SELECT * FROM payments WHERE order_id = ?`,
+      [orderId]
+    );
+    
+    // Get shipment info if exists
+    const [shipment] = await db.query(
+      `SELECT * FROM shipments WHERE order_id = ?`,
+      [orderId]
+    );
+    
+    res.json({
+      success: true,
+      data: {
+        ...orders[0],
+        items: items,
+        payment: payment[0] || null,
+        shipment: shipment[0] || null
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch order details',
+      error: error.message
+    });
+  }
+});
+
+// Get all orders with pagination and filtering
+router.get('/orders', async (req, res) => {
+  try {
+    const { page = 1, limit = 20, status, search, sortBy = 'created_at', sortOrder = 'DESC' } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    
+    let query = `
+      SELECT 
+        o.id,
+        o.id as order_id,
+        o.user_id,
+        o.total,
+        o.status,
+        o.shipping_cost,
+        o.created_at,
+        u.full_name as customer_name,
+        u.email as customer_email,
+        a.country as shipping_country
+      FROM orders o
+      LEFT JOIN users u ON o.user_id = u.id
+      LEFT JOIN addresses a ON o.address_id = a.id
+      WHERE 1=1
+    `;
+    const params = [];
+    
+    if (status) {
+      query += ' AND o.status = ?';
+      params.push(status);
+    }
+    
+    if (search) {
+      query += ' AND (CAST(o.id AS CHAR) LIKE ? OR u.full_name LIKE ? OR u.email LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+    
+    // Validate sort column to prevent SQL injection
+    const validSortColumns = ['id', 'total', 'status', 'created_at', 'shipping_cost'];
+    const safeSortBy = validSortColumns.includes(sortBy) ? sortBy : 'created_at';
+    const safeSortOrder = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    
+    query += ` ORDER BY o.${safeSortBy} ${safeSortOrder} LIMIT ? OFFSET ?`;
+    params.push(parseInt(limit), offset);
+    
+    const [orders] = await db.query(query, params);
+    
+    // Get total count for pagination
+    let countQuery = 'SELECT COUNT(*) as total FROM orders o WHERE 1=1';
+    const countParams = [];
+    
+    if (status) {
+      countQuery += ' AND o.status = ?';
+      countParams.push(status);
+    }
+    
+    if (search) {
+      countQuery += ' AND (CAST(o.id AS CHAR) LIKE ? OR o.user_id IN (SELECT id FROM users WHERE full_name LIKE ? OR email LIKE ?))';
+      countParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+    
+    const [totalResult] = await db.query(countQuery, countParams);
+    
+    res.json({
+      success: true,
+      data: orders,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: totalResult[0].total,
+        totalPages: Math.ceil(totalResult[0].total / parseInt(limit))
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch orders',
+      error: error.message
+    });
+  }
+});
+
+// Get order statistics
+router.get('/orders/stats/summary', async (req, res) => {
+  try {
+    const [stats] = await db.query(`
+      SELECT 
+        COUNT(*) as total_orders,
+        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
+        SUM(CASE WHEN status = 'shipped' THEN 1 ELSE 0 END) as shipped,
+        SUM(CASE WHEN status = 'delivered' THEN 1 ELSE 0 END) as delivered,
+        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+        SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled,
+        COALESCE(SUM(total), 0) as total_revenue,
+        COALESCE(AVG(total), 0) as average_order_value
+      FROM orders
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    `);
+    
+    res.json({
+      success: true,
+      data: stats[0]
+    });
+    
+  } catch (error) {
+    console.error('Error fetching order stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch order statistics'
+    });
+  }
+});
+
 module.exports = router;
