@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'http://localhost:5001/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,6 +23,21 @@ export const orderAPI = {
 export const paymentAPI = {
   processPayment: (paymentData) => API.post('/payment/process', paymentData),
   getStripeKey: () => API.get('/stripeapi'),
+};
+
+export const getProducts = (page = 1, limit = 10) => API.get('/products', { params: { page, limit } });
+export const getProductById = (id) => API.get(`/products/${id}`);
+export const productAPI = {
+  getProducts: (page = 1, limit = 10) => API.get('/products', { params: { page, limit } }),
+  getProductById: (id) => API.get(`/products/${id}`),
+};
+
+export const checkoutAPI = {
+  saveAddress: (addressData) => API.post('/checkout/address', addressData),
+  
+  getAddress: (userId) => API.get(`/checkout/address/${userId}`),
+  
+  updateAddress: (userId, addressData) => API.put(`/checkout/address/${userId}`, addressData),
 };
 
 export default API;
