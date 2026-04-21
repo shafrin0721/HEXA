@@ -45,12 +45,14 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="hero-section">
-        <img src="/images/Tshirtbrand.png" alt="Hero" />
-        <div className="hero-overlay">
+        <div className="hero-container">
           <div className="hero-content">
             <h1 className="title">Welcome to HEXA</h1>
             <p className="subtitle">Discover Your Perfect Style</p>
             <Link to="/products" className="btn btn-white">Shop Now</Link>
+          </div>
+          <div className="hero-image">
+            <img src="/images/Tshirtbrand.png" alt="Hero" />
           </div>
         </div>
       </section>
