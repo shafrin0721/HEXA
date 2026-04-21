@@ -75,27 +75,22 @@ export default function Home() {
           <div className="grid-3">
             <div className="feature-item">
               <div className="feature-icon">
-                <svg width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+                <img src="/images/Member1.jpg" alt="Secure Payments" width="60" height="60" style={{borderRadius: '50%', objectFit: 'cover'}} />
               </div>
               <h3>Secure Payments</h3>
               <p>Safe and reliable payment processing for all transactions</p>
             </div>
             <div className="feature-item">
               <div className="feature-icon">
-                <svg width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                 <img src="/images/9422848.png" alt="Secure Payments" width="60" height="60" style={{borderRadius: '50%', objectFit: 'cover'}} />
+                  
               </div>
               <h3>Order Tracking</h3>
               <p>Real-time updates on your order status and location</p>
             </div>
             <div className="feature-item">
               <div className="feature-icon">
-                <svg width="40" height="40" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                  <img src="/images/quality-verified-glyph-blue-and-black-icon-vector.jpg" alt="Secure Payments" width="60" height="60" style={{borderRadius: '50%', objectFit: 'cover'}} />
               </div>
               <h3>Quality Verification</h3>
               <p>Strict quality control measures for all products</p>
