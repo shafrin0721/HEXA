@@ -14,32 +14,6 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-gray-800 bg-black">
-        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/images/logo.svg" alt="Logo" className="w-10 h-10" />
-            <span className="text-lg font-bold">HEXA</span>
-          </Link>
-          <div className="hidden md:flex gap-8 text-sm">
-            <Link to="/" className="hover:text-gray-300">Home</Link>
-            <Link to="/products" className="hover:text-gray-300">Products</Link>
-            <Link to="/about" className="hover:text-gray-300">About</Link>
-            <Link to="/contact" className="hover:text-gray-300">Contact</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link to="/cart" className="relative">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z" />
-              </svg>
-              <span className="absolute -top-2 -right-2 bg-red-500 text-xs w-5 h-5 rounded-full flex items-center justify-center">1</span>
-            </Link>
-            <Link to="/login">
-              <img src="/images/profile.svg" alt="Profile" className="w-8 h-8 rounded-full border border-gray-600" />
-            </Link>
-          </div>
-        </div>
-      </nav>
 
       {/* Our Story */}
       <section className="py-24 px-8 border-b border-gray-800">
