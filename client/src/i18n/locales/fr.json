@@ -1,0 +1,70 @@
+{
+  "header": "En-tête",
+  "navigation": {
+    "home": "Accueil",
+    "products": "Produits",
+    "about": "À Propos",
+    "contact": "Contact",
+    "cart": "Panier",
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "settings": "Paramètres"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "profileSettings": "Paramètres du Profil",
+    "accessibility": "Accessibilité",
+    "notifications": "Notifications",
+    "security": "Sécurité",
+    "accountEmail": "Email du compte (utilisé pour charger/enregistrer dans la base de données)",
+    "loadProfile": "Charger le profil",
+    "profilePhoto": "Photo de Profil",
+    "uploadPhoto": "Téléchargez une nouvelle photo (stockée dans ce navigateur) ou supprimez la photo actuelle.",
+    "removePhoto": "Supprimer la photo",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "phoneNumber": "Numéro de Téléphone",
+    "saveProfile": "Enregistrer le profil dans la base de données",
+    "saving": "Enregistrement…",
+    "darkMode": "Mode Sombre",
+    "switchTheme": "Basculer entre les thèmes clair et sombre",
+    "fontSize": "Taille de Police",
+    "fontSizeDescription": "Ajustez la taille du texte pour une meilleure lisibilité",
+    "language": "Langue",
+    "emailNotifications": "Notifications par Email",
+    "smsAlerts": "Alertes SMS",
+    "newsletter": "Infolettre",
+    "accessibilityOptions": "Options d'Accessibilité",
+    "success": {
+      "photoUpdated": "Photo mise à jour — enregistrez votre profil pour conserver les autres modifications.",
+      "photoRemoved": "Photo supprimée",
+      "profileSaved": "Profil enregistré",
+      "passwordUpdated": "Mot de passe mis à jour (démo — non envoyé à un serveur)."
+    },
+    "errors": {
+      "enterEmail": "Entrez un email pour ce profil",
+      "invalidEmail": "Veuillez entrer une adresse email valide.",
+      "nameTooLong": "Le prénom et le nom ne doivent pas dépasser {{maxLength}} caractères.",
+      "invalidPhone": "Le téléphone doit inclure 7–15 chiffres, ou laissez le champ vide.",
+      "passwordShort": "Le mot de passe doit comporter au moins 8 caractères.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "loadError": "Impossible de charger le profil",
+      "saveError": "Impossible d'enregistrer",
+      "networkError": "Erreur réseau. L'API est-elle en cours d'exécution?"
+    }
+  },
+  "common": {
+    "yes": "Oui",
+    "no": "Non",
+    "ok": "OK",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "close": "Fermer",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès"
+  }
+}

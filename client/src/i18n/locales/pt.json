@@ -1,0 +1,70 @@
+{
+  "header": "Cabeçalho",
+  "navigation": {
+    "home": "Início",
+    "products": "Produtos",
+    "about": "Sobre",
+    "contact": "Contato",
+    "cart": "Carrinho",
+    "login": "Faça Login",
+    "register": "Registrar",
+    "settings": "Configurações"
+  },
+  "settings": {
+    "title": "Configurações",
+    "profileSettings": "Configurações de Perfil",
+    "accessibility": "Acessibilidade",
+    "notifications": "Notificações",
+    "security": "Segurança",
+    "accountEmail": "E-mail da conta (usado para carregar/salvar no banco de dados)",
+    "loadProfile": "Carregar perfil",
+    "profilePhoto": "Foto do Perfil",
+    "uploadPhoto": "Carregue uma nova foto (armazenada neste navegador) ou remova a atual.",
+    "removePhoto": "Remover foto",
+    "firstName": "Primeiro Nome",
+    "lastName": "Sobrenome",
+    "phoneNumber": "Número de Telefone",
+    "saveProfile": "Salvar perfil no banco de dados",
+    "saving": "Salvando…",
+    "darkMode": "Modo Escuro",
+    "switchTheme": "Alternar entre temas claro e escuro",
+    "fontSize": "Tamanho da Fonte",
+    "fontSizeDescription": "Ajuste o tamanho do texto para melhor legibilidade",
+    "language": "Idioma",
+    "emailNotifications": "Notificações por E-mail",
+    "smsAlerts": "Alertas por SMS",
+    "newsletter": "Boletim",
+    "accessibilityOptions": "Opções de Acessibilidade",
+    "success": {
+      "photoUpdated": "Foto atualizada — salve seu perfil para manter outras alterações.",
+      "photoRemoved": "Foto removida",
+      "profileSaved": "Perfil salvo",
+      "passwordUpdated": "Senha atualizada (demo — não enviada para um servidor)."
+    },
+    "errors": {
+      "enterEmail": "Digite um e-mail para este perfil",
+      "invalidEmail": "Por favor, digite um endereço de e-mail válido.",
+      "nameTooLong": "Nome e sobrenome devem ter no máximo {{maxLength}} caracteres.",
+      "invalidPhone": "O telefone deve incluir 7–15 dígitos, ou deixe o campo vazio.",
+      "passwordShort": "A senha deve ter pelo menos 8 caracteres.",
+      "passwordMismatch": "As senhas não correspondem.",
+      "loadError": "Não foi possível carregar o perfil",
+      "saveError": "Não foi possível salvar",
+      "networkError": "Erro de rede. A API está funcionando?"
+    }
+  },
+  "common": {
+    "yes": "Sim",
+    "no": "Não",
+    "ok": "OK",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "add": "Adicionar",
+    "close": "Fechar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso"
+  }
+}

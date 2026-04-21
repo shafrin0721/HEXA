@@ -1,0 +1,70 @@
+{
+  "header": "Encabezado",
+  "navigation": {
+    "home": "Inicio",
+    "products": "Productos",
+    "about": "Acerca de",
+    "contact": "Contacto",
+    "cart": "Carrito",
+    "login": "Inicia sesión",
+    "register": "Registrarse",
+    "settings": "Configuración"
+  },
+  "settings": {
+    "title": "Configuración",
+    "profileSettings": "Configuración de Perfil",
+    "accessibility": "Accesibilidad",
+    "notifications": "Notificaciones",
+    "security": "Seguridad",
+    "accountEmail": "Correo de cuenta (se utiliza para cargar/guardar en la base de datos)",
+    "loadProfile": "Cargar perfil",
+    "profilePhoto": "Foto de Perfil",
+    "uploadPhoto": "Carga una nueva foto (almacenada en este navegador) o elimina la actual.",
+    "removePhoto": "Eliminar foto",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "phoneNumber": "Número de Teléfono",
+    "saveProfile": "Guardar perfil en la base de datos",
+    "saving": "Guardando…",
+    "darkMode": "Modo Oscuro",
+    "switchTheme": "Cambiar entre temas claro y oscuro",
+    "fontSize": "Tamaño de Fuente",
+    "fontSizeDescription": "Ajusta el tamaño del texto para una mejor legibilidad",
+    "language": "Idioma",
+    "emailNotifications": "Notificaciones por Correo",
+    "smsAlerts": "Alertas por SMS",
+    "newsletter": "Boletín",
+    "accessibilityOptions": "Opciones de Accesibilidad",
+    "success": {
+      "photoUpdated": "Foto actualizada — guarda tu perfil para mantener otros cambios.",
+      "photoRemoved": "Foto eliminada",
+      "profileSaved": "Perfil guardado",
+      "passwordUpdated": "Contraseña actualizada (demostración — no se envió a un servidor)."
+    },
+    "errors": {
+      "enterEmail": "Ingresa un correo para este perfil",
+      "invalidEmail": "Por favor, ingresa una dirección de correo válida.",
+      "nameTooLong": "El nombre y apellido no deben exceder {{maxLength}} caracteres.",
+      "invalidPhone": "El teléfono debe incluir 7–15 dígitos, o deja el campo vacío.",
+      "passwordShort": "La contraseña debe tener al menos 8 caracteres.",
+      "passwordMismatch": "Las contraseñas no coinciden.",
+      "loadError": "No se pudo cargar el perfil",
+      "saveError": "No se pudo guardar",
+      "networkError": "Error de red. ¿Está ejecutándose la API?"
+    }
+  },
+  "common": {
+    "yes": "Sí",
+    "no": "No",
+    "ok": "Aceptar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "add": "Añadir",
+    "close": "Cerrar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito"
+  }
+}

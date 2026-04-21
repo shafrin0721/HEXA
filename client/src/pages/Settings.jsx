@@ -1,6 +1,6 @@
-import { jsx, jsxs } from "react/jsx-runtime";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { User, Eye, Bell, Shield, Camera, Trash2, KeyRound } from "lucide-react";
+import { useTranslation } from "i18next";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { apiUrl } from "@/lib/api";
 import { clampFontSize, isValidEmail, isValidPhone, MAX_NAME_LEN } from "@/lib/validation";
 import { useTheme } from "next-themes";
+import { useTypography, useLanguage } from "@/hooks/useAccessibility";
+import { SUPPORTED_LANGUAGES } from "@/i18n/config";
 
 const PROFILE_EMAIL_KEY = "hexal_profile_email";
 
@@ -27,15 +29,6 @@ function avatarStorageKey(email) {
 }
 
 const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face";
-
-const sidebarItems = [
-  { label: "Profile Settings", icon: User, id: "profile" },
-  { label: "Accessibility", icon: Eye, id: "accessibility" },
-  { label: "Notifications", icon: Bell, id: "notifications" },
-  { label: "Security", icon: Shield, id: "security" }
-];
-
-const LANGUAGE_OPTIONS = ["English (US)", "English (UK)", "Spanish", "French"];
 
 function readAndCompressImage(file) {
   return new Promise((resolve, reject) => {
@@ -80,7 +73,525 @@ function readAndCompressImage(file) {
 }
 
 function Settings() {
+  const { t } = useTranslation();
   const { setTheme } = useTheme();
+  const { fontScale, updateFontScale, minScale, maxScale } = useTypography();
+  const { currentLanguage, changeLanguage } = useLanguage();
+
+  const fileInputRef = useRef(null);
+  const [activeTab, setActiveTab] = useState("profile");
+  const [profileEmail, setProfileEmail] = useState(() => {
+    if (typeof window === "undefined") return "john.doe@example.com";
+    return localStorage.getItem(PROFILE_EMAIL_KEY) ?? "john.doe@example.com";
+  });
+  const [firstName, setFirstName] = useState("John");
+  const [lastName, setLastName] = useState("Doe");
+  const [phone, setPhone] = useState("+1 (555) 000-0000");
+  const [darkMode, setDarkMode] = useState(false);
+  const [emailNotif, setEmailNotif] = useState(true);
+  const [smsAlerts, setSmsAlerts] = useState(false);
+  const [newsletter, setNewsletter] = useState(true);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [avatarSrc, setAvatarSrc] = useState(null);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    setTheme(darkMode ? "dark" : "light");
+  }, [darkMode, setTheme]);
+
+  const applyAvatarFromProfile = useCallback((email, serverAvatar) => {
+    const key = avatarStorageKey(email);
+    const local = localStorage.getItem(key);
+    if (serverAvatar && /^https?:\/\//i.test(serverAvatar.trim())) {
+      setAvatarSrc(serverAvatar.trim());
+    } else if (local) {
+      setAvatarSrc(local);
+    } else {
+      setAvatarSrc(null);
+    }
+  }, []);
+
+  async function fetchProfileForEmail(email) {
+    setLoadingProfile(true);
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setLoadingProfile(false);
+      return;
+    }
+    if (!isValidEmail(trimmed)) {
+      toast.error(t("settings.errors.invalidEmail"));
+      setLoadingProfile(false);
+      return;
+    }
+    try {
+      const res = await fetch(`${apiUrl("/api/profile")}?email=${encodeURIComponent(trimmed)}`);
+      if (res.status === 404) {
+        toast.info("No saved profile for this email yet. Enter your details and save to create one.");
+        applyAvatarFromProfile(trimmed, null);
+        return;
+      }
+      if (!res.ok) {
+        toast.error(t("settings.errors.loadError"));
+        return;
+      }
+      const p = await res.json();
+      setFirstName(p.first_name ?? "");
+      setLastName(p.last_name ?? "");
+      setPhone(p.phone ?? "");
+      setDarkMode(Boolean(p.dark_mode));
+      if (typeof p.language === "string" && Object.keys(SUPPORTED_LANGUAGES).includes(p.language)) {
+        await changeLanguage(p.language);
+      }
+      setEmailNotif(Boolean(p.email_notif));
+      setSmsAlerts(Boolean(p.sms_alerts));
+      setNewsletter(Boolean(p.newsletter));
+      applyAvatarFromProfile(trimmed, p.avatar_url);
+    } catch {
+      toast.error(t("settings.errors.networkError"));
+    } finally {
+      setLoadingProfile(false);
+    }
+  }
+
+  useEffect(() => {
+    void fetchProfileForEmail(profileEmail);
+  }, []);
+
+  async function saveProfile() {
+    const email = profileEmail.trim();
+    if (!email) {
+      toast.error(t("settings.errors.enterEmail"));
+      return;
+    }
+    if (!isValidEmail(email)) {
+      toast.error(t("settings.errors.invalidEmail"));
+      return;
+    }
+    const fn = firstName.trim();
+    const ln = lastName.trim();
+    if (fn.length > MAX_NAME_LEN || ln.length > MAX_NAME_LEN) {
+      toast.error(t("settings.errors.nameTooLong", { maxLength: MAX_NAME_LEN }));
+      return;
+    }
+    if (!isValidPhone(phone)) {
+      toast.error(t("settings.errors.invalidPhone"));
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch(apiUrl("/api/profile"), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          first_name: fn,
+          last_name: ln,
+          phone: phone.trim(),
+          dark_mode: darkMode,
+          font_size: fontScale,
+          language: currentLanguage,
+          email_notif: emailNotif,
+          sms_alerts: smsAlerts,
+          newsletter
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(typeof data.error === "string" ? data.error : t("settings.errors.saveError"));
+        return;
+      }
+      localStorage.setItem(PROFILE_EMAIL_KEY, email);
+      if (avatarSrc && avatarSrc.startsWith("data:")) {
+        localStorage.setItem(avatarStorageKey(email), avatarSrc);
+      }
+      toast.success(t("settings.success.profileSaved"));
+    } catch {
+      toast.error(t("settings.errors.networkError"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleAvatarButtonClick() {
+    fileInputRef.current?.click();
+  }
+
+  async function handleAvatarFileChange(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !file.type.startsWith("image/")) {
+      if (file) toast.error("Please choose an image file.");
+      return;
+    }
+    try {
+      const dataUrl = await readAndCompressImage(file);
+      setAvatarSrc(dataUrl);
+      localStorage.setItem(avatarStorageKey(profileEmail), dataUrl);
+      toast.success(t("settings.success.photoUpdated"));
+    } catch {
+      toast.error("Could not process that image.");
+    }
+  }
+
+  function handleRemoveAvatar() {
+    const email = profileEmail.trim();
+    setAvatarSrc(null);
+    if (email) {
+      localStorage.removeItem(avatarStorageKey(email));
+    }
+    toast.success(t("settings.success.photoRemoved"));
+  }
+
+  function handlePasswordSubmit(e) {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast.error(t("settings.errors.passwordShort"));
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error(t("settings.errors.passwordMismatch"));
+      return;
+    }
+    toast.success(t("settings.success.passwordUpdated"));
+    setPasswordDialogOpen(false);
+    setNewPassword("");
+    setConfirmPassword("");
+  }
+
+  const sidebarItems = [
+    { label: t("settings.profileSettings"), icon: User, id: "profile" },
+    { label: t("settings.accessibility"), icon: Eye, id: "accessibility" },
+    { label: t("settings.notifications"), icon: Bell, id: "notifications" },
+    { label: t("settings.security"), icon: Shield, id: "security" }
+  ];
+
+  const cardClass = "bg-white dark:bg-card rounded-xl p-6 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-border";
+
+  return (
+    <div className="container py-12 flex justify-center">
+      <div className="flex gap-8 max-w-5xl w-full mx-auto">
+        <aside className="w-56 shrink-0">
+          <nav className="space-y-1 bg-white dark:bg-card rounded-xl p-4 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-border">
+            {sidebarItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === item.id
+                    ? "bg-[#f0f2f5] dark:bg-muted text-[#111318] dark:text-foreground"
+                    : "text-[#6b707c] dark:text-muted-foreground hover:text-[#111318] hover:dark:text-foreground hover:bg-[#f4f5f7] dark:hover:bg-muted/50"
+                }`}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        <div className="flex-1 space-y-6">
+          {/* Profile Settings Tab */}
+          {activeTab === "profile" && (
+            <section className={cardClass}>
+              <h2 className="text-lg font-semibold text-[#111318] dark:text-foreground mb-6">
+                {t("settings.profileSettings")}
+              </h2>
+
+              <div className="mb-4">
+                <label htmlFor="profile-email" className="text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block">
+                  {t("settings.accountEmail")}
+                </label>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <input
+                    id="profile-email"
+                    type="email"
+                    value={profileEmail}
+                    onChange={(e) => setProfileEmail(e.target.value)}
+                    className="w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring sm:flex-1"
+                    placeholder="you@example.com"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0"
+                    disabled={loadingProfile}
+                    onClick={() => void fetchProfileForEmail(profileEmail)}
+                  >
+                    {t("settings.loadProfile")}
+                  </Button>
+                </div>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                aria-hidden="true"
+                onChange={(e) => void handleAvatarFileChange(e)}
+              />
+
+              <div className="flex items-center gap-4 mb-6">
+                <div className="relative">
+                  <div className="h-16 w-16 rounded-full bg-[#e1e4ea] dark:bg-muted overflow-hidden">
+                    <img
+                      src={avatarSrc || DEFAULT_AVATAR}
+                      alt=""
+                      className={`h-full w-full object-cover ${avatarSrc ? "" : "opacity-50"}`}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center shadow-sm hover:opacity-90"
+                    aria-label="Change profile photo"
+                    onClick={handleAvatarButtonClick}
+                  >
+                    <Camera className="h-3 w-3 text-primary-foreground" />
+                  </button>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[#111318] dark:text-foreground">{t("settings.profilePhoto")}</p>
+                  <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground">{t("settings.uploadPhoto")}</p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="mt-1 h-8 px-2 text-destructive hover:text-destructive"
+                    onClick={handleRemoveAvatar}
+                    disabled={!avatarSrc}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1" />
+                    {t("settings.removePhoto")}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label htmlFor="first-name" className="text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block">
+                    {t("settings.firstName")}
+                  </label>
+                  <input
+                    id="first-name"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    maxLength={MAX_NAME_LEN}
+                    placeholder={t("settings.firstName")}
+                    className="w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="last-name" className="text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block">
+                    {t("settings.lastName")}
+                  </label>
+                  <input
+                    id="last-name"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    maxLength={MAX_NAME_LEN}
+                    placeholder={t("settings.lastName")}
+                    className="w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
+                  />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="phone" className="text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block">
+                  {t("settings.phoneNumber")}
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder={t("settings.phoneNumber")}
+                  className="w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
+                />
+              </div>
+
+              <Button type="button" onClick={saveProfile} disabled={saving || loadingProfile} className="w-full sm:w-auto">
+                {saving ? t("settings.saving") : t("settings.saveProfile")}
+              </Button>
+            </section>
+          )}
+
+          {/* Accessibility Settings Tab */}
+          {activeTab === "accessibility" && (
+            <section className={cardClass}>
+              <h2 className="text-lg font-semibold text-[#111318] dark:text-foreground mb-6">
+                {t("settings.accessibilityOptions")}
+              </h2>
+
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-sm font-medium text-[#111318] dark:text-foreground">{t("settings.darkMode")}</p>
+                  <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground">{t("settings.switchTheme")}</p>
+                </div>
+                <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+              </div>
+
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-medium text-[#111318] dark:text-foreground">{t("settings.fontSize")}</p>
+                  <span className="text-xs font-medium text-[#111318] dark:text-foreground">{fontScale}%</span>
+                </div>
+                <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground mb-3">{t("settings.fontSizeDescription")}</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-[#9ca0aa] dark:text-muted-foreground">A</span>
+                  <Slider
+                    value={[fontScale]}
+                    onValueChange={(val) => updateFontScale(val[0])}
+                    min={minScale}
+                    max={maxScale}
+                    step={5}
+                    className="flex-1"
+                  />
+                  <span className="text-base text-[#9ca0aa] dark:text-muted-foreground">A</span>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="language" className="text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block">
+                  {t("settings.language")}
+                </label>
+                <select
+                  id="language"
+                  value={currentLanguage}
+                  onChange={(e) => void changeLanguage(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
+                  aria-label="Language preference"
+                >
+                  {Object.entries(SUPPORTED_LANGUAGES).map(([code, label]) => (
+                    <option key={code} value={code}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={saveProfile} disabled={saving}>
+                Save accessibility settings
+              </Button>
+            </section>
+          )}
+
+          {/* Notifications Settings Tab */}
+          {activeTab === "notifications" && (
+            <section className={cardClass}>
+              <h2 className="text-lg font-semibold text-[#111318] dark:text-foreground mb-6">
+                Notification Preferences
+              </h2>
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-[#111318] dark:text-foreground">{t("settings.emailNotifications")}</p>
+                    <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground">Receive booking confirmations and updates</p>
+                  </div>
+                  <Switch checked={emailNotif} onCheckedChange={setEmailNotif} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-[#111318] dark:text-foreground">{t("settings.smsAlerts")}</p>
+                    <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground">Get text messages for important updates</p>
+                  </div>
+                  <Switch checked={smsAlerts} onCheckedChange={setSmsAlerts} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-[#111318] dark:text-foreground">{t("settings.newsletter")}</p>
+                    <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground">Weekly updates and travel inspiration</p>
+                  </div>
+                  <Switch checked={newsletter} onCheckedChange={setNewsletter} />
+                </div>
+              </div>
+              <Button type="button" variant="outline" className="mt-6 w-full sm:w-auto" onClick={saveProfile} disabled={saving}>
+                Save notifications
+              </Button>
+            </section>
+          )}
+
+          {/* Security Settings Tab */}
+          {activeTab === "security" && (
+            <section className={cardClass}>
+              <h2 className="text-lg font-semibold text-[#111318] dark:text-foreground mb-6">
+                {t("settings.security")}
+              </h2>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-[#111318] dark:text-foreground">Two-factor authentication</p>
+                    <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground">
+                      Add an extra step when signing in (preference stored locally for this demo).
+                    </p>
+                  </div>
+                  <Switch
+                    checked={twoFactorEnabled}
+                    onCheckedChange={(v) => {
+                      setTwoFactorEnabled(v);
+                      toast.success(v ? "Two-factor authentication enabled (local only)." : "Two-factor authentication disabled.");
+                    }}
+                  />
+                </div>
+
+                <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="outline" className="w-full sm:w-auto">
+                      <KeyRound className="h-4 w-4 mr-2" />
+                      Change Password
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Change Password</DialogTitle>
+                      <DialogDescription>Enter a new password. Minimum 8 characters.</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                      <div>
+                        <Label htmlFor="new-pw">New Password</Label>
+                        <Input
+                          id="new-pw"
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Enter new password"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="confirm-pw">Confirm Password</Label>
+                        <Input
+                          id="confirm-pw"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Confirm password"
+                        />
+                      </div>
+                      <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setPasswordDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit">Update Password</Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Settings;
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState("profile");
   const [profileEmail, setProfileEmail] = useState(() => {

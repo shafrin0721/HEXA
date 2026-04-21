@@ -1,0 +1,70 @@
+{
+  "header": "ヘッダー",
+  "navigation": {
+    "home": "ホーム",
+    "products": "製品",
+    "about": "について",
+    "contact": "お問い合わせ",
+    "cart": "カート",
+    "login": "ログイン",
+    "register": "登録",
+    "settings": "設定"
+  },
+  "settings": {
+    "title": "設定",
+    "profileSettings": "プロフィール設定",
+    "accessibility": "アクセシビリティ",
+    "notifications": "通知",
+    "security": "セキュリティ",
+    "accountEmail": "アカウントメール（データベースの読み込み/保存に使用）",
+    "loadProfile": "プロフィールを読み込む",
+    "profilePhoto": "プロフィール写真",
+    "uploadPhoto": "新しい写真をアップロード（このブラウザに保存）するか、現在の写真を削除してください。",
+    "removePhoto": "写真を削除",
+    "firstName": "名",
+    "lastName": "姓",
+    "phoneNumber": "電話番号",
+    "saveProfile": "プロフィールをデータベースに保存",
+    "saving": "保存中…",
+    "darkMode": "ダークモード",
+    "switchTheme": "ライトテーマとダークテーマを切り替える",
+    "fontSize": "フォントサイズ",
+    "fontSizeDescription": "より良い読みやすさのためにテキストサイズを調整",
+    "language": "言語",
+    "emailNotifications": "メール通知",
+    "smsAlerts": "SMS通知",
+    "newsletter": "ニュースレター",
+    "accessibilityOptions": "アクセシビリティオプション",
+    "success": {
+      "photoUpdated": "写真が更新されました — プロフィールを保存して他の変更を保持してください。",
+      "photoRemoved": "写真が削除されました",
+      "profileSaved": "プロフィールが保存されました",
+      "passwordUpdated": "パスワードが更新されました（デモ — サーバーに送信されません）。"
+    },
+    "errors": {
+      "enterEmail": "このプロフィールのメールアドレスを入力してください",
+      "invalidEmail": "有効なメールアドレスを入力してください。",
+      "nameTooLong": "名と姓は最大{{maxLength}}文字である必要があります。",
+      "invalidPhone": "電話は7～15桁である必要があります。またはフィールドを空のままにしてください。",
+      "passwordShort": "パスワードは最低8文字である必要があります。",
+      "passwordMismatch": "パスワードが一致しません。",
+      "loadError": "プロフィールを読み込めませんでした",
+      "saveError": "保存できませんでした",
+      "networkError": "ネットワークエラー。APIが実行されていますか？"
+    }
+  },
+  "common": {
+    "yes": "はい",
+    "no": "いいえ",
+    "ok": "OK",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "add": "追加",
+    "close": "閉じる",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "header": "标题",
+  "navigation": {
+    "home": "主页",
+    "products": "产品",
+    "about": "关于",
+    "contact": "联系",
+    "cart": "购物车",
+    "login": "登录",
+    "register": "注册",
+    "settings": "设置"
+  },
+  "settings": {
+    "title": "设置",
+    "profileSettings": "个人资料设置",
+    "accessibility": "无障碍",
+    "notifications": "通知",
+    "security": "安全",
+    "accountEmail": "账户电子邮件（用于在数据库中加载/保存）",
+    "loadProfile": "加载个人资料",
+    "profilePhoto": "个人资料照片",
+    "uploadPhoto": "上传新照片（存储在此浏览器中）或删除当前照片。",
+    "removePhoto": "删除照片",
+    "firstName": "名字",
+    "lastName": "姓氏",
+    "phoneNumber": "电话号码",
+    "saveProfile": "将个人资料保存到数据库",
+    "saving": "保存中…",
+    "darkMode": "深色模式",
+    "switchTheme": "在浅色和深色主题之间切换",
+    "fontSize": "字体大小",
+    "fontSizeDescription": "调整文本大小以获得更好的可读性",
+    "language": "语言",
+    "emailNotifications": "电子邮件通知",
+    "smsAlerts": "短信提醒",
+    "newsletter": "新闻通讯",
+    "accessibilityOptions": "无障碍选项",
+    "success": {
+      "photoUpdated": "照片已更新 — 保存您的个人资料以保持其他更改。",
+      "photoRemoved": "照片已删除",
+      "profileSaved": "个人资料已保存",
+      "passwordUpdated": "密码已更新（演示 — 未发送到服务器）。"
+    },
+    "errors": {
+      "enterEmail": "为此个人资料输入电子邮件",
+      "invalidEmail": "请输入有效的电子邮件地址。",
+      "nameTooLong": "名字和姓氏最多只能包含{{maxLength}}个字符。",
+      "invalidPhone": "电话必须包含7–15位数字，或将字段留空。",
+      "passwordShort": "密码必须至少8个字符。",
+      "passwordMismatch": "密码不匹配。",
+      "loadError": "无法加载个人资料",
+      "saveError": "无法保存",
+      "networkError": "网络错误。API是否正在运行？"
+    }
+  },
+  "common": {
+    "yes": "是",
+    "no": "否",
+    "ok": "确定",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "add": "添加",
+    "close": "关闭",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功"
+  }
+}

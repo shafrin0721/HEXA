@@ -1,0 +1,70 @@
+{
+  "header": "Header",
+  "navigation": {
+    "home": "Home",
+    "products": "Products",
+    "about": "About",
+    "contact": "Contact",
+    "cart": "Basket",
+    "login": "Log In",
+    "register": "Register",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "profileSettings": "Profile Settings",
+    "accessibility": "Accessibility",
+    "notifications": "Notifications",
+    "security": "Security",
+    "accountEmail": "Account email (used to load / save in database)",
+    "loadProfile": "Load profile",
+    "profilePhoto": "Profile Photo",
+    "uploadPhoto": "Upload a new photo (stored in this browser) or remove the current one.",
+    "removePhoto": "Remove photo",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phoneNumber": "Phone Number",
+    "saveProfile": "Save profile to database",
+    "saving": "Saving…",
+    "darkMode": "Dark Mode",
+    "switchTheme": "Switch between light and dark themes",
+    "fontSize": "Font Size",
+    "fontSizeDescription": "Adjust the text size for better readability",
+    "language": "Language",
+    "emailNotifications": "Email Notifications",
+    "smsAlerts": "SMS Alerts",
+    "newsletter": "Newsletter",
+    "accessibilityOptions": "Accessibility Options",
+    "success": {
+      "photoUpdated": "Photo updated — save your profile to keep other changes.",
+      "photoRemoved": "Photo removed",
+      "profileSaved": "Profile saved",
+      "passwordUpdated": "Password updated (demo — not sent to a server)."
+    },
+    "errors": {
+      "enterEmail": "Enter an email for this profile",
+      "invalidEmail": "Please enter a valid email address.",
+      "nameTooLong": "First and last names must be at most {{maxLength}} characters.",
+      "invalidPhone": "Phone must include 7–15 digits, or leave the field empty.",
+      "passwordShort": "Password must be at least 8 characters.",
+      "passwordMismatch": "Passwords do not match.",
+      "loadError": "Could not load profile",
+      "saveError": "Could not save",
+      "networkError": "Network error. Is the API running?"
+    }
+  },
+  "common": {
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}

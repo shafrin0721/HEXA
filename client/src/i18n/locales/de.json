@@ -1,0 +1,70 @@
+{
+  "header": "Kopfzeile",
+  "navigation": {
+    "home": "Startseite",
+    "products": "Produkte",
+    "about": "Über Uns",
+    "contact": "Kontakt",
+    "cart": "Warenkorb",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "settings": "Einstellungen"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "profileSettings": "Profileinstellungen",
+    "accessibility": "Barrierefreiheit",
+    "notifications": "Benachrichtigungen",
+    "security": "Sicherheit",
+    "accountEmail": "Konto-E-Mail (wird zum Laden/Speichern in der Datenbank verwendet)",
+    "loadProfile": "Profil laden",
+    "profilePhoto": "Profilfoto",
+    "uploadPhoto": "Laden Sie ein neues Foto hoch (in diesem Browser gespeichert) oder entfernen Sie das aktuelle.",
+    "removePhoto": "Foto entfernen",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "phoneNumber": "Telefonnummer",
+    "saveProfile": "Profil in Datenbank speichern",
+    "saving": "Speichern…",
+    "darkMode": "Dunkler Modus",
+    "switchTheme": "Zwischen hellen und dunklen Designs wechseln",
+    "fontSize": "Schriftgröße",
+    "fontSizeDescription": "Passen Sie die Textgröße für bessere Lesbarkeit an",
+    "language": "Sprache",
+    "emailNotifications": "E-Mail-Benachrichtigungen",
+    "smsAlerts": "SMS-Benachrichtigungen",
+    "newsletter": "Newsletter",
+    "accessibilityOptions": "Barrierefreiheitsoptionen",
+    "success": {
+      "photoUpdated": "Foto aktualisiert — speichern Sie Ihr Profil, um andere Änderungen zu behalten.",
+      "photoRemoved": "Foto entfernt",
+      "profileSaved": "Profil gespeichert",
+      "passwordUpdated": "Passwort aktualisiert (Demo — nicht an einen Server gesendet)."
+    },
+    "errors": {
+      "enterEmail": "Geben Sie eine E-Mail für dieses Profil ein",
+      "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+      "nameTooLong": "Vor- und Nachname dürfen maximal {{maxLength}} Zeichen lang sein.",
+      "invalidPhone": "Das Telefon muss 7–15 Ziffern enthalten oder das Feld leer lassen.",
+      "passwordShort": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+      "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+      "loadError": "Profil konnte nicht geladen werden",
+      "saveError": "Konnte nicht speichern",
+      "networkError": "Netzwerkfehler. Läuft die API?"
+    }
+  },
+  "common": {
+    "yes": "Ja",
+    "no": "Nein",
+    "ok": "OK",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "add": "Hinzufügen",
+    "close": "Schließen",
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "success": "Erfolg"
+  }
+}
