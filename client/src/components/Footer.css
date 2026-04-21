@@ -1,0 +1,60 @@
+.footer {
+  background: #000;
+  color: #fff;
+  padding: 50px 60px 20px;
+  margin-top: 50px;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+/* Brand */
+.footer-brand {
+  width: 250px;
+}
+
+.footer-brand h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+/* Links */
+.footer-links h3,
+.footer-contact h3 {
+  margin-bottom: 15px;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links ul li {
+  margin-bottom: 8px;
+  cursor: pointer;
+  color: #ccc;
+}
+
+.footer-links ul li:hover {
+  color: white;
+}
+
+/* Contact */
+.footer-contact p {
+  margin-bottom: 8px;
+  color: #ccc;
+}
+
+/* Bottom */
+.footer-bottom {
+  text-align: center;
+  margin-top: 30px;
+  border-top: 1px solid #222;
+  padding-top: 15px;
+  font-size: 14px;
+  color: #888;
+}

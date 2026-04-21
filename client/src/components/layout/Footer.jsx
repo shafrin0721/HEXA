@@ -1,58 +1,54 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import './Footer.css';
+import React from "react";
+import "../Footer.css";
 
-const Footer = () => {
-    return (
-        <footer className="footer">
-            <div className="footer-container">
-                <div className="footer-grid">
-                    <div className="footer-section">
-                        <h3>Get to Know Us</h3>
-                        <ul>
-                            <li><Link to="/">Home</Link></li>
-                            <li><Link to="/about">About</Link></li>
-                            <li><Link to="/contact">Contact</Link></li>
-                            <li><Link to="/cart">Cart</Link></li>
-                        </ul>
-                    </div>
-                    
-                    <div className="footer-section">
-                        <h3>Make Money with Us</h3>
-                        <ul>
-                            <li><a href="#">Sell products</a></li>
-                            <li><a href="#">Sell on Business</a></li>
-                            <li><a href="#">Advertise Your Products</a></li>
-                            <li><a href="#">Self-Publish with Us</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div className="footer-section">
-                        <h3>Let Us Help You</h3>
-                        <ul>
-                            <li><Link to="/profile">Your Account</Link></li>
-                            <li><Link to="/orders">Your Orders</Link></li>
-                            <li><a href="#">Returns & Replacements</a></li>
-                            <li><a href="#">Help</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div className="footer-section">
-                        <h3>Contact Us</h3>
-                        <ul className="contact-info">
-                            <li>📞 +44 20 7946 0123</li>
-                            <li>✉️ support@hexa.com</li>
-                            <li>📍 123 Northern Park Lane, West London, W1A 4ZZ, United Kingdom</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div className="footer-bottom">
-                    <p>&copy; 2024 HEXA Clothing. All rights reserved.</p>
-                </div>
-            </div>
-        </footer>
-    );
-};
+export default function Footer() {
+  return (
+    <footer className="footer">
 
-export default Footer;
+      <div className="footer-container">
+
+        {/* Brand */}
+        <div className="footer-brand">
+          <h2>HEXA</h2>
+          <p>Discover your perfect style with modern fashion and premium quality.</p>
+        </div>
+
+        {/* Links */}
+        <div className="footer-links">
+          <h3>Quick Links</h3>
+          <ul>
+            <li>Home</li>
+            <li>Products</li>
+            <li>About</li>
+            <li>Contact</li>
+          </ul>
+        </div>
+
+        {/* Support */}
+        <div className="footer-links">
+          <h3>Support</h3>
+          <ul>
+            <li>FAQ</li>
+            <li>Shipping</li>
+            <li>Returns</li>
+            <li>Privacy Policy</li>
+          </ul>
+        </div>
+
+        {/* Contact */}
+        <div className="footer-contact">
+          <h3>Contact</h3>
+          <p>📞 +44 20 7946 0123</p>
+          <p>📧 support@hexa.com</p>
+          <p>📍 London, UK</p>
+        </div>
+
+      </div>
+
+      <div className="footer-bottom">
+        <p>© 2026 HEXA. All Rights Reserved.</p>
+      </div>
+
+    </footer>
+  );
+}
