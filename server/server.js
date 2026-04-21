@@ -15,7 +15,6 @@ const addressRoutes = require('./routes/addressRoutes');
 dotenv.config();
 const app = express();
 
-// Middleware
 app.use(cors());
 
 // IMPORTANT: Increase payload size limit for image uploads
@@ -26,7 +25,6 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));  // Allow URL en
 app.use('/api/auth', authRoutes);
 app.use('/api/cart', cartRoutes);
 
-// Routes - IMPORTANT: Order matters
 app.use('/api/orders', ordersRoutes);
 app.use('/api', paymentsRoutes);
 app.use("/api/contact", contactRoutes);
