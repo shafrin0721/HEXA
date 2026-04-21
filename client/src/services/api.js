@@ -32,4 +32,12 @@ export const productAPI = {
   getProductById: (id) => API.get(`/products/${id}`),
 };
 
+export const checkoutAPI = {
+  saveAddress: (addressData) => API.post('/checkout/address', addressData),
+  
+  getAddress: (userId) => API.get(`/checkout/address/${userId}`),
+  
+  updateAddress: (userId, addressData) => API.put(`/checkout/address/${userId}`, addressData),
+};
+
 export default API;

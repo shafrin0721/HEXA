@@ -59,7 +59,7 @@ function OrderSummary1() {
       const data = await response.json();
 
       if (data.success) {
-        navigate("/order-success");
+        navigate("/address");
       } else {
         setError(data.message || "Failed to place order");
       }

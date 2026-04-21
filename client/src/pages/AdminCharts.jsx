@@ -277,9 +277,9 @@ export default function AdminCharts() {
   return (
     <AdminLayout>
       <div className="space-y-8 text-black">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between text-black">
           <div>
-            <h1 className="text-4xl font-bold">Charts and Tables</h1>
+            <h1 className="text-4xl font-bold tect-black">Charts and Tables</h1>
             <p className="text-gray-600 mt-1">Analytics and insights from your data</p>
           </div>
           <div className="flex gap-2">
