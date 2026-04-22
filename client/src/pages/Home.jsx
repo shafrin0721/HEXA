@@ -1,4 +1,4 @@
-﻿import React from 'react';
+﻿﻿import React from 'react';
 import { Link } from 'react-router-dom';
 
 const products = [
@@ -32,7 +32,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative h-96 bg-black overflow-hidden">
-        <img src="/images/Tshirtbrand.png" alt="Hero" className="absolute inset-0 w-full h-full object-cover" />
+        <img src="/images/product1_new.jpg" alt="Hero" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative max-w-7xl mx-auto h-full flex items-center px-8">
           <div>

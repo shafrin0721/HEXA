@@ -23,6 +23,7 @@ import OrderSuccess from "./pages/OrderSuccess";
 import About from "./pages/About";
 import { CartProvider } from './context/CartContext';
 import { ProductProvider } from './context/ProductContext';
+import AdminUsers from "./pages/AdminUsers";
 
 // Admin Pages
 import AdminDashboard from "./pages/AdminDashboard";
@@ -77,6 +78,7 @@ const App = () => (
                 <Route path="/admin/customers" element={<AdminCustomers />} />
                 <Route path="/admin/charts" element={<AdminCharts />} />
                 <Route path="/admin/inventory" element={<AdminInventory />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -1,3 +1,4 @@
+// frontend/src/services/api.js
 import axios from 'axios';
 
 const API = axios.create({
@@ -16,8 +17,9 @@ API.interceptors.request.use((req) => {
 });
 
 export const orderAPI = {
+  createOrder: (orderData) => API.post('/orders/create-order', orderData), // Only one definition
   getOrderTotals: () => API.get('/orders/totals'),
-  createOrder: (orderData) => API.post('/orders', orderData),
+  getOrder: (orderId) => API.get(`/orders/${orderId}`),
 };
 
 export const paymentAPI = {
@@ -31,6 +33,12 @@ export const productAPI = {
   getProducts: (page = 1, limit = 10) => API.get('/products', { params: { page, limit } }),
   getProductById: (id) => API.get(`/products/${id}`),
 
+};
+
+export const checkoutAPI = {
+  saveAddress: (addressData) => API.post('/checkout/address', addressData),
+  getAddress: (userId) => API.get(`/checkout/address/${userId}`),
+  updateAddress: (userId, addressData) => API.put(`/checkout/address/${userId}`, addressData),
 };
 
 export default API;
