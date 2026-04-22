@@ -127,7 +127,7 @@ const Navbar = () => {
                         Signed in as <span className="text-white font-medium">{user?.name || 'User'}</span>
                       </div>
                       <Link
-                        to="/profile"
+                        to="/settings"
                         className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
                         onClick={() => setIsDropdownOpen(false)}
                       >

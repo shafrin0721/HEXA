@@ -14,24 +14,20 @@ export default function Home() {
     inquiry: '',
   });
 
-  // Get only first 4 products for featured section
   const featuredProducts = React.useMemo(() => {
     if (!products || products.length === 0) return [];
     return products.slice(0, 4);
   }, [products]);
 
-  // Helper function to parse price (handles both string and number)
   const parsePrice = (price) => {
     if (typeof price === 'number') return price;
     if (typeof price === 'string') {
-      // Remove currency symbols and convert to number
       const numericPrice = parseFloat(price.replace(/[^0-9.-]/g, ''));
       return isNaN(numericPrice) ? 0 : numericPrice;
     }
     return 0;
   };
 
-  // Helper function to format price
   const formatPrice = (price) => {
     const numericPrice = parsePrice(price);
     return `$${numericPrice.toFixed(2)}`;
@@ -60,7 +56,6 @@ export default function Home() {
         quantity: 1
       }
     });
-    // Navigate to cart page after adding
     navigate('/cart');
   };
 
@@ -75,11 +70,9 @@ export default function Home() {
         quantity: 1
       }
     });
-    // Navigate to checkout page
     navigate('/order-summary');
   };
 
-  // Helper function to get rating stars
   const renderStars = (rating = 0) => {
     const numericRating = typeof rating === 'string' ? parseFloat(rating) : rating;
     const fullStars = Math.floor(numericRating);
@@ -104,13 +97,13 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative h-96 bg-black overflow-hidden">
-        <img src="/images/product1_new.jpg" alt="Hero" className="absolute inset-0 w-full h-full object-cover" />
+        <img src="/images/Tshirtbrand.png" alt="Hero" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative max-w-7xl mx-auto h-full flex items-center px-8">
           <div>
             <h1 className="text-7xl font-bold mb-4 leading-tight text-white">Welcome to HEXA</h1>
             <p className="text-2xl text-gray-200 mb-8">Discover Your Perfect Style</p>
-            <Link to="/products" className="inline-block bg-white text-black px-12 py-3 rounded font-semibold hover:bg-gray-100 transition-colors">Shop Now</Link>
+            <Link to="/products" className="inline-block bg-black text-white px-12 py-3 rounded font-semibold hover:bg-gray-900">Shop Now</Link>
           </div>
         </div>
       </section>
