@@ -1,92 +1,100 @@
 const pool = require("../config/db");
 
-let schemaReadyPromise = null;
-
-async function ensureProfileSchema() {
-  if (!schemaReadyPromise) {
-    schemaReadyPromise = (async () => {
-      const dbName = process.env.DB_NAME || "hexal_db";
-      const [columns] = await pool.execute(
-        `SELECT COLUMN_NAME
-         FROM information_schema.COLUMNS
-         WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'profiles'`,
-        [dbName],
-      );
-      const columnSet = new Set(columns.map((c) => c.COLUMN_NAME));
-      if (!columnSet.has("profile_photo")) {
-        await pool.execute("ALTER TABLE profiles ADD COLUMN profile_photo LONGTEXT NULL");
-      }
-      if (!columnSet.has("two_factor_enabled")) {
-        await pool.execute(
-          "ALTER TABLE profiles ADD COLUMN two_factor_enabled TINYINT(1) NOT NULL DEFAULT 0",
-        );
-      }
-    })().catch((err) => {
-      schemaReadyPromise = null;
-      throw err;
-    });
-  }
-  await schemaReadyPromise;
-}
-
 async function findProfileByEmail(email) {
-  await ensureProfileSchema();
   const [rows] = await pool.execute(
-    `SELECT id, email, first_name, last_name, phone, profile_photo, dark_mode, font_size, language, email_notif, two_factor_enabled
-     FROM profiles
-     WHERE email = ?`,
-    [email],
+    "SELECT * FROM profiles WHERE email = ?",
+    [email]
   );
-  return rows[0] ?? null;
+  return rows[0] || null;
 }
 
-async function createProfile(payload) {
-  await ensureProfileSchema();
-  await pool.execute(
-    `INSERT INTO profiles (email, first_name, last_name, phone, profile_photo, dark_mode, font_size, language, email_notif, two_factor_enabled)
+async function createProfile(profileData) {
+  const {
+    email,
+    first_name,
+    last_name,
+    phone,
+    profile_photo,
+    dark_mode,
+    font_size,
+    language,
+    email_notif,
+    two_factor_enabled,
+  } = profileData;
+
+  const [result] = await pool.execute(
+    `INSERT INTO profiles 
+     (email, first_name, last_name, phone, profile_photo, dark_mode, font_size, language, email_notif, two_factor_enabled) 
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      payload.email,
-      payload.first_name,
-      payload.last_name,
-      payload.phone,
-      payload.profile_photo,
-      payload.dark_mode,
-      payload.font_size,
-      payload.language,
-      payload.email_notif,
-      payload.two_factor_enabled,
-    ],
+      email,
+      first_name || null,
+      last_name || null,
+      phone || null,
+      profile_photo || null,
+      dark_mode ? 1 : 0,
+      font_size || 50,
+      language || "English (US)",
+      email_notif ? 1 : 0,
+      two_factor_enabled ? 1 : 0,
+    ]
   );
+  return result.insertId;
 }
 
-async function updateProfileByEmail(email, payload) {
-  await ensureProfileSchema();
-  await pool.execute(
-    `UPDATE profiles
-     SET first_name = ?, last_name = ?, phone = ?, profile_photo = ?, dark_mode = ?, font_size = ?, language = ?, email_notif = ?, two_factor_enabled = ?
+async function updateProfileByEmail(email, profileData) {
+  const {
+    first_name,
+    last_name,
+    phone,
+    profile_photo,
+    dark_mode,
+    font_size,
+    language,
+    email_notif,
+    two_factor_enabled,
+  } = profileData;
+
+  const [result] = await pool.execute(
+    `UPDATE profiles SET 
+     first_name = ?, 
+     last_name = ?, 
+     phone = ?, 
+     profile_photo = ?, 
+     dark_mode = ?, 
+     font_size = ?, 
+     language = ?, 
+     email_notif = ?, 
+     two_factor_enabled = ?,
+     updated_at = CURRENT_TIMESTAMP
      WHERE email = ?`,
     [
-      payload.first_name,
-      payload.last_name,
-      payload.phone,
-      payload.profile_photo,
-      payload.dark_mode,
-      payload.font_size,
-      payload.language,
-      payload.email_notif,
-      payload.two_factor_enabled,
+      first_name || null,
+      last_name || null,
+      phone || null,
+      profile_photo || null,
+      dark_mode ? 1 : 0,
+      font_size || 50,
+      language || "English (US)",
+      email_notif ? 1 : 0,
+      two_factor_enabled ? 1 : 0,
       email,
-    ],
+    ]
   );
+  return result.affectedRows;
 }
 
 async function updateTwoFactorByEmail(email, enabled) {
-  await ensureProfileSchema();
-  await pool.execute(
-    "UPDATE profiles SET two_factor_enabled = ? WHERE email = ?",
-    [enabled ? 1 : 0, email],
+  const [result] = await pool.execute(
+    "UPDATE profiles SET two_factor_enabled = ?, updated_at = CURRENT_TIMESTAMP WHERE email = ?",
+    [enabled ? 1 : 0, email]
   );
+  return result.affectedRows;
+}
+
+async function deleteProfileByEmail(email) {
+  const [result] = await pool.execute("DELETE FROM profiles WHERE email = ?", [email]);
+  return result.affectedRows;
 }
 
 module.exports = {
@@ -94,4 +102,5 @@ module.exports = {
   createProfile,
   updateProfileByEmail,
   updateTwoFactorByEmail,
+  deleteProfileByEmail,
 };

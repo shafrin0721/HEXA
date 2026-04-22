@@ -1,4 +1,3 @@
-import { jsx, jsxs } from "react/jsx-runtime";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { User, Eye, Bell, Shield, Camera, Trash2, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ import { toast } from "sonner";
 import { apiUrl } from "@/lib/api";
 import { clampFontSize, isValidEmail, isValidPhone, MAX_NAME_LEN } from "@/lib/validation";
 import { useTheme } from "next-themes";
+import { useAvatar } from '@/context/AvatarContext';
 
 const PROFILE_EMAIL_KEY = "hexal_profile_email";
 
@@ -80,40 +80,66 @@ function readAndCompressImage(file) {
 }
 
 function Settings() {
+  const { updateAvatar } = useAvatar();
   const { setTheme } = useTheme();
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState("profile");
   const [profileEmail, setProfileEmail] = useState(() => {
-    if (typeof window === "undefined") return "john.doe@example.com";
-    return localStorage.getItem(PROFILE_EMAIL_KEY) ?? "john.doe@example.com";
+    if (typeof window === "undefined") return "";
+    const stored = localStorage.getItem(PROFILE_EMAIL_KEY);
+    if (stored) return stored;
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        return parsed?.email || "";
+      } catch {
+        return "";
+      }
+    }
+    return "";
   });
-  const [firstName, setFirstName] = useState("John");
-  const [lastName, setLastName] = useState("Doe");
-  const [phone, setPhone] = useState("+1 (555) 000-0000");
+  const [signedInEmail, setSignedInEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
   const [fontSize, setFontSize] = useState([50]);
   const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState("English (US)");
   const [emailNotif, setEmailNotif] = useState(true);
   const [smsAlerts, setSmsAlerts] = useState(false);
   const [newsletter, setNewsletter] = useState(true);
-  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [loadingProfile, setLoadingProfile] = useState(false);
   const [saving, setSaving] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState(null);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [updating2FA, setUpdating2FA] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [updatingPassword, setUpdatingPassword] = useState(false);
 
   useEffect(() => {
     setTheme(darkMode ? "dark" : "light");
   }, [darkMode, setTheme]);
 
- 
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        if (parsed?.email) setSignedInEmail(parsed.email);
+      } catch {
+        setSignedInEmail("");
+      }
+    }
+  }, []);
 
   const applyAvatarFromProfile = useCallback((email, serverAvatar) => {
     const key = avatarStorageKey(email);
     const local = localStorage.getItem(key);
-    if (serverAvatar && /^https?:\/\//i.test(serverAvatar.trim())) {
+    if (serverAvatar && serverAvatar.trim()) {
       setAvatarSrc(serverAvatar.trim());
     } else if (local) {
       setAvatarSrc(local);
@@ -123,26 +149,28 @@ function Settings() {
   }, []);
 
   async function fetchProfileForEmail(email) {
+    if (!email) return;
     setLoadingProfile(true);
     const trimmed = email.trim();
-    if (!trimmed) {
-      setLoadingProfile(false);
-      return;
-    }
     if (!isValidEmail(trimmed)) {
-      toast.error("Please enter a valid email before loading the profile.");
+      toast.error("Please enter a valid email address.");
       setLoadingProfile(false);
       return;
     }
     try {
       const res = await fetch(`${apiUrl("/api/profile")}?email=${encodeURIComponent(trimmed)}`);
       if (res.status === 404) {
-        toast.info("No saved profile for this email yet. Enter your details and save to create one.");
+        toast.info("No saved profile found for this email.");
+        setFirstName("");
+        setLastName("");
+        setPhone("");
+        setEmailNotif(true);
+        setTwoFactorEnabled(false);
         applyAvatarFromProfile(trimmed, null);
         return;
       }
       if (!res.ok) {
-        toast.error("Could not load profile");
+        toast.error("Could not load profile.");
         return;
       }
       const p = await res.json();
@@ -155,75 +183,81 @@ function Settings() {
         setLanguage(p.language);
       }
       setEmailNotif(Boolean(p.email_notif));
-      setSmsAlerts(Boolean(p.sms_alerts));
-      setNewsletter(Boolean(p.newsletter));
-      applyAvatarFromProfile(trimmed, p.avatar_url);
-    } catch {
-      toast.error("Network error loading profile");
+      setTwoFactorEnabled(Boolean(p.two_factor_enabled));
+      applyAvatarFromProfile(trimmed, p.profile_photo);
+    } catch (error) {
+      console.error("Fetch profile error:", error);
+      toast.error("Network error while loading profile.");
     } finally {
       setLoadingProfile(false);
     }
   }
 
   useEffect(() => {
-    void fetchProfileForEmail(profileEmail);
-  }, []);
+    if (profileEmail) {
+      void fetchProfileForEmail(profileEmail);
+    }
+  }, [profileEmail]);
 
   async function saveProfile() {
-    const email = profileEmail.trim();
-    if (!email) {
-      toast.error("Enter an email for this profile");
-      return;
-    }
-    if (!isValidEmail(email)) {
-      toast.error("Please enter a valid email address.");
-      return;
-    }
-    const fn = firstName.trim();
-    const ln = lastName.trim();
-    if (fn.length > MAX_NAME_LEN || ln.length > MAX_NAME_LEN) {
-      toast.error(`First and last names must be at most ${MAX_NAME_LEN} characters.`);
-      return;
-    }
-    if (!isValidPhone(phone)) {
-      toast.error("Phone must include 7–15 digits, or leave the field empty.");
-      return;
-    }
-    const fontSizeValue = clampFontSize(fontSize[0] ?? 50);
-    setSaving(true);
-    try {
-      const res = await fetch(apiUrl("/api/profile"), {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          first_name: fn,
-          last_name: ln,
-          phone: phone.trim(),
-          dark_mode: darkMode,
-          font_size: fontSizeValue,
-          language,
-          email_notif: emailNotif,
-          sms_alerts: smsAlerts,
-          newsletter
-        })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        toast.error(typeof data.error === "string" ? data.error : "Could not save");
-        return;
-      }
-      localStorage.setItem(PROFILE_EMAIL_KEY, email);
-      if (avatarSrc && avatarSrc.startsWith("data:")) {
-        localStorage.setItem(avatarStorageKey(email), avatarSrc);
-      }
-      toast.success("Profile saved");
-    } catch {
-      toast.error("Network error. Is the API running?");
-    } finally {
-      setSaving(false);
-    }
+  const email = profileEmail.trim();
+  if (!email) {
+    toast.error("Email is required.");
+    return;
   }
+  if (!isValidEmail(email)) {
+    toast.error("Please enter a valid email address.");
+    return;
+  }
+  const fn = firstName.trim();
+  const ln = lastName.trim();
+  if (fn.length > MAX_NAME_LEN || ln.length > MAX_NAME_LEN) {
+    toast.error(`First and last names must be at most ${MAX_NAME_LEN} characters.`);
+    return;
+  }
+  if (!isValidPhone(phone)) {
+    toast.error("Phone number must contain 7 to 15 digits, or be empty.");
+    return;
+  }
+  const fontSizeValue = clampFontSize(fontSize[0] ?? 50);
+  setSaving(true);
+  try {
+    const res = await fetch(apiUrl("/api/profile"), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        first_name: fn,
+        last_name: ln,
+        phone: phone.trim(),
+        dark_mode: darkMode,
+        font_size: fontSizeValue,
+        language,
+        email_notif: emailNotif,
+        profile_photo: avatarSrc,
+        two_factor_enabled: twoFactorEnabled,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast.error(typeof data.error === "string" ? data.error : "Could not save profile.");
+      return;
+    }
+    localStorage.setItem(PROFILE_EMAIL_KEY, email);
+    if (avatarSrc && avatarSrc.startsWith("data:")) {
+      localStorage.setItem(avatarStorageKey(email), avatarSrc);
+      // Update global avatar context
+      updateAvatar(avatarSrc, email);
+    }
+    toast.success("Profile saved successfully.");
+    await fetchProfileForEmail(email);
+  } catch (error) {
+    console.error("Save profile error:", error);
+    toast.error("Network error while saving profile.");
+  } finally {
+    setSaving(false);
+  }
+}
 
   function handleAvatarButtonClick() {
     fileInputRef.current?.click();
@@ -239,55 +273,123 @@ function Settings() {
     try {
       const dataUrl = await readAndCompressImage(file);
       setAvatarSrc(dataUrl);
-      localStorage.setItem(avatarStorageKey(profileEmail), dataUrl);
-      toast.success("Photo updated — save your profile to keep other changes.");
+      if (profileEmail.trim()) {
+        localStorage.setItem(avatarStorageKey(profileEmail), dataUrl);
+      }
+      toast.success("Profile photo updated. Click save to keep changes.");
     } catch {
-      toast.error("Could not process that image.");
+      toast.error("Could not process this image.");
     }
   }
 
   function handleRemoveAvatar() {
-    const email = profileEmail.trim();
-    setAvatarSrc(null);
-    if (email) {
-      localStorage.removeItem(avatarStorageKey(email));
+  const email = profileEmail.trim();
+  setAvatarSrc(null);
+  if (email) {
+    localStorage.removeItem(avatarStorageKey(email));
+    // Update global avatar context to null
+    updateAvatar(null, email);
+  }
+  toast.success("Profile photo removed.");
+}
+
+  async function handleTwoFactorToggle(checked) {
+    const email = profileEmail.trim() || signedInEmail.trim();
+    if (!email || !isValidEmail(email)) {
+      toast.error("Load a valid profile email first.");
+      return;
     }
-    toast.success("Photo removed");
+    setUpdating2FA(true);
+    try {
+      const res = await fetch(apiUrl("/api/profile/security/2fa"), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, enabled: checked }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(typeof data.error === "string" ? data.error : "Could not update 2FA setting.");
+        return;
+      }
+      setTwoFactorEnabled(Boolean(data.two_factor_enabled));
+      toast.success(checked ? "Two-factor authentication enabled." : "Two-factor authentication disabled.");
+    } catch {
+      toast.error("Network error while updating 2FA.");
+    } finally {
+      setUpdating2FA(false);
+    }
   }
 
-  function handlePasswordSubmit(e) {
+  async function handlePasswordSubmit(e) {
     e.preventDefault();
+    const email = profileEmail.trim() || signedInEmail.trim();
+    if (!email || !isValidEmail(email)) {
+      toast.error("A valid signed-in email is required.");
+      return;
+    }
     if (newPassword.length < 8) {
-      toast.error("Password must be at least 8 characters.");
+      toast.error("New password must be at least 8 characters.");
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/\d/.test(newPassword)) {
+      toast.error("New password must include uppercase, lowercase, and a number.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match.");
+      toast.error("New password and confirm password do not match.");
       return;
     }
-    toast.success("Password updated (demo — not sent to a server).");
-    setPasswordDialogOpen(false);
-    setNewPassword("");
-    setConfirmPassword("");
+    setUpdatingPassword(true);
+    try {
+      const res = await fetch(apiUrl("/api/profile/security/password"), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          current_password: currentPassword,
+          new_password: newPassword,
+          confirm_password: confirmPassword,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(typeof data.error === "string" ? data.error : "Could not update password.");
+        return;
+      }
+      toast.success("Password updated successfully.");
+      setPasswordDialogOpen(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch {
+      toast.error("Network error while changing password.");
+    } finally {
+      setUpdatingPassword(false);
+    }
   }
 
-  const cardClass = "bg-white dark:bg-gray-800 rounded-xl p-6 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-gray-700";
+  function clearStoredEmail() {
+    localStorage.removeItem(PROFILE_EMAIL_KEY);
+    setProfileEmail("");
+    toast.success("Saved email cleared from this device.");
+  }
+
+  const cardClass = "bg-white dark:bg-card rounded-xl p-6 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-border";
 
   return (
     <div className="container py-12 flex justify-center">
       <div className="flex gap-8 max-w-5xl w-full mx-auto">
-        {/* Sidebar */}
         <aside className="w-56 shrink-0">
-          <nav className="space-y-1 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-gray-700">
+          <nav className="space-y-1 bg-white dark:bg-card rounded-xl p-4 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-border">
             {sidebarItems.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === item.id 
-                    ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white" 
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  activeTab === item.id
+                    ? "bg-[#f0f2f5] dark:bg-muted text-[#111318] dark:text-foreground"
+                    : "text-[#6b707c] dark:text-muted-foreground hover:text-[#111318] hover:dark:text-foreground hover:bg-[#f4f5f7] dark:hover:bg-muted/50"
                 }`}
               >
                 <item.icon className="h-4 w-4" />
@@ -297,16 +399,14 @@ function Settings() {
           </nav>
         </aside>
 
-        {/* Main Content */}
         <div className="flex-1 space-y-6">
-          {/* Profile Settings */}
           {activeTab === "profile" && (
             <section className={cardClass}>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Profile Settings</h2>
-              
+              <h2 className="text-lg font-semibold text-[#111318] dark:text-foreground mb-6">Profile Settings</h2>
+
               <div className="mb-4">
-                <label htmlFor="profile-email" className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 block">
-                  Account email (used to load / save in database)
+                <label htmlFor="profile-email" className="text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block">
+                  Email
                 </label>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <input
@@ -314,8 +414,8 @@ function Settings() {
                     type="email"
                     value={profileEmail}
                     onChange={(e) => setProfileEmail(e.target.value)}
-                    className="w-full h-10 rounded-lg border border-black/5 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:focus:ring-gray-500 sm:flex-1"
-                    placeholder="you@example.com"
+                    className="w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring sm:flex-1"
+                    placeholder="you@gmail.com"
                   />
                   <Button
                     type="button"
@@ -324,7 +424,7 @@ function Settings() {
                     disabled={loadingProfile}
                     onClick={() => void fetchProfileForEmail(profileEmail)}
                   >
-                    Load profile
+                    Load Profile
                   </Button>
                 </div>
               </div>
@@ -340,7 +440,7 @@ function Settings() {
 
               <div className="flex items-center gap-4 mb-6">
                 <div className="relative">
-                  <div className="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                  <div className="h-16 w-16 rounded-full bg-[#e1e4ea] dark:bg-muted overflow-hidden">
                     <img
                       src={avatarSrc || DEFAULT_AVATAR}
                       alt=""
@@ -349,33 +449,33 @@ function Settings() {
                   </div>
                   <button
                     type="button"
-                    className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center shadow-sm hover:opacity-90"
+                    className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center shadow-sm hover:opacity-90"
                     aria-label="Change profile photo"
                     onClick={handleAvatarButtonClick}
                   >
-                    <Camera className="h-3 w-3 text-white" />
+                    <Camera className="h-3 w-3 text-primary-foreground" />
                   </button>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">Profile Photo</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Upload a new photo (stored in this browser) or remove the current one.</p>
+                  <p className="text-sm font-medium text-[#111318] dark:text-foreground">Profile Photo</p>
+                  <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground">Upload Photo</p>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="mt-1 h-8 px-2 text-red-600 hover:text-red-700"
+                    className="mt-1 h-8 px-2 text-destructive hover:text-destructive"
                     onClick={handleRemoveAvatar}
                     disabled={!avatarSrc}
                   >
                     <Trash2 className="h-3.5 w-3.5 mr-1" />
-                    Remove photo
+                    Remove Photo
                   </Button>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label htmlFor="first-name" className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 block">
+                  <label htmlFor="first-name" className="text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block">
                     First Name
                   </label>
                   <input
@@ -385,11 +485,11 @@ function Settings() {
                     onChange={(e) => setFirstName(e.target.value)}
                     maxLength={MAX_NAME_LEN}
                     placeholder="First Name"
-                    className="w-full h-10 rounded-lg border border-black/5 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:focus:ring-gray-500"
+                    className="w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
                   />
                 </div>
                 <div>
-                  <label htmlFor="last-name" className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 block">
+                  <label htmlFor="last-name" className="text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block">
                     Last Name
                   </label>
                   <input
@@ -399,13 +499,13 @@ function Settings() {
                     onChange={(e) => setLastName(e.target.value)}
                     maxLength={MAX_NAME_LEN}
                     placeholder="Last Name"
-                    className="w-full h-10 rounded-lg border border-black/5 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:focus:ring-gray-500"
+                    className="w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
                   />
                 </div>
               </div>
 
               <div className="mb-4">
-                <label htmlFor="phone" className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 block">
+                <label htmlFor="phone" className="text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block">
                   Phone Number
                 </label>
                 <input
@@ -414,48 +514,54 @@ function Settings() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Phone Number"
-                  className="w-full h-10 rounded-lg border border-black/5 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:focus:ring-gray-500"
+                  className="w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
                 />
               </div>
 
-              <Button type="button" onClick={saveProfile} disabled={saving || loadingProfile} className="w-full sm:w-auto">
-                {saving ? "Saving…" : "Save profile to database"}
+              <Button
+                type="button"
+                onClick={saveProfile}
+                disabled={saving || loadingProfile}
+                className="w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700 hover:text-white active:scale-[0.98] shadow-sm hover:shadow-md transition-all disabled:opacity-60"
+              >
+                {saving ? "Saving Profile..." : "Save Profile"}
               </Button>
             </section>
           )}
 
-          {/* Accessibility */}
           {activeTab === "accessibility" && (
             <section className={cardClass}>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Accessibility Options</h2>
-              
+              <h2 className="text-lg font-semibold text-[#111318] dark:text-foreground mb-6">Accessibility</h2>
+
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">Dark Mode</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Switch between light and dark themes</p>
+                  <p className="text-sm font-medium text-[#111318] dark:text-foreground">Dark Mode</p>
+                  <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground">Switch between light and dark themes</p>
                 </div>
                 <Switch checked={darkMode} onCheckedChange={setDarkMode} />
               </div>
 
               <div className="mb-6">
-                <p className="text-sm font-medium text-gray-900 dark:text-white mb-3">Font Size</p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-medium text-[#111318] dark:text-foreground">Font Size</p>
+                  <span className="text-xs font-medium text-[#111318] dark:text-foreground">{fontSize[0]}%</span>
+                </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">A</span>
-                  <Slider value={fontSize} onValueChange={setFontSize} max={100} step={1} className="flex-1" />
-                  <span className="text-base text-gray-500 dark:text-gray-400">A</span>
+                  <span className="text-xs text-[#9ca0aa] dark:text-muted-foreground">A</span>
+                  <Slider value={fontSize} onValueChange={setFontSize} min={50} max={100} step={5} className="flex-1" />
+                  <span className="text-base text-[#9ca0aa] dark:text-muted-foreground">A</span>
                 </div>
               </div>
 
               <div className="mb-6">
-                <label htmlFor="language" className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 block">
+                <label htmlFor="language" className="text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block">
                   Language
                 </label>
                 <select
                   id="language"
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full h-10 rounded-lg border border-black/5 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:focus:ring-gray-500"
-                  aria-label="Language preference"
+                  className="w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
                 >
                   {LANGUAGE_OPTIONS.map((opt) => (
                     <option key={opt} value={opt}>{opt}</option>
@@ -469,124 +575,99 @@ function Settings() {
             </section>
           )}
 
-          {/* Notifications */}
           {activeTab === "notifications" && (
             <section className={cardClass}>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Notification Preferences</h2>
-              
+              <h2 className="text-lg font-semibold text-[#111318] dark:text-foreground mb-6">Notification Preferences</h2>
               <div className="space-y-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">Email Notifications</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Receive booking confirmations and updates</p>
+                    <p className="text-sm font-medium text-[#111318] dark:text-foreground">Email Notifications</p>
+                    <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground">Receive all important updates and alerts via email</p>
                   </div>
                   <Switch checked={emailNotif} onCheckedChange={setEmailNotif} />
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">SMS Alerts</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Get text messages for important updates</p>
-                  </div>
-                  <Switch checked={smsAlerts} onCheckedChange={setSmsAlerts} />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">Newsletter</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Weekly updates and travel inspiration</p>
-                  </div>
-                  <Switch checked={newsletter} onCheckedChange={setNewsletter} />
-                </div>
               </div>
-
               <Button type="button" variant="outline" className="mt-6 w-full sm:w-auto" onClick={saveProfile} disabled={saving}>
-                Save notifications
+                Save notification preference
               </Button>
             </section>
           )}
 
-          {/* Security */}
           {activeTab === "security" && (
             <section className={cardClass}>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Security</h2>
-              
+              <h2 className="text-lg font-semibold text-[#111318] dark:text-foreground mb-6">Security</h2>
               <div className="space-y-6">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">Two-factor authentication</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Add an extra step when signing in (preference stored locally for this demo).</p>
+                    <p className="text-sm font-medium text-[#111318] dark:text-foreground">Two-factor authentication</p>
+                    <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground">Require OTP verification during login.</p>
                   </div>
-                  <Switch
-                    checked={twoFactorEnabled}
-                    onCheckedChange={(v) => {
-                      setTwoFactorEnabled(v);
-                      toast.success(v ? "Two-factor authentication enabled (local only)." : "Two-factor authentication disabled.");
-                    }}
+                  <Switch 
+                    checked={twoFactorEnabled} 
+                    disabled={updating2FA} 
+                    onCheckedChange={(v) => void handleTwoFactorToggle(v)} 
                   />
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                  <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button type="button" variant="outline" className="gap-2">
-                        <KeyRound className="h-4 w-4" />
-                        Change password
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Change password</DialogTitle>
-                        <DialogDescription>
-                          This demo does not send passwords to a server. Use this to confirm the form works.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <form onSubmit={handlePasswordSubmit}>
-                        <div className="grid gap-4 py-4">
-                          <div className="grid gap-2">
-                            <Label htmlFor="new-password">New password</Label>
-                            <Input
-                              id="new-password"
-                              type="password"
-                              autoComplete="new-password"
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              placeholder="At least 8 characters"
-                            />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor="confirm-password">Confirm password</Label>
-                            <Input
-                              id="confirm-password"
-                              type="password"
-                              autoComplete="new-password"
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
-                            />
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button type="button" variant="outline" onClick={() => setPasswordDialogOpen(false)}>
-                            Cancel
-                          </Button>
-                          <Button type="submit">Update password</Button>
-                        </DialogFooter>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="outline" className="w-full sm:w-auto">
+                      <KeyRound className="h-4 w-4 mr-2" />
+                      Change Password
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Change Password</DialogTitle>
+                      <DialogDescription>Enter your current password, then your new password.</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                      <div>
+                        <Label htmlFor="current-pw">Current Password</Label>
+                        <Input 
+                          id="current-pw" 
+                          type="password" 
+                          value={currentPassword} 
+                          onChange={(e) => setCurrentPassword(e.target.value)} 
+                          placeholder="Enter current password" 
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-pw">New Password</Label>
+                        <Input 
+                          id="new-pw" 
+                          type="password" 
+                          value={newPassword} 
+                          onChange={(e) => setNewPassword(e.target.value)} 
+                          placeholder="At least 8 characters" 
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="confirm-pw">Confirm New Password</Label>
+                        <Input 
+                          id="confirm-pw" 
+                          type="password" 
+                          value={confirmPassword} 
+                          onChange={(e) => setConfirmPassword(e.target.value)} 
+                          placeholder="Confirm new password" 
+                        />
+                      </div>
+                      <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setPasswordDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={updatingPassword}>
+                          {updatingPassword ? "Updating..." : "Update Password"}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
 
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Signed-in email</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Clear the stored profile email on this device (does not delete your account on the server).</p>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      localStorage.removeItem(PROFILE_EMAIL_KEY);
-                      toast.success("Stored profile email cleared from this browser.");
-                    }}
-                  >
+                <div className="border-t border-border pt-6">
+                  <p className="text-sm font-medium text-[#111318] dark:text-foreground mb-2">Signed-in Email</p>
+                  <p className="text-xs text-[#9ca0aa] dark:text-muted-foreground mb-3">{signedInEmail || "No signed-in user found."}</p>
+                  <Button type="button" variant="secondary" onClick={clearStoredEmail}>
                     Clear stored email
                   </Button>
                 </div>

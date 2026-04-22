@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
   message TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'unread',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -147,4 +148,48 @@ CREATE TABLE activities (
     file_name VARCHAR(100),
     text_content TEXT,
     created_at DATETIME
+);
+CREATE TABLE addresses (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    email VARCHAR(255),
+    address_line_1 TEXT,
+    address_line_2 TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    postal_code VARCHAR(20),
+    country VARCHAR(100),
+    phone VARCHAR(50),
+    is_default BOOLEAN DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE product_variants (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT NOT NULL,
+    size VARCHAR(10),
+    color VARCHAR(50),
+    stock INT DEFAULT 0,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+CREATE TABLE profiles (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    phone VARCHAR(20),
+    profile_photo TEXT,
+    dark_mode TINYINT(1) DEFAULT 0,
+    font_size INT DEFAULT 50,
+    language VARCHAR(50) DEFAULT 'English (US)',
+    email_notif TINYINT(1) DEFAULT 1,
+    two_factor_enabled TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_email (email)
 );
