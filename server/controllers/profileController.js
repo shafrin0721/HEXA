@@ -78,7 +78,6 @@ async function getProfile(req, res) {
 }
 
 async function upsertProfile(req, res) {
-  console.log("Received profile data:", req.body);
   
   const picked = pickAllowed(req.body ?? {}, PROFILE_PUT_KEYS);
 
