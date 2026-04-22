@@ -148,7 +148,7 @@ const handleSubmit = async (e) => {
   
   if (!userId) {
     localStorage.setItem('redirectAfterLogin', '/checkout/address');
-    navigate('/login');
+    navigate('/');
     return;
   }
   
