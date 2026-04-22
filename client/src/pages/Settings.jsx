@@ -108,11 +108,7 @@ function Settings() {
     setTheme(darkMode ? "dark" : "light");
   }, [darkMode, setTheme]);
 
-  useEffect(() => {
-    const v = fontSize[0] ?? 50;
-    const px = 14 + v / 100 * 10;
-    document.documentElement.style.fontSize = `${px}px`;
-  }, [fontSize]);
+ 
 
   const applyAvatarFromProfile = useCallback((email, serverAvatar) => {
     const key = avatarStorageKey(email);
@@ -275,298 +271,332 @@ function Settings() {
     setConfirmPassword("");
   }
 
-  const cardClass = "bg-white dark:bg-card rounded-xl p-6 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-border";
+  const cardClass = "bg-white dark:bg-gray-800 rounded-xl p-6 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-gray-700";
 
-  return /* @__PURE__ */ jsx("div", { className: "container py-12 flex justify-center", children: /* @__PURE__ */ jsxs("div", { className: "flex gap-8 max-w-5xl w-full mx-auto", children: [
-    /* @__PURE__ */ jsx("aside", { className: "w-56 shrink-0", children: /* @__PURE__ */ jsx("nav", { className: "space-y-1 bg-white dark:bg-card rounded-xl p-4 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-border", children: sidebarItems.map((item) => /* @__PURE__ */ jsxs(
-      "button",
-      {
-        type: "button",
-        onClick: () => setActiveTab(item.id),
-        className: `w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === item.id ? "bg-[#f0f2f5] dark:bg-muted text-[#111318] dark:text-foreground" : "text-[#6b707c] dark:text-muted-foreground hover:text-[#111318] hover:dark:text-foreground hover:bg-[#f4f5f7] dark:hover:bg-muted/50"}`,
-        children: [
-          /* @__PURE__ */ jsx(item.icon, { className: "h-4 w-4" }),
-          item.label
-        ]
-      },
-      item.id
-    )) }) }),
-    /* @__PURE__ */ jsxs("div", { className: "flex-1 space-y-6", children: [
-      activeTab === "profile" && /* @__PURE__ */ jsxs("section", { className: cardClass, children: [
-        /* @__PURE__ */ jsx("h2", { className: "text-lg font-semibold text-[#111318] dark:text-foreground mb-6", children: "Profile Settings" }),
-        /* @__PURE__ */ jsxs("div", { className: "mb-4", children: [
-          /* @__PURE__ */ jsx("label", { htmlFor: "profile-email", className: "text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block", children: "Account email (used to load / save in database)" }),
-          /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 sm:flex-row sm:items-center", children: [
-            /* @__PURE__ */ jsx(
-              "input",
-              {
-                id: "profile-email",
-                type: "email",
-                value: profileEmail,
-                onChange: (e) => setProfileEmail(e.target.value),
-                className: "w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring sm:flex-1",
-                placeholder: "you@example.com"
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              Button,
-              {
-                type: "button",
-                variant: "outline",
-                className: "shrink-0",
-                disabled: loadingProfile,
-                onClick: () => void fetchProfileForEmail(profileEmail),
-                children: "Load profile"
-              }
-            )
-          ] })
-        ] }),
-        /* @__PURE__ */ jsx(
-          "input",
-          {
-            ref: fileInputRef,
-            type: "file",
-            accept: "image/*",
-            className: "hidden",
-            "aria-hidden": true,
-            onChange: (e) => void handleAvatarFileChange(e)
-          }
-        ),
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 mb-6", children: [
-          /* @__PURE__ */ jsxs("div", { className: "relative", children: [
-            /* @__PURE__ */ jsx("div", { className: "h-16 w-16 rounded-full bg-[#e1e4ea] dark:bg-muted overflow-hidden", children: /* @__PURE__ */ jsx(
-              "img",
-              {
-                src: avatarSrc || DEFAULT_AVATAR,
-                alt: "",
-                className: `h-full w-full object-cover ${avatarSrc ? "" : "opacity-50"}`
-              }
-            ) }),
-            /* @__PURE__ */ jsx(
-              "button",
-              {
-                type: "button",
-                className: "absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center shadow-sm hover:opacity-90",
-                "aria-label": "Change profile photo",
-                onClick: handleAvatarButtonClick,
-                children: /* @__PURE__ */ jsx(Camera, { className: "h-3 w-3 text-primary-foreground" })
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
-            /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-[#111318] dark:text-foreground", children: "Profile Photo" }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-[#9ca0aa] dark:text-muted-foreground", children: "Upload a new photo (stored in this browser) or remove the current one." }),
-            /* @__PURE__ */ jsxs(
-              Button,
-              {
-                type: "button",
-                variant: "ghost",
-                size: "sm",
-                className: "mt-1 h-8 px-2 text-destructive hover:text-destructive",
-                onClick: handleRemoveAvatar,
-                disabled: !avatarSrc,
-                children: [
-                  /* @__PURE__ */ jsx(Trash2, { className: "h-3.5 w-3.5 mr-1" }),
-                  "Remove photo"
-                ]
-              }
-            )
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-2 gap-4 mb-4", children: [
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("label", { htmlFor: "first-name", className: "text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block", children: "First Name" }),
-            /* @__PURE__ */ jsx(
-              "input",
-              {
-                id: "first-name",
-                type: "text",
-                value: firstName,
-                onChange: (e) => setFirstName(e.target.value),
-                maxLength: MAX_NAME_LEN,
-                placeholder: "First Name",
-                className: "w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("label", { htmlFor: "last-name", className: "text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block", children: "Last Name" }),
-            /* @__PURE__ */ jsx(
-              "input",
-              {
-                id: "last-name",
-                type: "text",
-                value: lastName,
-                onChange: (e) => setLastName(e.target.value),
-                maxLength: MAX_NAME_LEN,
-                placeholder: "Last Name",
-                className: "w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
-              }
-            )
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "mb-4", children: [
-          /* @__PURE__ */ jsx("label", { htmlFor: "phone", className: "text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block", children: "Phone Number" }),
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              id: "phone",
-              type: "tel",
-              value: phone,
-              onChange: (e) => setPhone(e.target.value),
-              placeholder: "Phone Number",
-              className: "w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsx(Button, { type: "button", onClick: saveProfile, disabled: saving || loadingProfile, className: "w-full sm:w-auto", children: saving ? "Saving…" : "Save profile to database" })
-      ] }),
-      activeTab === "accessibility" && /* @__PURE__ */ jsxs("section", { className: cardClass, children: [
-        /* @__PURE__ */ jsx("h2", { className: "text-lg font-semibold text-[#111318] dark:text-foreground mb-6", children: "Accessibility Options" }),
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-6", children: [
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-[#111318] dark:text-foreground", children: "Dark Mode" }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-[#9ca0aa] dark:text-muted-foreground", children: "Switch between light and dark themes" })
-          ] }),
-          /* @__PURE__ */ jsx(Switch, { checked: darkMode, onCheckedChange: setDarkMode })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "mb-6", children: [
-          /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-[#111318] dark:text-foreground mb-3", children: "Font Size" }),
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
-            /* @__PURE__ */ jsx("span", { className: "text-xs text-[#9ca0aa] dark:text-muted-foreground", children: "A" }),
-            /* @__PURE__ */ jsx(Slider, { value: fontSize, onValueChange: setFontSize, max: 100, step: 1, className: "flex-1" }),
-            /* @__PURE__ */ jsx("span", { className: "text-base text-[#9ca0aa] dark:text-muted-foreground", children: "A" })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "mb-6", children: [
-          /* @__PURE__ */ jsx("label", { htmlFor: "language", className: "text-sm font-medium text-[#111318] dark:text-foreground mb-1.5 block", children: "Language" }),
-          /* @__PURE__ */ jsx(
-            "select",
-            {
-              id: "language",
-              value: language,
-              onChange: (e) => setLanguage(e.target.value),
-              className: "w-full h-10 rounded-lg border border-black/5 dark:border-border bg-white dark:bg-background px-3 text-sm text-[#111318] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#111318]/70 dark:focus:ring-ring",
-              "aria-label": "Language preference",
-              children: LANGUAGE_OPTIONS.map((opt) => /* @__PURE__ */ jsx("option", { value: opt, children: opt }, opt))
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsx(Button, { type: "button", variant: "outline", className: "w-full sm:w-auto", onClick: saveProfile, disabled: saving, children: "Save accessibility settings" })
-      ] }),
-      activeTab === "notifications" && /* @__PURE__ */ jsxs("section", { className: cardClass, children: [
-        /* @__PURE__ */ jsx("h2", { className: "text-lg font-semibold text-[#111318] dark:text-foreground mb-6", children: "Notification Preferences" }),
-        /* @__PURE__ */ jsxs("div", { className: "space-y-5", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-            /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-[#111318] dark:text-foreground", children: "Email Notifications" }),
-              /* @__PURE__ */ jsx("p", { className: "text-xs text-[#9ca0aa] dark:text-muted-foreground", children: "Receive booking confirmations and updates" })
-            ] }),
-            /* @__PURE__ */ jsx(Switch, { checked: emailNotif, onCheckedChange: setEmailNotif })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-            /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-[#111318] dark:text-foreground", children: "SMS Alerts" }),
-              /* @__PURE__ */ jsx("p", { className: "text-xs text-[#9ca0aa] dark:text-muted-foreground", children: "Get text messages for important updates" })
-            ] }),
-            /* @__PURE__ */ jsx(Switch, { checked: smsAlerts, onCheckedChange: setSmsAlerts })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-            /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-[#111318] dark:text-foreground", children: "Newsletter" }),
-              /* @__PURE__ */ jsx("p", { className: "text-xs text-[#9ca0aa] dark:text-muted-foreground", children: "Weekly updates and travel inspiration" })
-            ] }),
-            /* @__PURE__ */ jsx(Switch, { checked: newsletter, onCheckedChange: setNewsletter })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsx(Button, { type: "button", variant: "outline", className: "mt-6 w-full sm:w-auto", onClick: saveProfile, disabled: saving, children: "Save notifications" })
-      ] }),
-      activeTab === "security" && /* @__PURE__ */ jsxs("section", { className: cardClass, children: [
-        /* @__PURE__ */ jsx("h2", { className: "text-lg font-semibold text-[#111318] dark:text-foreground mb-6", children: "Security" }),
-        /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-4", children: [
-            /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-[#111318] dark:text-foreground", children: "Two-factor authentication" }),
-              /* @__PURE__ */ jsx("p", { className: "text-xs text-[#9ca0aa] dark:text-muted-foreground", children: "Add an extra step when signing in (preference stored locally for this demo)." })
-            ] }),
-            /* @__PURE__ */ jsx(
-              Switch,
-              {
-                checked: twoFactorEnabled,
-                onCheckedChange: (v) => {
-                  setTwoFactorEnabled(v);
-                  toast.success(v ? "Two-factor authentication enabled (local only)." : "Two-factor authentication disabled.");
-                }
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsx("div", { className: "border-t border-border dark:border-border pt-6", children: /* @__PURE__ */ jsxs(Dialog, { open: passwordDialogOpen, onOpenChange: setPasswordDialogOpen, children: [
-            /* @__PURE__ */ jsx(DialogTrigger, { asChild: true, children: /* @__PURE__ */ jsxs(Button, { type: "button", variant: "outline", className: "gap-2", children: [
-              /* @__PURE__ */ jsx(KeyRound, { className: "h-4 w-4" }),
-              "Change password"
-            ] }) }),
-            /* @__PURE__ */ jsxs(DialogContent, { className: "sm:max-w-md", children: [
-              /* @__PURE__ */ jsxs(DialogHeader, { children: [
-                /* @__PURE__ */ jsx(DialogTitle, { children: "Change password" }),
-                /* @__PURE__ */ jsx(DialogDescription, { children: "This demo does not send passwords to a server. Use this to confirm the form works." })
-              ] }),
-              /* @__PURE__ */ jsxs("form", { onSubmit: handlePasswordSubmit, children: [
-                /* @__PURE__ */ jsxs("div", { className: "grid gap-4 py-4", children: [
-                  /* @__PURE__ */ jsxs("div", { className: "grid gap-2", children: [
-                    /* @__PURE__ */ jsx(Label, { htmlFor: "new-password", children: "New password" }),
-                    /* @__PURE__ */ jsx(
-                      Input,
-                      {
-                        id: "new-password",
-                        type: "password",
-                        autoComplete: "new-password",
-                        value: newPassword,
-                        onChange: (e) => setNewPassword(e.target.value),
-                        placeholder: "At least 8 characters"
-                      }
-                    )
-                  ] }),
-                  /* @__PURE__ */ jsxs("div", { className: "grid gap-2", children: [
-                    /* @__PURE__ */ jsx(Label, { htmlFor: "confirm-password", children: "Confirm password" }),
-                    /* @__PURE__ */ jsx(
-                      Input,
-                      {
-                        id: "confirm-password",
-                        type: "password",
-                        autoComplete: "new-password",
-                        value: confirmPassword,
-                        onChange: (e) => setConfirmPassword(e.target.value)
-                      }
-                    )
-                  ] })
-                ] }),
-                /* @__PURE__ */ jsxs(DialogFooter, { children: [
-                  /* @__PURE__ */ jsx(Button, { type: "button", variant: "outline", onClick: () => setPasswordDialogOpen(false), children: "Cancel" }),
-                  /* @__PURE__ */ jsx(Button, { type: "submit", children: "Update password" })
-                ] })
-              ] })
-            ] })
-          ] }) }),
-          /* @__PURE__ */ jsxs("div", { className: "border-t border-border pt-6", children: [
-            /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-[#111318] dark:text-foreground mb-2", children: "Signed-in email" }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-[#9ca0aa] dark:text-muted-foreground mb-3", children: "Clear the stored profile email on this device (does not delete your account on the server)." }),
-            /* @__PURE__ */ jsx(
-              Button,
-              {
-                type: "button",
-                variant: "secondary",
-                onClick: () => {
-                  localStorage.removeItem(PROFILE_EMAIL_KEY);
-                  toast.success("Stored profile email cleared from this browser.");
-                },
-                children: "Clear stored email"
-              }
-            )
-          ] })
-        ] })
-      ] })
-    ] })
-  ] }) });
+  return (
+    <div className="container py-12 flex justify-center">
+      <div className="flex gap-8 max-w-5xl w-full mx-auto">
+        {/* Sidebar */}
+        <aside className="w-56 shrink-0">
+          <nav className="space-y-1 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-[0_18px_40px_rgba(0,0,0,0.35)] border border-transparent dark:border-gray-700">
+            {sidebarItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === item.id 
+                    ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white" 
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                }`}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <div className="flex-1 space-y-6">
+          {/* Profile Settings */}
+          {activeTab === "profile" && (
+            <section className={cardClass}>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Profile Settings</h2>
+              
+              <div className="mb-4">
+                <label htmlFor="profile-email" className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 block">
+                  Account email (used to load / save in database)
+                </label>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <input
+                    id="profile-email"
+                    type="email"
+                    value={profileEmail}
+                    onChange={(e) => setProfileEmail(e.target.value)}
+                    className="w-full h-10 rounded-lg border border-black/5 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:focus:ring-gray-500 sm:flex-1"
+                    placeholder="you@example.com"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0"
+                    disabled={loadingProfile}
+                    onClick={() => void fetchProfileForEmail(profileEmail)}
+                  >
+                    Load profile
+                  </Button>
+                </div>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                aria-hidden="true"
+                onChange={(e) => void handleAvatarFileChange(e)}
+              />
+
+              <div className="flex items-center gap-4 mb-6">
+                <div className="relative">
+                  <div className="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <img
+                      src={avatarSrc || DEFAULT_AVATAR}
+                      alt=""
+                      className={`h-full w-full object-cover ${avatarSrc ? "" : "opacity-50"}`}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center shadow-sm hover:opacity-90"
+                    aria-label="Change profile photo"
+                    onClick={handleAvatarButtonClick}
+                  >
+                    <Camera className="h-3 w-3 text-white" />
+                  </button>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Profile Photo</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Upload a new photo (stored in this browser) or remove the current one.</p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="mt-1 h-8 px-2 text-red-600 hover:text-red-700"
+                    onClick={handleRemoveAvatar}
+                    disabled={!avatarSrc}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1" />
+                    Remove photo
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label htmlFor="first-name" className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 block">
+                    First Name
+                  </label>
+                  <input
+                    id="first-name"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    maxLength={MAX_NAME_LEN}
+                    placeholder="First Name"
+                    className="w-full h-10 rounded-lg border border-black/5 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:focus:ring-gray-500"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="last-name" className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 block">
+                    Last Name
+                  </label>
+                  <input
+                    id="last-name"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    maxLength={MAX_NAME_LEN}
+                    placeholder="Last Name"
+                    className="w-full h-10 rounded-lg border border-black/5 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:focus:ring-gray-500"
+                  />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="phone" className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 block">
+                  Phone Number
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Phone Number"
+                  className="w-full h-10 rounded-lg border border-black/5 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:focus:ring-gray-500"
+                />
+              </div>
+
+              <Button type="button" onClick={saveProfile} disabled={saving || loadingProfile} className="w-full sm:w-auto">
+                {saving ? "Saving…" : "Save profile to database"}
+              </Button>
+            </section>
+          )}
+
+          {/* Accessibility */}
+          {activeTab === "accessibility" && (
+            <section className={cardClass}>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Accessibility Options</h2>
+              
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Dark Mode</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Switch between light and dark themes</p>
+                </div>
+                <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+              </div>
+
+              <div className="mb-6">
+                <p className="text-sm font-medium text-gray-900 dark:text-white mb-3">Font Size</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">A</span>
+                  <Slider value={fontSize} onValueChange={setFontSize} max={100} step={1} className="flex-1" />
+                  <span className="text-base text-gray-500 dark:text-gray-400">A</span>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="language" className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 block">
+                  Language
+                </label>
+                <select
+                  id="language"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-black/5 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:focus:ring-gray-500"
+                  aria-label="Language preference"
+                >
+                  {LANGUAGE_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+
+              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={saveProfile} disabled={saving}>
+                Save accessibility settings
+              </Button>
+            </section>
+          )}
+
+          {/* Notifications */}
+          {activeTab === "notifications" && (
+            <section className={cardClass}>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Notification Preferences</h2>
+              
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Email Notifications</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Receive booking confirmations and updates</p>
+                  </div>
+                  <Switch checked={emailNotif} onCheckedChange={setEmailNotif} />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">SMS Alerts</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Get text messages for important updates</p>
+                  </div>
+                  <Switch checked={smsAlerts} onCheckedChange={setSmsAlerts} />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Newsletter</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Weekly updates and travel inspiration</p>
+                  </div>
+                  <Switch checked={newsletter} onCheckedChange={setNewsletter} />
+                </div>
+              </div>
+
+              <Button type="button" variant="outline" className="mt-6 w-full sm:w-auto" onClick={saveProfile} disabled={saving}>
+                Save notifications
+              </Button>
+            </section>
+          )}
+
+          {/* Security */}
+          {activeTab === "security" && (
+            <section className={cardClass}>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Security</h2>
+              
+              <div className="space-y-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Two-factor authentication</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Add an extra step when signing in (preference stored locally for this demo).</p>
+                  </div>
+                  <Switch
+                    checked={twoFactorEnabled}
+                    onCheckedChange={(v) => {
+                      setTwoFactorEnabled(v);
+                      toast.success(v ? "Two-factor authentication enabled (local only)." : "Two-factor authentication disabled.");
+                    }}
+                  />
+                </div>
+
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                  <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button type="button" variant="outline" className="gap-2">
+                        <KeyRound className="h-4 w-4" />
+                        Change password
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Change password</DialogTitle>
+                        <DialogDescription>
+                          This demo does not send passwords to a server. Use this to confirm the form works.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handlePasswordSubmit}>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid gap-2">
+                            <Label htmlFor="new-password">New password</Label>
+                            <Input
+                              id="new-password"
+                              type="password"
+                              autoComplete="new-password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              placeholder="At least 8 characters"
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="confirm-password">Confirm password</Label>
+                            <Input
+                              id="confirm-password"
+                              type="password"
+                              autoComplete="new-password"
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button type="button" variant="outline" onClick={() => setPasswordDialogOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button type="submit">Update password</Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Signed-in email</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Clear the stored profile email on this device (does not delete your account on the server).</p>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      localStorage.removeItem(PROFILE_EMAIL_KEY);
+                      toast.success("Stored profile email cleared from this browser.");
+                    }}
+                  >
+                    Clear stored email
+                  </Button>
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Settings;
