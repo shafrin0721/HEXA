@@ -17,11 +17,9 @@ const app = express();
 
 app.use(cors());
 
-// IMPORTANT: Increase payload size limit for image uploads
-app.use(express.json({ limit: '50mb' }));  // Allow JSON payloads up to 50MB
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));  // Allow URL encoded payloads up to 50MB
+app.use(express.json({ limit: '50mb' }));  
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));  
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cart', cartRoutes);
 
@@ -33,11 +31,9 @@ app.use('/api/products', productRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/checkout', addressRoutes);
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack);
   
-  // Handle specific error types
   if (err.type === 'entity.too.large') {
     return res.status(413).json({
       success: false,
