@@ -1,29 +1,74 @@
+// backend/routes/orderRoutes.js (Complete working version)
 const express = require("express");
 const router = express.Router();
 const db = require('../config/db');
+const authMiddleware = require('../middleware/auth');
 
-router.post("/", async (req, res) => {
+// Create order from review page
+router.post("/create-order", authMiddleware, async (req, res) => {
   try {
-    const { items, total, shipping_address, payment_info, payment_intent_id } = req.body;
-    const user_id = 2; // In production: req.user.id
+    const { items, total, subtotal, shipping, payment_intent_id, payment_info, shipping_address } = req.body;
+    const user_id = req.user.id; // Get from authenticated user, NOT hardcoded
+
+    if (!user_id) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated"
+      });
+    }
 
     const connection = await db.getConnection();
     await connection.beginTransaction();
 
     try {
-      // Insert payment - matches your payments table
+      // Get or create address
+      let addressId = shipping_address?.addressId;
+      
+      if (!addressId) {
+        // Check if address already exists
+        const [existingAddress] = await connection.query(
+          `SELECT id FROM addresses 
+           WHERE user_id = ? AND address_line_1 = ? AND postal_code = ?`,
+          [user_id, shipping_address?.address, shipping_address?.zipCode]
+        );
+        
+        if (existingAddress.length > 0) {
+          addressId = existingAddress[0].id;
+        } else {
+          // Insert new address
+          const [addressResult] = await connection.query(
+            `INSERT INTO addresses 
+             (user_id, first_name, last_name, email, address_line_1, 
+              city, state, postal_code, country, phone, created_at, updated_at) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+            [user_id, 
+             shipping_address?.firstName || 'Unknown',
+             shipping_address?.lastName || 'Unknown',
+             shipping_address?.email || 'unknown@email.com',
+             shipping_address?.address || 'Unknown',
+             shipping_address?.city || 'Unknown',
+             shipping_address?.state || 'Unknown',
+             shipping_address?.zipCode || '00000',
+             'USA',
+             shipping_address?.phone || '0000000000']
+          );
+          addressId = addressResult.insertId;
+        }
+      }
+
+      // Insert payment
       const [paymentResult] = await connection.query(
         `INSERT INTO payments (amount, payment_method, card_last_four, card_type, status, transaction_id, created_at) 
          VALUES (?, ?, ?, ?, 'completed', ?, NOW())`,
-        [total, "credit_card", payment_info.card_last4, payment_info.card_type, payment_intent_id],
+        [total, "credit_card", payment_info?.card_last4 || '0000', payment_info?.card_type || 'visa', payment_intent_id],
       );
       const paymentId = paymentResult.insertId;
 
-      // Insert order - matches your orders table (only has user_id, total, status, created_at)
+      // Insert order with address_id
       const [orderResult] = await connection.query(
-        `INSERT INTO orders (user_id, total, status, created_at) 
-         VALUES (?, ?, 'pending', NOW())`,
-        [user_id, total]
+        `INSERT INTO orders (user_id, address_id, total, status, shipping_cost, created_at) 
+         VALUES (?, ?, ?, 'pending', ?, NOW())`,
+        [user_id, addressId, total, shipping || 0]
       );
       const orderId = orderResult.insertId;
 
@@ -33,12 +78,12 @@ router.post("/", async (req, res) => {
         [orderId, paymentId]
       );
 
-      // Insert order items - matches your order_items table
+      // Insert order items
       for (const item of items) {
         await connection.query(
           `INSERT INTO order_items (order_id, product_id, quantity, price) 
            VALUES (?, ?, ?, ?)`,
-          [orderId, item.id, item.quantity, item.price],
+          [orderId, item.id, item.quantity || 1, item.price || 0],
         );
       }
 
@@ -59,6 +104,7 @@ router.post("/", async (req, res) => {
             amount: total,
             status: "completed",
           },
+          address_id: addressId
         },
       });
     } catch (error) {
@@ -77,10 +123,10 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/totals", async (req, res) => {
+// Get order totals from cart
+router.get("/totals", authMiddleware, async (req, res) => {
   try {
-    // Get user_id from authentication (assuming you have auth middleware)
-    const user_id = req.user?.id || 2; // Fallback to 2 for testing
+    const user_id = req.user.id;
     
     const [cartItems] = await db.query(`
       SELECT 
@@ -92,9 +138,7 @@ router.get("/totals", async (req, res) => {
       FROM cart_items ci
       JOIN products p ON ci.product_id = p.id
       WHERE ci.user_id = ?
-    `,
-      [user_id],
-    );
+    `, [user_id]);
 
     if (cartItems.length === 0) {
       return res.json({
@@ -131,7 +175,6 @@ router.get("/totals", async (req, res) => {
         subtotal: parseFloat(subtotal.toFixed(2)),
         shipping: parseFloat(shipping.toFixed(2)),
         total: parseFloat(total.toFixed(2)),
-        user_id: user_id, // Optional: return user_id for debugging
       },
     });
   } catch (error) {
@@ -144,11 +187,16 @@ router.get("/totals", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+// Get order by ID
+router.get("/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
+    const user_id = req.user.id;
 
-    const [orders] = await db.query(`SELECT * FROM orders WHERE id = ?`, [id]);
+    const [orders] = await db.query(
+      `SELECT * FROM orders WHERE id = ? AND user_id = ?`,
+      [id, user_id]
+    );
 
     if (orders.length === 0) {
       return res.status(404).json({
@@ -157,7 +205,6 @@ router.get("/:id", async (req, res) => {
       });
     }
     
-    // Updated to match your order_items table (no variant_id)
     const [items] = await db.query(`
       SELECT oi.*, p.name, p.image
       FROM order_items oi
@@ -165,7 +212,6 @@ router.get("/:id", async (req, res) => {
       WHERE oi.order_id = ?
     `, [id]);
     
-    // Get payment info
     const [payment] = await db.query(`
       SELECT * FROM payments WHERE order_id = ?
     `, [id]);

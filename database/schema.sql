@@ -55,17 +55,18 @@ CREATE TABLE IF NOT EXISTS payments (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS orders (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  user_id INT UNSIGNED NOT NULL DEFAULT 1,
-  total DECIMAL(12,2) NOT NULL,
-  status VARCHAR(32) NOT NULL DEFAULT 'pending',
-  shipping_address JSON,
-  payment_id INT UNSIGNED,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (payment_id) REFERENCES payments(id)
-);
 
+CREATE TABLE orders (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    address_id INT,        -- NULL allowed
+    shipping_method_id INT, -- NULL allowed
+    total DECIMAL(10,2),
+    status VARCHAR(20),    -- 'pending', 'processing', 'shipped', 'completed'
+    created_at DATETIME,
+    shipping_cost DECIMAL(10,2) DEFAULT 0,
+    shipping_country VARCHAR(100)
+);
 CREATE TABLE IF NOT EXISTS order_items (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   order_id INT UNSIGNED NOT NULL,
@@ -74,4 +75,76 @@ CREATE TABLE IF NOT EXISTS order_items (
   price DECIMAL(10,2) NOT NULL,
   FOREIGN KEY (order_id) REFERENCES orders(id),
   FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+-- Create shipments table if not exists
+CREATE TABLE IF NOT EXISTS shipments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT NOT NULL,
+    tracking_number VARCHAR(100),
+    status ENUM('Ongoing', 'Completed', 'Delayed', 'in_transit', 'delivered') DEFAULT 'Ongoing',
+    shipping_cost DECIMAL(10, 2) DEFAULT 0,
+    shipping_country VARCHAR(100),
+    shipped_date DATE,
+    delivered_date DATE,
+    estimated_delivery DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);
+
+-- Add shipping columns to orders table if not exists
+ALTER TABLE orders 
+ADD COLUMN IF NOT EXISTS shipping_cost DECIMAL(10, 2) DEFAULT 0,
+ADD COLUMN IF NOT EXISTS shipping_country VARCHAR(100);
+
+-- Create index for better performance
+CREATE INDEX idx_shipments_status ON shipments(status);
+CREATE INDEX idx_shipments_created ON shipments(created_at);
+CREATE INDEX idx_orders_created ON orders(created_at);
+CREATE INDEX idx_orders_status ON orders(status);
+
+-- Insert sample shipment data
+INSERT INTO shipments (order_id, tracking_number, status, shipping_cost, shipping_country, shipped_date, delivered_date, created_at) VALUES
+(1, 'TRK001', 'Completed', 15.50, 'USA', '2024-01-15', '2024-01-18', '2024-01-15 10:00:00'),
+(2, 'TRK002', 'Ongoing', 12.00, 'Canada', '2024-01-16', NULL, '2024-01-16 11:00:00'),
+(3, 'TRK003', 'Delayed', 18.00, 'Italy', '2024-01-14', NULL, '2024-01-14 09:00:00'),
+(4, 'TRK004', 'Completed', 10.00, 'USA', '2024-01-17', '2024-01-19', '2024-01-17 14:00:00'),
+(5, 'TRK005', 'Ongoing', 14.50, 'Canada', '2024-01-18', NULL, '2024-01-18 08:00:00');
+
+-- Update orders with shipping info
+UPDATE orders o 
+SET o.shipping_cost = (
+    SELECT s.shipping_cost 
+    FROM shipments s 
+    WHERE s.order_id = o.id 
+    LIMIT 1
+),
+o.shipping_country = (
+    SELECT s.shipping_country 
+    FROM shipments s 
+    WHERE s.order_id = o.id 
+    LIMIT 1
+)
+WHERE EXISTS (SELECT 1 FROM shipments s WHERE s.order_id = o.id);
+
+CREATE TABLE tasks (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    priority VARCHAR(10),  -- 'High', 'Low'
+    progress INT,          -- 0-100
+    date DATE,
+    user_id INT,
+    status VARCHAR(20),    -- 'new', 'in_progress', 'completed'
+    created_at DATETIME
+);
+
+CREATE TABLE activities (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    user_name VARCHAR(100),
+    action VARCHAR(50),    -- 'updated task', 'commented on project', 'created new task'
+    file_name VARCHAR(100),
+    text_content TEXT,
+    created_at DATETIME
 );

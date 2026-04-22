@@ -6,9 +6,7 @@ import logo from "../assets/logo.png";
 import productImg from "../assets/t-6.jpg";
 
 function OrderSummary1() {
-  const { cart } = useCart(); // Get cart data from context
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { cart } = useCart();
   const navigate = useNavigate();
 
   // Calculate totals from cart
@@ -17,58 +15,12 @@ function OrderSummary1() {
   const total = subtotal + shipping;
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const handlePlaceOrder = async () => {
+  const handleProceedToCheckout = () => {
     if (cart.length === 0) {
-      setError("Your cart is empty");
       return;
     }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Create order payload with all items from cart
-      const payload = {
-        items: cart.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: Number(item.price),
-          quantity: item.quantity,
-          image: item.image,
-          variant: item.variant || null
-        })),
-        total: total,
-        subtotal: subtotal,
-        shipping: shipping,
-        payment_intent_id: `pi_${Date.now()}`,
-        payment_status: "completed",
-        payment_info: {
-          card_last4: "4242",
-          card_type: "visa"
-        }
-      };
-
-      const response = await fetch("http://localhost:5001/api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        navigate("/order-success");
-      } else {
-        setError(data.message || "Failed to place order");
-      }
-    } catch (err) {
-      console.error("Error placing order:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    // Just navigate to address page, don't create order yet
+    navigate("/address");
   };
 
   // Redirect if cart is empty
@@ -86,17 +38,6 @@ function OrderSummary1() {
               Continue Shopping
             </button>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="bg-black text-white p-5 font-sans min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-4"></div>
-          <p>Placing your order...</p>
         </div>
       </div>
     );
@@ -160,12 +101,6 @@ function OrderSummary1() {
           </div>
         </div>
 
-        {error && (
-          <div className="mt-4 p-3 bg-red-900/20 border border-red-500 rounded text-red-400 text-center">
-            {error}
-          </div>
-        )}
-
         {/* Buttons */}
         <div className="flex justify-end gap-4 mt-5">
           <button 
@@ -175,11 +110,10 @@ function OrderSummary1() {
             Continue Shopping
           </button>
           <button 
-            onClick={handlePlaceOrder}
-            disabled={loading}
-            className="bg-yellow-500 text-white px-8 py-3 rounded hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleProceedToCheckout}
+            className="bg-yellow-500 text-white px-8 py-3 rounded hover:bg-yellow-600 transition"
           >
-            {loading ? "Processing..." : "Place Order"}
+            Proceed to Checkout
           </button>
         </div>
       </div>
