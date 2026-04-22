@@ -1,96 +1,42 @@
-<<<<<<< HEAD
-import { jsx, jsxs } from "react/jsx-runtime";
-import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, User } from "lucide-react";
-
-const navItems = [
-  { label: "Home", path: "/" },
-  { label: "Products", path: "/products" },
-  { label: "About", path: "/about" },
-  { label: "Contact", path: "/contact" }
-];
-
-function Navbar() {
-  const location = useLocation();
-
-  return /* @__PURE__ */ jsx("header", {
-    className: "sticky top-0 z-50 bg-[#111111] border-b border-neutral-800",
-    children: /* @__PURE__ */ jsxs("div", {
-      className: "container flex h-16 items-center px-6 mx-auto max-w-7xl",
-      children: [
-        /* Logo - Left side */
-        /* @__PURE__ */ jsx("div", {
-          className: "flex items-center w-[160px]",
-          children: /* @__PURE__ */ jsx(Link, {
-            to: "/",
-            className: "flex items-center",
-            children: /* @__PURE__ */ jsx("span", {
-              className: "text-xl font-bold tracking-widest text-white uppercase",
-              style: { letterSpacing: "0.2em" },
-              children: "HEXA"
-            })
-          })
-        }),
-
-        /* Nav links - Centered */
-        /* @__PURE__ */ jsx("nav", {
-          className: "hidden md:flex flex-1 items-center justify-center gap-8",
-          children: navItems.map((item) => /* @__PURE__ */ jsx(
-            Link,
-            {
-              to: item.path,
-              className: `text-sm font-medium transition-colors duration-200 ${
-                location.pathname === item.path
-                  ? "text-white"
-                  : "text-neutral-400 hover:text-white"
-              }`,
-              children: item.label
-            },
-            item.path
-          ))
-        }),
-
-        /* Icons - Right side */
-        /* @__PURE__ */ jsxs("div", {
-          className: "flex items-center justify-end gap-3 w-[160px]",
-          children: [
-            /* Cart icon with badge */
-            /* @__PURE__ */ jsxs("button", {
-              className: "relative p-2 text-neutral-300 hover:text-white transition-colors duration-200",
-              "aria-label": "Shopping cart",
-              children: [
-                /* @__PURE__ */ jsx(ShoppingCart, { className: "h-5 w-5" }),
-                /* @__PURE__ */ jsx("span", {
-                  className: "absolute -top-0 -right-0 h-4 w-4 rounded-full bg-amber-400 text-[10px] font-bold flex items-center justify-center text-black",
-                  children: "2"
-                })
-              ]
-            }),
-
-            /* User icon */
-            /* @__PURE__ */ jsx(Link, {
-              to: "/settings",
-              className: "p-2 text-neutral-300 hover:text-white transition-colors duration-200",
-              "aria-label": "User account",
-              children: /* @__PURE__ */ jsx(User, { className: "h-5 w-5" })
-            })
-          ]
-        })
-      ]
-    })
-  });
-}
-
-export {
-  Navbar
-=======
-import { Link } from "react-router-dom";
+// frontend/src/components/Navbar.jsx
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from '../context/CartContext';
+import { useState, useEffect } from "react";
 
 const Navbar = () => {
-  const { cart } = useCart(); 
+  const { cart } = useCart();
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  useEffect(() => {
+    // Get user from localStorage - check both 'user' and 'role' from your Auth component
+    const storedUser = localStorage.getItem('user');
+    const storedRole = localStorage.getItem('role');
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (e) {
+        console.error('Error parsing user data', e);
+      }
+    } else if (storedRole) {
+      // If only role is stored, create a basic user object
+      setUser({ role: storedRole });
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('role');
+    setUser(null);
+    navigate('/auth');
+    window.location.reload();
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-800 bg-black">
@@ -99,12 +45,14 @@ const Navbar = () => {
           <img src="/images/logo.svg" alt="Logo" className="w-8 h-8" />
           <span className="text-sm font-bold text-white">HEXA</span>
         </Link>
+        
         <div className="hidden md:flex gap-12 text-sm">
           <Link to="/" className="text-white hover:text-gray-300">Home</Link>
           <Link to="/products" className="text-white hover:text-gray-300">Products</Link>
           <Link to="/about" className="text-white hover:text-gray-300">About</Link>
           <Link to="/contact" className="text-white hover:text-gray-300">Contact</Link>
         </div>
+        
         <div className="flex items-center gap-6">
           <Link to="/cart" className="relative text-white">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,14 +64,115 @@ const Navbar = () => {
               </span>
             )}
           </Link>
-          <Link to="/settings">
-            <img src="/images/profile.svg" alt="Profile" className="w-7 h-7 rounded-full" />
-          </Link>
+          
+          {/* Profile/Settings Section with Admin Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="focus:outline-none"
+            >
+              <img 
+                src="/images/profile.svg" 
+                alt="Profile" 
+                className="w-7 h-7 rounded-full cursor-pointer hover:opacity-80 transition-opacity" 
+              />
+            </button>
+            
+            {isDropdownOpen && (
+              <>
+                {/* Backdrop for closing dropdown when clicking outside */}
+                <div 
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsDropdownOpen(false)}
+                ></div>
+                
+                {/* Dropdown Menu */}
+                <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-md shadow-lg py-1 z-50 border border-gray-700">
+                  {user && (user.role === 'admin' || localStorage.getItem('role') === 'admin') ? (
+                    <>
+                      <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
+                        Signed in as <span className="text-white font-medium">{user?.name || 'Admin'}</span>
+                      </div>
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        📊 Admin Dashboard
+                      </Link>
+                      <Link
+                        to="/settings"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        👤 My Profile
+                      </Link>
+                      <Link
+                        to="/orders"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        📦 My Orders
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition-colors border-t border-gray-700"
+                      >
+                        🚪 Sign Out
+                      </button>
+                    </>
+                  ) : user ? (
+                    <>
+                      <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
+                        Signed in as <span className="text-white font-medium">{user?.name || 'User'}</span>
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        👤 My Profile
+                      </Link>
+                      <Link
+                        to="/orders"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        📦 My Orders
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition-colors border-t border-gray-700"
+                      >
+                        🚪 Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/auth"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        🔑 Sign In
+                      </Link>
+                      <Link
+                        to="/auth"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        📝 Register
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </nav>
   );
->>>>>>> b327b34bbef206d86bf0931bac70dccb7c8526d2
 };
 
 export default Navbar;
