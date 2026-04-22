@@ -1,18 +1,20 @@
-// frontend/src/components/Navbar.jsx
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from '../context/CartContext';
+import { useAvatar } from '../context/AvatarContext';
 import { useState, useEffect } from "react";
+
+const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face";
 
 const Navbar = () => {
   const { cart } = useCart();
   const navigate = useNavigate();
+  const { avatarUrl, isLoading } = useAvatar(); // Call hook at top level
   const [user, setUser] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => {
-    // Get user from localStorage - check both 'user' and 'role' from your Auth component
     const storedUser = localStorage.getItem('user');
     const storedRole = localStorage.getItem('role');
     
@@ -24,7 +26,6 @@ const Navbar = () => {
         console.error('Error parsing user data', e);
       }
     } else if (storedRole) {
-      // If only role is stored, create a basic user object
       setUser({ role: storedRole });
     }
   }, []);
@@ -33,6 +34,10 @@ const Navbar = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('role');
+    if (user?.email) {
+      const avatarKey = `hexal_profile_avatar:${user.email.toLowerCase()}`;
+      localStorage.removeItem(avatarKey);
+    }
     setUser(null);
     navigate('/auth');
     window.location.reload();
@@ -65,33 +70,31 @@ const Navbar = () => {
             )}
           </Link>
           
-          {/* Profile/Settings Section with Admin Dropdown */}
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="focus:outline-none"
             >
               <img 
-                src="/images/profile.svg" 
+                src={isLoading ? DEFAULT_AVATAR : (avatarUrl || DEFAULT_AVATAR)}
                 alt="Profile" 
-                className="w-7 h-7 rounded-full cursor-pointer hover:opacity-80 transition-opacity" 
+                className="w-8 h-8 rounded-full cursor-pointer hover:opacity-80 transition-opacity object-cover" 
               />
             </button>
             
             {isDropdownOpen && (
               <>
-                {/* Backdrop for closing dropdown when clicking outside */}
                 <div 
                   className="fixed inset-0 z-40"
                   onClick={() => setIsDropdownOpen(false)}
                 ></div>
                 
-                {/* Dropdown Menu */}
                 <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-md shadow-lg py-1 z-50 border border-gray-700">
+                  {/* Dropdown content remains the same */}
                   {user && (user.role === 'admin' || localStorage.getItem('role') === 'admin') ? (
                     <>
                       <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
-                        Signed in as <span className="text-white font-medium">{user?.name || 'Admin'}</span>
+                        Signed in as <span className="text-white font-medium">{user?.name || user?.username || 'Admin'}</span>
                       </div>
                       <Link
                         to="/admin"
@@ -124,7 +127,7 @@ const Navbar = () => {
                   ) : user ? (
                     <>
                       <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
-                        Signed in as <span className="text-white font-medium">{user?.name || 'User'}</span>
+                        Signed in as <span className="text-white font-medium">{user?.name || user?.username || 'User'}</span>
                       </div>
                       <Link
                         to="/settings"

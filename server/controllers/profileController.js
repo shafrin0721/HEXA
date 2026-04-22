@@ -33,16 +33,17 @@ const PROFILE_PUT_KEYS = [
 ];
 
 function rowToProfile(row) {
+  if (!row) return null;
   return {
     id: row.id,
     email: row.email,
-    first_name: row.first_name,
-    last_name: row.last_name,
-    phone: row.phone,
+    first_name: row.first_name || "",
+    last_name: row.last_name || "",
+    phone: row.phone || "",
     profile_photo: row.profile_photo,
     dark_mode: Boolean(row.dark_mode),
-    font_size: row.font_size,
-    language: row.language,
+    font_size: row.font_size || 50,
+    language: row.language || "English (US)",
     email_notif: Boolean(row.email_notif),
     two_factor_enabled: Boolean(row.two_factor_enabled),
   };
@@ -54,7 +55,7 @@ function isDatabaseConnectionError(err) {
       (err.code === "ECONNREFUSED" ||
         err.code === "PROTOCOL_CONNECTION_LOST" ||
         err.code === "ER_ACCESS_DENIED_ERROR" ||
-        err.code === "ER_BAD_DB_ERROR"),
+        err.code === "ER_BAD_DB_ERROR")
   );
 }
 
@@ -77,6 +78,8 @@ async function getProfile(req, res) {
 }
 
 async function upsertProfile(req, res) {
+  console.log("Received profile data:", req.body);
+  
   const picked = pickAllowed(req.body ?? {}, PROFILE_PUT_KEYS);
 
   const emailRaw = typeof picked.email === "string" ? picked.email.trim() : "";
@@ -132,23 +135,24 @@ async function upsertProfile(req, res) {
     };
 
     if (!existing) {
-      await createProfile(payload);
+      const newId = await createProfile(payload);
+      console.log("Created new profile with ID:", newId);
       if (email_notif) {
         try {
           await sendProfileNotificationEmail({
             email: emailRaw,
-            subject: "Gmail notifications enabled",
-            message:
-              "You have enabled Gmail notifications. Important updates will now be sent to this email address.",
+            subject: "Profile Created",
+            message: "Your profile has been created successfully.",
           });
         } catch (mailErr) {
           console.warn("profile notification email skipped:", mailErr.message);
         }
       }
-      return res.status(201).json({ ok: true, created: true });
+      return res.status(201).json({ ok: true, created: true, id: newId });
     }
 
     await updateProfileByEmail(emailRaw, payload);
+    console.log("Updated profile for email:", emailRaw);
     if (email_notif) {
       try {
         await sendProfileNotificationEmail({
@@ -166,7 +170,7 @@ async function upsertProfile(req, res) {
     if (isDatabaseConnectionError(err)) {
       return res.status(503).json({ error: "Database is not available. Please start MySQL and try again." });
     }
-    return res.status(500).json({ error: "Could not save profile" });
+    return res.status(500).json({ error: "Could not save profile: " + err.message });
   }
 }
 
@@ -203,9 +207,7 @@ async function updateTwoFactor(req, res) {
     try {
       await sendNotificationIfEnabled({
         email: trimmed,
-        subject: enabled
-          ? "Two-factor authentication enabled"
-          : "Two-factor authentication disabled",
+        subject: enabled ? "Two-factor authentication enabled" : "Two-factor authentication disabled",
         message: enabled
           ? "Two-factor authentication has been enabled on your account."
           : "Two-factor authentication has been disabled on your account.",
@@ -236,9 +238,7 @@ async function changePassword(req, res) {
     return res.status(400).json({ error: "New password and confirm password do not match" });
   }
   if (!/[A-Z]/.test(new_password) || !/[a-z]/.test(new_password) || !/\d/.test(new_password)) {
-    return res
-      .status(400)
-      .json({ error: "Password must include uppercase, lowercase, and a number" });
+    return res.status(400).json({ error: "Password must include uppercase, lowercase, and a number" });
   }
 
   try {
