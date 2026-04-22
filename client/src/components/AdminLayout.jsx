@@ -1,9 +1,8 @@
-// frontend/src/components/AdminLayout.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Truck, BarChart3, Users, ShoppingCart, Lock, Search, Bell, Home, LogOut, User } from 'lucide-react';
 
-export default function AdminLayout({ children }) {  // Make sure to accept children prop
+export default function AdminLayout({ children }) { 
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -20,7 +19,6 @@ export default function AdminLayout({ children }) {  // Make sure to accept chil
   ];
 
   useEffect(() => {
-    // Get user data from localStorage
     const storedUser = localStorage.getItem('user');
     const storedRole = localStorage.getItem('role');
     
@@ -150,7 +148,6 @@ export default function AdminLayout({ children }) {  // Make sure to accept chil
           </div>
         </header>
 
-        {/* Page Content - Render children here */}
         <main className="p-8">
           {children}
         </main>
