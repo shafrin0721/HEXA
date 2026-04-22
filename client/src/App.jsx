@@ -14,8 +14,6 @@ import HexaHomePage from "./pages/Home";
 import ProductsPage from "./pages/ProductsPage";
 import ProductPage from './pages/Productpage';
 import CartPage from "./pages/Cart";  
-import Login from "./pages/Login";
-import Register from "./pages/Register";
 import CheckoutAddress from "./pages/CheckoutAddress";
 import ShippingStep from "./pages/ShippingStep";
 import OrderSummary1 from "./pages/OrderSummary";
@@ -34,6 +32,7 @@ import AdminCharts from "./pages/AdminCharts";
 import AdminInventory from "./pages/AdminInventory";
 
 import Layout from "./components/Layout";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -57,8 +56,6 @@ const App = () => (
                   <Route path="/products" element={<ProductsPage />} />
                   <Route path="/product" element={<ProductPage />} />
                   <Route path="/cart" element={<CartPage />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
                   <Route path="/address" element={<CheckoutAddress />} />
                   <Route path="/checkout/shipping" element={<ShippingStep />} />
                   <Route path="/order-summary" element={<OrderSummary1 />} />
@@ -72,13 +69,15 @@ const App = () => (
                 </Route>
                 
     
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/logistics" element={<AdminLogistics />} />
-                <Route path="/admin/sales" element={<AdminSales />} />
-                <Route path="/admin/customers" element={<AdminCustomers />} />
-                <Route path="/admin/charts" element={<AdminCharts />} />
-                <Route path="/admin/inventory" element={<AdminInventory />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
+                 <Route element={<AdminRoute />}>
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/logistics" element={<AdminLogistics />} />
+                  <Route path="/admin/sales" element={<AdminSales />} />
+                  <Route path="/admin/customers" element={<AdminCustomers />} />
+                  <Route path="/admin/charts" element={<AdminCharts />} />
+                  <Route path="/admin/inventory" element={<AdminInventory />} />
+                  <Route path="/admin/users" element={<AdminUsers />} />
+                </Route>
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

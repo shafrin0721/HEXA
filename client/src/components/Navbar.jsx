@@ -1,10 +1,42 @@
-import { Link } from "react-router-dom";
+// frontend/src/components/Navbar.jsx
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from '../context/CartContext';
+import { useState, useEffect } from "react";
 
 const Navbar = () => {
-  const { cart } = useCart(); 
+  const { cart } = useCart();
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  useEffect(() => {
+    // Get user from localStorage - check both 'user' and 'role' from your Auth component
+    const storedUser = localStorage.getItem('user');
+    const storedRole = localStorage.getItem('role');
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (e) {
+        console.error('Error parsing user data', e);
+      }
+    } else if (storedRole) {
+      // If only role is stored, create a basic user object
+      setUser({ role: storedRole });
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('role');
+    setUser(null);
+    navigate('/auth');
+    window.location.reload();
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-800 bg-black">
@@ -13,12 +45,14 @@ const Navbar = () => {
           <img src="/images/logo.svg" alt="Logo" className="w-8 h-8" />
           <span className="text-sm font-bold text-white">HEXA</span>
         </Link>
+        
         <div className="hidden md:flex gap-12 text-sm">
           <Link to="/" className="text-white hover:text-gray-300">Home</Link>
           <Link to="/products" className="text-white hover:text-gray-300">Products</Link>
           <Link to="/about" className="text-white hover:text-gray-300">About</Link>
           <Link to="/contact" className="text-white hover:text-gray-300">Contact</Link>
         </div>
+        
         <div className="flex items-center gap-6">
           <Link to="/cart" className="relative text-white">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,9 +64,111 @@ const Navbar = () => {
               </span>
             )}
           </Link>
-          <Link to="/settings">
-            <img src="/images/profile.svg" alt="Profile" className="w-7 h-7 rounded-full" />
-          </Link>
+          
+          {/* Profile/Settings Section with Admin Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="focus:outline-none"
+            >
+              <img 
+                src="/images/profile.svg" 
+                alt="Profile" 
+                className="w-7 h-7 rounded-full cursor-pointer hover:opacity-80 transition-opacity" 
+              />
+            </button>
+            
+            {isDropdownOpen && (
+              <>
+                {/* Backdrop for closing dropdown when clicking outside */}
+                <div 
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsDropdownOpen(false)}
+                ></div>
+                
+                {/* Dropdown Menu */}
+                <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-md shadow-lg py-1 z-50 border border-gray-700">
+                  {user && (user.role === 'admin' || localStorage.getItem('role') === 'admin') ? (
+                    <>
+                      <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
+                        Signed in as <span className="text-white font-medium">{user?.name || 'Admin'}</span>
+                      </div>
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        📊 Admin Dashboard
+                      </Link>
+                      <Link
+                        to="/settings"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        👤 My Profile
+                      </Link>
+                      <Link
+                        to="/orders"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        📦 My Orders
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition-colors border-t border-gray-700"
+                      >
+                        🚪 Sign Out
+                      </button>
+                    </>
+                  ) : user ? (
+                    <>
+                      <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
+                        Signed in as <span className="text-white font-medium">{user?.name || 'User'}</span>
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        👤 My Profile
+                      </Link>
+                      <Link
+                        to="/orders"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        📦 My Orders
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition-colors border-t border-gray-700"
+                      >
+                        🚪 Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/auth"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        🔑 Sign In
+                      </Link>
+                      <Link
+                        to="/auth"
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        📝 Register
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </nav>
