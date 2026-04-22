@@ -2,10 +2,10 @@
 import { Link } from 'react-router-dom';
 
 const products = [
-  { id: 1, name: 'Veritas Strength Tee', image: '/images/product1_new.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
-  { id: 2, name: 'Chorale Noir Tee', image: '/images/product2_new.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
-  { id: 3, name: 'Élan Focus Tee', image: '/images/product3_new.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
-  { id: 4, name: 'Divinus Path Tee', image: '/images/product4_new.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
+  { id: 1, name: 'Veritas Strength Tee', image: '/images/Design/pexels-bandar-baant-2160637741-36908564.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
+  { id: 2, name: 'Chorale Noir Tee', image: '/images/Design/pexels-bandar-baant-2160637741-37025819.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
+  { id: 3, name: 'Élan Focus Tee', image: '/images/Design/pexels-bandar-baant-2160637741-36899307.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
+  { id: 4, name: 'Divinus Path Tee', image: '/images/Design/pexels-edmilson-eucleni-64454054-11782729.jpg', desc: 'Soft cotton tee with a classic cut, perfect for everyday wear.', price: '$19.99' },
 ];
 
 export default function Home() {
@@ -89,7 +89,7 @@ export default function Home() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map((product) => (
               <div key={product.id} className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
-                <div className="h-64 overflow-hidden">
+                <div className="h-48">
                   <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="p-4">
