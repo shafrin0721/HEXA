@@ -21,6 +21,7 @@ import OrderSuccess from "./pages/OrderSuccess";
 import About from "./pages/About";
 import { CartProvider } from './context/CartContext';
 import { ProductProvider } from './context/ProductContext';
+import { AvatarProvider } from './context/AvatarContext';
 import AdminUsers from "./pages/AdminUsers";
 
 // Admin Pages
@@ -48,41 +49,42 @@ const App = () => (
             v7_relativeSplatPath: true,
           }}
         >
-          <CartProvider>
-            <ProductProvider>
-              <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<HexaHomePage />} />
-                  <Route path="/products" element={<ProductsPage />} />
-                  <Route path="/product" element={<ProductPage />} />
-                  <Route path="/cart" element={<CartPage />} />
-                  <Route path="/address" element={<CheckoutAddress />} />
-                  <Route path="/checkout/shipping" element={<ShippingStep />} />
-                  <Route path="/order-summary" element={<OrderSummary1 />} />
-                  <Route path="/order-success" element={<OrderSuccess />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/payment" element={<PaymentPage />} />
-                  <Route path="/review" element={<ReviewPage />} />
-                </Route>
-                
-    
-                 <Route element={<AdminRoute />}>
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/admin/logistics" element={<AdminLogistics />} />
-                  <Route path="/admin/sales" element={<AdminSales />} />
-                  <Route path="/admin/customers" element={<AdminCustomers />} />
-                  <Route path="/admin/charts" element={<AdminCharts />} />
-                  <Route path="/admin/inventory" element={<AdminInventory />} />
-                  <Route path="/admin/users" element={<AdminUsers />} />
-                </Route>
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </ProductProvider>
-          </CartProvider>
+          <AvatarProvider>
+            <CartProvider>
+              <ProductProvider>
+                <Routes>
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<HexaHomePage />} />
+                    <Route path="/products" element={<ProductsPage />} />
+                    <Route path="/product" element={<ProductPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/address" element={<CheckoutAddress />} />
+                    <Route path="/checkout/shipping" element={<ShippingStep />} />
+                    <Route path="/order-summary" element={<OrderSummary1 />} />
+                    <Route path="/order-success" element={<OrderSuccess />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/payment" element={<PaymentPage />} />
+                    <Route path="/review" element={<ReviewPage />} />
+                  </Route>
+                  
+                  <Route element={<AdminRoute />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/logistics" element={<AdminLogistics />} />
+                    <Route path="/admin/sales" element={<AdminSales />} />
+                    <Route path="/admin/customers" element={<AdminCustomers />} />
+                    <Route path="/admin/charts" element={<AdminCharts />} />
+                    <Route path="/admin/inventory" element={<AdminInventory />} />
+                    <Route path="/admin/users" element={<AdminUsers />} />
+                  </Route>
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ProductProvider>
+            </CartProvider>
+          </AvatarProvider>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
