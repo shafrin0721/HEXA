@@ -5,6 +5,7 @@ import ProductCard from '../components/ProductCard';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
 import { getProductById } from '../services/api';
+import confetti from 'canvas-confetti';
 
 
 export default function ProductPage() {
@@ -20,6 +21,7 @@ export default function ProductPage() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const productId = Number(searchParams.get('id')) || 1;
+
 
   useEffect(() => {
    setIsLoggedIn(!!localStorage.getItem("token"));
@@ -67,6 +69,28 @@ export default function ProductPage() {
         variant: size,
       },
     });
+
+    confetti({
+      particleCount: 100, // කෑලි කීයක් වැටෙන්න ඕනෙද
+      spread: 70,         // කොච්චර පළලට විහිදෙන්න ඕනෙද
+      origin: { y: 0.6 }, // තිරයේ කොතනින්ද පටන් ගන්න ඕනේ (0.6 කියන්නේ මැදට වගේ)
+      colors: ['#d4af37', '#ffffff', '#222222'] // ඔයාගේ brand colors (Gold, White, Black)
+    });
+
+    const duration = 2 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    const interval = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      confetti({ ...defaults, particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } });
+    }, 250);
   };
 
   // const handleAddToCart = () => {
@@ -167,8 +191,14 @@ const handleAddToCart = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mt-1">
-            <button 
+            {/* <button 
               className="flex-1 h-12 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] text-white font-semibold cursor-pointer transition-all hover:-translate-y-0.5 hover:opacity-95"
+              onClick={handleAddToCart}
+            >
+              Add to Cart
+            </button> */}
+            <button 
+              className="flex-1 h-12 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] text-white font-semibold cursor-pointer transition-all active:scale-95 hover:-translate-y-0.5 hover:opacity-95"
               onClick={handleAddToCart}
             >
               Add to Cart
