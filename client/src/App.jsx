@@ -22,6 +22,8 @@ import About from "./pages/About";
 import { CartProvider } from './context/CartContext';
 import { ProductProvider } from './context/ProductContext';
 import { AvatarProvider } from './context/AvatarContext';
+import { WishlistProvider } from './context/WishlistContext';
+import WishlistPage from "./pages/Wishlist";
 import AdminUsers from "./pages/AdminUsers";
 
 // Admin Pages
@@ -50,6 +52,7 @@ const App = () => (
           }}
         >
           <AvatarProvider>
+            <WishlistProvider>
             <CartProvider>
               <ProductProvider>
                 <Routes>
@@ -68,6 +71,7 @@ const App = () => (
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/payment" element={<PaymentPage />} />
                     <Route path="/review" element={<ReviewPage />} />
+                    <Route path="/wishlist" element={<WishlistPage />} />
                   </Route>
                   
                   <Route element={<AdminRoute />}>
@@ -84,6 +88,7 @@ const App = () => (
                 </Routes>
               </ProductProvider>
             </CartProvider>
+          </WishlistProvider>
           </AvatarProvider>
         </BrowserRouter>
       </TooltipProvider>
