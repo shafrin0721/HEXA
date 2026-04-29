@@ -360,8 +360,8 @@ export default function AdminDashboard() {
                   </div>
 
                   {detailTasks.map((task) => (
-                    <div key={task.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      <div className="flex justify-between items-start mb-3">
+                    <div key={task.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200 ">
+                      <div className="flex justify-between items-start mb-3 text-black">
                         <div>
                           <h3 className="font-bold text-lg">{task.name}</h3>
                           <span className={`inline-block text-xs px-2 py-1 rounded mt-1 ${
@@ -377,7 +377,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-3 text-black">
                         <div>
                           <div className="flex justify-between text-sm mb-1">
                             <span className="text-gray-600">Progress</span>

@@ -8,9 +8,51 @@ const CheckoutAddress = () => {
   const navigate = useNavigate();
   const { cart } = useCart();
   
-  // Get user info from localStorage
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const userId = user.id;
+  // Get user info from localStorage - FIXED to work with token
+  let userId = null;
+  let userEmail = '';
+  
+  try {
+    // Method 1: Try to get user from localStorage (if exists)
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      userId = user._id || user.id;
+      userEmail = user.email || '';
+    }
+    
+    // Method 2: If no user object, decode JWT token to get user ID
+    if (!userId) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          // Decode JWT token
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          const tokenData = JSON.parse(jsonPayload);
+          userId = tokenData.id;
+          userEmail = tokenData.email || '';
+          console.log('User ID from token:', userId);
+        } catch (error) {
+          console.error('Error decoding token:', error);
+        }
+      }
+    }
+    
+    // Method 3: Try to get from hexal_profile_data as fallback
+    if (!userEmail) {
+      const profileData = localStorage.getItem('hexal_profile_data');
+      if (profileData) {
+        const profile = JSON.parse(profileData);
+        userEmail = profile.email;
+      }
+    }
+  } catch (error) {
+    console.error('Error parsing user data:', error);
+  }
   
   // Calculate totals from cart
   const subtotal = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
@@ -19,7 +61,7 @@ const CheckoutAddress = () => {
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   
   const [formData, setFormData] = useState({
-    email: user.email || '',
+    email: userEmail || '',
     firstName: '',
     lastName: '',
     address: '',
@@ -138,71 +180,94 @@ const CheckoutAddress = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // In CheckoutAddress.jsx, update the handleSubmit function:
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!validateForm()) {
-    return;
-  }
-  
-  if (!userId) {
-    localStorage.setItem('redirectAfterLogin', '/checkout/address');
-    navigate('/login');
-    return;
-  }
-  
-  setIsSubmitting(true);
-  
-  try {
-    const addressData = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      address: formData.address,
-      city: formData.city,
-      state: formData.state,
-      zipCode: formData.zipCode,
-      phone: formData.phone
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    let response;
-    
-    if (selectedAddressId) {
-      response = await checkoutAPI.updateAddress(userId, {
-        ...addressData,
-        addressId: selectedAddressId
-      });
-    } else {
-      response = await checkoutAPI.saveAddress(addressData);
+    if (!validateForm()) {
+      return;
     }
     
-    if (response.data.success) {
-      // Store address ID separately
-      const addressId = response.data.addressId || selectedAddressId;
-      
-      // Store complete address data with ID
-      const completeAddressData = {
-        id: addressId,
-        ...formData
+    // Get fresh userId from token if needed
+    let currentUserId = userId;
+    let currentUserEmail = formData.email;
+    
+    if (!currentUserId) {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          const tokenData = JSON.parse(jsonPayload);
+          currentUserId = tokenData.id;
+        }
+      } catch (error) {
+        console.error('Error getting user ID from token:', error);
+      }
+    }
+    
+    if (!currentUserId) {
+      console.log('No user ID found, redirecting to login');
+      localStorage.setItem('redirectAfterLogin', '/checkout/address');
+      navigate('/auth');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const addressData = {
+        userId: currentUserId,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        phone: formData.phone
       };
       
-      localStorage.setItem('addressData', JSON.stringify(completeAddressData));
-      localStorage.setItem('addressId', addressId); // Store ID separately
+      let response;
       
-      navigate('/checkout/shipping');
-    } else {
-      setErrors({ submit: response.data.message || 'Failed to save address' });
+      if (selectedAddressId) {
+        response = await checkoutAPI.updateAddress(currentUserId, {
+          ...addressData,
+          addressId: selectedAddressId
+        });
+      } else {
+        response = await checkoutAPI.saveAddress(addressData);
+      }
+      
+      if (response.data.success) {
+        // Store address ID separately
+        const addressId = response.data.addressId || selectedAddressId;
+        
+        // Store complete address data with ID
+        const completeAddressData = {
+          id: addressId,
+          ...formData
+        };
+        
+        localStorage.setItem('addressData', JSON.stringify(completeAddressData));
+        localStorage.setItem('addressId', addressId); // Store ID separately
+        
+        console.log('Address saved successfully, navigating to shipping');
+        navigate('/checkout/shipping');
+      } else {
+        setErrors({ submit: response.data.message || 'Failed to save address' });
+      }
+    } catch (error) {
+      console.error('Error saving address:', error);
+      setErrors({ 
+        submit: error.response?.data?.message || 'Failed to save address. Please try again.' 
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error('Error saving address:', error);
-    setErrors({ 
-      submit: error.response?.data?.message || 'Failed to save address. Please try again.' 
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   // Redirect if cart is empty
   if (cart.length === 0) {
