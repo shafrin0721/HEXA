@@ -16,15 +16,37 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
+// Add response interceptor for better error logging
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error Details:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.response?.data?.message || error.message
+    });
+    return Promise.reject(error);
+  }
+);
+
 export const orderAPI = {
-  createOrder: (orderData) => API.post('/orders/create-order', orderData), // Only one definition
+  createOrder: (orderData) => API.post('/orders/create-order', orderData),
   getOrderTotals: () => API.get('/orders/totals'),
   getOrder: (orderId) => API.get(`/orders/${orderId}`),
 };
 
 export const paymentAPI = {
-  processPayment: (paymentData) => API.post('/payment/process', paymentData),
+  processPayment: (paymentData) => {
+    console.log('Sending payment request:', paymentData);
+    return API.post('/payment/process', paymentData);
+  },
   getStripeKey: () => API.get('/stripeapi'),
+   convertTokenToPaymentMethod: (tokenData) => {
+    console.log('Converting token to payment method:', tokenData);
+    return API.post('/payment/convert-token', tokenData);
+  },
 };
 
 export const getProducts = (page = 1, limit = 10) => API.get('/products', { params: { page, limit } });

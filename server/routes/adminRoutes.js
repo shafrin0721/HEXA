@@ -701,6 +701,79 @@ router.get('/sales/leads-table', async (req, res) => {
     }
 });
 
+
+router.get('/contacts',  async (req, res) => {
+    try {
+        const [contacts] = await db.query(`
+            SELECT 
+                id,
+                name,
+                email,
+                message,
+                status,
+                created_at,
+                updated_at
+            FROM contact_messages
+            ORDER BY created_at DESC
+        `);
+        
+        res.json({
+            success: true,
+            data: contacts
+        });
+    } catch (error) {
+        console.error('Error fetching contacts:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Update contact status
+router.put('/contacts/:id/status', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        
+        // Validate status
+        if (!['unread', 'read'].includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status value' });
+        }
+        
+        const [result] = await db.query(
+            'UPDATE contact_messages SET status = ?, updated_at = NOW() WHERE id = ?',
+            [status, id]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Contact message not found' });
+        }
+        
+        res.json({ success: true, message: 'Status updated successfully' });
+    } catch (error) {
+        console.error('Error updating contact status:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get single contact message
+router.get('/contacts/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [contacts] = await db.query(
+            'SELECT * FROM contact_messages WHERE id = ?',
+            [id]
+        );
+        
+        if (contacts.length === 0) {
+            return res.status(404).json({ success: false, message: 'Contact message not found' });
+        }
+        
+        res.json({ success: true, data: contacts[0] });
+    } catch (error) {
+        console.error('Error fetching contact:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // ==================== LOGISTICS ROUTES ====================
 
 // Get logistics metrics from database

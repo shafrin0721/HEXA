@@ -1,8 +1,8 @@
-// src/pages/AdminSales.jsx - CORRECTED VERSION
+// src/pages/AdminSales.jsx - WITH MODAL AND EDITABLE STATUS
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Loader2, AlertCircle, RefreshCw, Eye } from 'lucide-react';
+import { Loader2, AlertCircle, RefreshCw, Eye, Mail, CheckCircle, Clock, X, Edit2, Save } from 'lucide-react';
 import adminAPI from '../services/adminApi';
 
 export default function AdminSales() {
@@ -15,7 +15,14 @@ export default function AdminSales() {
   const [leadsData, setLeadsData] = useState([]);
   const [pipelineData, setPipelineData] = useState([]);
   const [opportunitiesData, setOpportunitiesData] = useState([]);
-  const [leadsTable, setLeadsTable] = useState([]);
+  const [contactsData, setContactsData] = useState([]);
+  
+  // Modal state
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingStatus, setEditingStatus] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   
   // Track which APIs failed
   const [apiErrors, setApiErrors] = useState({
@@ -23,7 +30,7 @@ export default function AdminSales() {
     leads: false,
     pipeline: false,
     opportunities: false,
-    leadsTable: false
+    contacts: false
   });
 
   useEffect(() => {
@@ -38,7 +45,7 @@ export default function AdminSales() {
       leads: false,
       pipeline: false,
       opportunities: false,
-      leadsTable: false
+      contacts: false
     });
     
     try {
@@ -47,51 +54,45 @@ export default function AdminSales() {
         leadsRes,
         pipelineRes,
         opportunitiesRes,
-        leadsTableRes
+        contactsRes
       ] = await Promise.all([
         adminAPI.getSalesMetrics(dateRange),
         adminAPI.getLeadsData(),
         adminAPI.getPipelineData(),
         adminAPI.getOpportunitiesData(),
-        adminAPI.getLeadsTable()
+        adminAPI.getContacts()
       ]);
 
-      // Set sales metrics
       if (metricsRes.data.success && metricsRes.data.data && metricsRes.data.data.length > 0) {
         setSalesMetrics(metricsRes.data.data);
       } else {
         setApiErrors(prev => ({ ...prev, metrics: true }));
       }
 
-      // Set leads data
       if (leadsRes.data.success && leadsRes.data.data && leadsRes.data.data.length > 0) {
         setLeadsData(leadsRes.data.data);
       } else {
         setApiErrors(prev => ({ ...prev, leads: true }));
       }
 
-      // Set pipeline data
       if (pipelineRes.data.success && pipelineRes.data.data && pipelineRes.data.data.length > 0) {
         setPipelineData(pipelineRes.data.data);
       } else {
         setApiErrors(prev => ({ ...prev, pipeline: true }));
       }
 
-      // Set opportunities data
       if (opportunitiesRes.data.success && opportunitiesRes.data.data && opportunitiesRes.data.data.length > 0) {
         setOpportunitiesData(opportunitiesRes.data.data);
       } else {
         setApiErrors(prev => ({ ...prev, opportunities: true }));
       }
 
-      // Set leads table
-      if (leadsTableRes.data.success && leadsTableRes.data.data && leadsTableRes.data.data.length > 0) {
-        setLeadsTable(leadsTableRes.data.data);
+      if (contactsRes.data.success && contactsRes.data.data && contactsRes.data.data.length > 0) {
+        setContactsData(contactsRes.data.data);
       } else {
-        setApiErrors(prev => ({ ...prev, leadsTable: true }));
+        setApiErrors(prev => ({ ...prev, contacts: true }));
       }
 
-      // Check if all APIs failed
       const allFailed = Object.values(apiErrors).every(v => v === true);
       if (allFailed) {
         setError('Unable to fetch any sales data. Please check your database connection.');
@@ -109,9 +110,48 @@ export default function AdminSales() {
     setDateRange(range);
   };
 
+  const updateContactStatus = async (id, status) => {
+    setUpdatingStatus(true);
+    try {
+      const response = await adminAPI.updateContactStatus(id, status);
+      if (response.data.success) {
+        // Update local state
+        setContactsData(prevContacts =>
+          prevContacts.map(contact =>
+            contact.id === id ? { ...contact, status: status } : contact
+          )
+        );
+        if (selectedContact && selectedContact.id === id) {
+          setSelectedContact({ ...selectedContact, status: status });
+        }
+        setEditingStatus(false);
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('Failed to update status. Please try again.');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const openModal = (contact) => {
+    setSelectedContact(contact);
+    setNewStatus(contact.status);
+    setEditingStatus(false);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedContact(null);
+    setEditingStatus(false);
+  };
+
   const totalLeads = leadsData.reduce((sum, item) => sum + (item.value || 0), 0);
   const totalOpportunities = opportunitiesData.reduce((sum, item) => sum + (item.value || 0), 0);
   const pipelineTotal = pipelineData.reduce((sum, item) => sum + (item.value || 0), 0);
+  
+  const unreadCount = contactsData.filter(contact => contact.status === 'unread').length;
 
   if (loading) {
     return (
@@ -144,9 +184,8 @@ export default function AdminSales() {
     );
   }
 
-  // Check if there's any data to display
   const hasAnyData = salesMetrics.length > 0 || leadsData.length > 0 || pipelineData.length > 0 || 
-                     opportunitiesData.length > 0 || leadsTable.length > 0;
+                     opportunitiesData.length > 0 || contactsData.length > 0;
 
   if (!hasAnyData) {
     return (
@@ -178,7 +217,6 @@ export default function AdminSales() {
           <p className="text-2xl font-bold">Sales Analytics</p>
         </div>
 
-        {/* Show partial data warnings */}
         {Object.values(apiErrors).some(v => v === true) && (
           <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
             <div className="flex items-center gap-2">
@@ -190,66 +228,12 @@ export default function AdminSales() {
 
         {/* Filter Bar */}
         <div className="flex gap-2 flex-wrap">
-          <button 
-            onClick={() => handleDateRangeChange('today')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              dateRange === 'today' 
-                ? 'bg-blue-500 text-white' 
-                : 'border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            Today
-          </button>
-          <button 
-            onClick={() => handleDateRangeChange('yesterday')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              dateRange === 'yesterday' 
-                ? 'bg-blue-500 text-white' 
-                : 'border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            Yesterday
-          </button>
-          <button 
-            onClick={() => handleDateRangeChange('3D')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              dateRange === '3D' 
-                ? 'bg-blue-500 text-white' 
-                : 'border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            3D
-          </button>
-          <button 
-            onClick={() => handleDateRangeChange('3M')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              dateRange === '3M' 
-                ? 'bg-blue-500 text-white' 
-                : 'border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            3 M
-          </button>
-          <button 
-            onClick={() => handleDateRangeChange('6M')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              dateRange === '6M' 
-                ? 'bg-blue-500 text-white' 
-                : 'border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            6 M
-          </button>
-          <button 
-            onClick={() => handleDateRangeChange('12M')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              dateRange === '12M' 
-                ? 'bg-blue-500 text-white' 
-                : 'border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            12 M
-          </button>
+          <button onClick={() => handleDateRangeChange('today')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${dateRange === 'today' ? 'bg-blue-500 text-white' : 'border border-gray-200 hover:bg-gray-50'}`}>Today</button>
+          <button onClick={() => handleDateRangeChange('yesterday')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${dateRange === 'yesterday' ? 'bg-blue-500 text-white' : 'border border-gray-200 hover:bg-gray-50'}`}>Yesterday</button>
+          <button onClick={() => handleDateRangeChange('3D')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${dateRange === '3D' ? 'bg-blue-500 text-white' : 'border border-gray-200 hover:bg-gray-50'}`}>3D</button>
+          <button onClick={() => handleDateRangeChange('3M')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${dateRange === '3M' ? 'bg-blue-500 text-white' : 'border border-gray-200 hover:bg-gray-50'}`}>3 M</button>
+          <button onClick={() => handleDateRangeChange('6M')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${dateRange === '6M' ? 'bg-blue-500 text-white' : 'border border-gray-200 hover:bg-gray-50'}`}>6 M</button>
+          <button onClick={() => handleDateRangeChange('12M')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${dateRange === '12M' ? 'bg-blue-500 text-white' : 'border border-gray-200 hover:bg-gray-50'}`}>12 M</button>
         </div>
 
         {/* Metrics Cards */}
@@ -258,31 +242,20 @@ export default function AdminSales() {
             <div className="col-span-3 text-center py-8 text-gray-500">
               <AlertCircle size={32} className="mx-auto mb-2 text-gray-400" />
               <p>Unable to load sales metrics</p>
-              <button 
-                onClick={fetchSalesData}
-                className="mt-2 text-blue-600 text-sm hover:underline"
-              >
-                Retry
-              </button>
+              <button onClick={fetchSalesData} className="mt-2 text-blue-600 text-sm hover:underline">Retry</button>
             </div>
           ) : salesMetrics.length === 0 ? (
-            <div className="col-span-3 text-center py-8 text-gray-500">
-              No sales metrics available
-            </div>
+            <div className="col-span-3 text-center py-8 text-gray-500">No sales metrics available</div>
           ) : (
             salesMetrics.map((metric, idx) => (
               <div key={idx} className="bg-white p-6 rounded-lg border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-lg">
-                    {idx === 0 ? '💵' : '👤'}
-                  </div>
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-lg">{idx === 0 ? '💵' : '👤'}</div>
                 </div>
                 <p className="text-gray-600 text-sm">{metric.label}</p>
                 <p className="text-3xl font-bold mt-2">{metric.value}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className={metric.change?.includes('+') ? 'text-green-600' : 'text-red-600'}>
-                    {metric.change}
-                  </span>
+                  <span className={metric.change?.includes('+') ? 'text-green-600' : 'text-red-600'}>{metric.change}</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">{metric.vs}</p>
               </div>
@@ -300,49 +273,23 @@ export default function AdminSales() {
                 <div className="text-center">
                   <AlertCircle size={32} className="mx-auto mb-2 text-gray-400" />
                   <p>Unable to load leads data</p>
-                  <button 
-                    onClick={fetchSalesData}
-                    className="mt-2 text-blue-600 text-sm hover:underline"
-                  >
-                    Retry
-                  </button>
+                  <button onClick={fetchSalesData} className="mt-2 text-blue-600 text-sm hover:underline">Retry</button>
                 </div>
               </div>
             ) : leadsData.length === 0 ? (
-              <div className="flex items-center justify-center h-[250px] text-gray-500">
-                No leads data available
-              </div>
+              <div className="flex items-center justify-center h-[250px] text-gray-500">No leads data available</div>
             ) : (
               <>
                 <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
-                    <Pie
-                      data={leadsData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
-                      dataKey="value"
-                      label={({ name, percent }) => percent > 0 ? `${(percent * 100).toFixed(0)}%` : ''}
-                    >
-                      {leadsData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill || ['#3b82f6', '#1e40af', '#93c5fd'][index % 3]} />
-                      ))}
+                    <Pie data={leadsData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label={({ name, percent }) => percent > 0 ? `${(percent * 100).toFixed(0)}%` : ''}>
+                      {leadsData.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.fill || ['#3b82f6', '#1e40af', '#93c5fd'][index % 3]} />))}
                     </Pie>
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="mt-4 text-center">
-                  <p className="text-3xl font-bold">{totalLeads}</p>
-                  <p className="text-gray-600 text-sm">Total</p>
-                </div>
-                <div className="mt-4 space-y-2 text-sm">
-                  {leadsData.map((item, idx) => (
-                    <p key={idx} className="text-gray-700">
-                      🟦 {item.name}: {item.value}
-                    </p>
-                  ))}
-                </div>
+                <div className="mt-4 text-center"><p className="text-3xl font-bold">{totalLeads}</p><p className="text-gray-600 text-sm">Total</p></div>
+                <div className="mt-4 space-y-2 text-sm">{leadsData.map((item, idx) => (<p key={idx} className="text-gray-700">🟦 {item.name}: {item.value}</p>))}</div>
               </>
             )}
           </div>
@@ -355,18 +302,11 @@ export default function AdminSales() {
                 <div className="text-center">
                   <AlertCircle size={32} className="mx-auto mb-2 text-gray-400" />
                   <p>Unable to load pipeline data</p>
-                  <button 
-                    onClick={fetchSalesData}
-                    className="mt-2 text-blue-600 text-sm hover:underline"
-                  >
-                    Retry
-                  </button>
+                  <button onClick={fetchSalesData} className="mt-2 text-blue-600 text-sm hover:underline">Retry</button>
                 </div>
               </div>
             ) : pipelineData.length === 0 ? (
-              <div className="flex items-center justify-center h-[250px] text-gray-500">
-                No pipeline data available
-              </div>
+              <div className="flex items-center justify-center h-[250px] text-gray-500">No pipeline data available</div>
             ) : (
               <>
                 <ResponsiveContainer width="100%" height={250}>
@@ -379,9 +319,7 @@ export default function AdminSales() {
                   </BarChart>
                 </ResponsiveContainer>
                 <div className="mt-4 space-y-2 text-sm">
-                  {pipelineData.map((item, idx) => (
-                    <p key={idx}>🟦 {item.name}: {item.value}</p>
-                  ))}
+                  {pipelineData.map((item, idx) => (<p key={idx}>🟦 {item.name}: {item.value}</p>))}
                   <p>🟦 Conversion Rate: {pipelineTotal > 0 ? Math.round((pipelineData[1]?.value / pipelineData[0]?.value) * 100) : 0}%</p>
                 </div>
               </>
@@ -396,69 +334,50 @@ export default function AdminSales() {
                 <div className="text-center">
                   <AlertCircle size={32} className="mx-auto mb-2 text-gray-400" />
                   <p>Unable to load opportunities data</p>
-                  <button 
-                    onClick={fetchSalesData}
-                    className="mt-2 text-blue-600 text-sm hover:underline"
-                  >
-                    Retry
-                  </button>
+                  <button onClick={fetchSalesData} className="mt-2 text-blue-600 text-sm hover:underline">Retry</button>
                 </div>
               </div>
             ) : opportunitiesData.length === 0 ? (
-              <div className="flex items-center justify-center h-[250px] text-gray-500">
-                No opportunities data available
-              </div>
+              <div className="flex items-center justify-center h-[250px] text-gray-500">No opportunities data available</div>
             ) : (
               <>
                 <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
-                    <Pie
-                      data={opportunitiesData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
-                      dataKey="value"
-                      label={({ name, percent }) => percent > 0 ? `${(percent * 100).toFixed(0)}%` : ''}
-                    >
-                      {opportunitiesData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill || ['#3b82f6', '#1e40af', '#93c5fd'][index % 3]} />
-                      ))}
+                    <Pie data={opportunitiesData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label={({ name, percent }) => percent > 0 ? `${(percent * 100).toFixed(0)}%` : ''}>
+                      {opportunitiesData.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.fill || ['#3b82f6', '#1e40af', '#93c5fd'][index % 3]} />))}
                     </Pie>
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="mt-4 text-center">
-                  <p className="text-3xl font-bold">{totalOpportunities}</p>
-                  <p className="text-gray-600 text-sm">Total</p>
-                </div>
-                <div className="mt-4 space-y-2 text-sm">
-                  {opportunitiesData.map((item, idx) => (
-                    <p key={idx}>🟦 {item.name}: {item.value}</p>
-                  ))}
-                </div>
+                <div className="mt-4 text-center"><p className="text-3xl font-bold">{totalOpportunities}</p><p className="text-gray-600 text-sm">Total</p></div>
+                <div className="mt-4 space-y-2 text-sm">{opportunitiesData.map((item, idx) => (<p key={idx}>🟦 {item.name}: {item.value}</p>))}</div>
               </>
             )}
           </div>
         </div>
 
-        {/* New Leads Table */}
+        {/* Contact Messages Table with Modal */}
         <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <h3 className="font-bold mb-4">Recent Leads</h3>
-          {apiErrors.leadsTable ? (
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold">Contact Messages</h3>
+            {unreadCount > 0 && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
+                <Mail size={14} />
+                {unreadCount} unread
+              </div>
+            )}
+          </div>
+          
+          {apiErrors.contacts ? (
             <div className="text-center py-8 text-gray-500">
               <AlertCircle size={32} className="mx-auto mb-2 text-gray-400" />
-              <p>Unable to load leads data</p>
-              <button 
-                onClick={fetchSalesData}
-                className="mt-2 text-blue-600 text-sm hover:underline"
-              >
-                Retry
-              </button>
+              <p>Unable to load contact messages</p>
+              <button onClick={fetchSalesData} className="mt-2 text-blue-600 text-sm hover:underline">Retry</button>
             </div>
-          ) : leadsTable.length === 0 ? (
+          ) : contactsData.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              No leads found
+              <Mail size={32} className="mx-auto mb-2 text-gray-400" />
+              <p>No contact messages found</p>
             </div>
           ) : (
             <>
@@ -466,37 +385,161 @@ export default function AdminSales() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Contact ID</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Customer</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">ID</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Name</th>
                       <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Email</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Phone</th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Est. revenue</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Message</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Status</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Date</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {leadsTable.slice(0, 5).map((lead, idx) => (
-                      <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-4 text-sm text-blue-600">{lead.id || lead.contact_id}</td>
-                        <td className="py-3 px-4 text-sm text-gray-900">{lead.name || lead.customer_name}</td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{lead.email}</td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{lead.phone}</td>
-                        <td className="py-3 px-4 text-sm text-gray-900">
-                          ${(lead.revenue || lead.estimated_revenue || 0).toLocaleString()}
+                    {contactsData.slice(0, 5).map((contact) => (
+                      <tr key={contact.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-3 px-4 text-sm text-blue-600">#{contact.id}</td>
+                        <td className="py-3 px-4 text-sm text-gray-900 font-medium">{contact.name}</td>
+                        <td className="py-3 px-4 text-sm text-gray-600">{contact.email}</td>
+                        <td className="py-3 px-4 text-sm text-gray-600 max-w-md">
+                          <div className="truncate" title={contact.message}>
+                            {contact.message.length > 60 ? contact.message.substring(0, 60) + '...' : contact.message}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-sm">
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                            contact.status === 'unread' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                          }`}>
+                            {contact.status === 'unread' ? <Clock size={12} /> : <CheckCircle size={12} />}
+                            {contact.status || 'unread'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-500">
+                          {new Date(contact.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-4 text-sm">
+                          <button
+                            onClick={() => openModal(contact)}
+                            className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                          >
+                            <Eye size={16} />
+                            View
+                          </button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              <div className="mt-4 flex items-center justify-center gap-2">
+              <div className="mt-4 flex items-center justify-between">
                 <p className="text-sm text-gray-600">
-                  Show 1 to {Math.min(5, leadsTable.length)} of {leadsTable.length} results
+                  Showing {Math.min(5, contactsData.length)} of {contactsData.length} messages
                 </p>
+                
               </div>
             </>
           )}
         </div>
       </div>
+
+      {/* Modal for viewing full message and editing status */}
+      {isModalOpen && selectedContact && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900">Message Details</h3>
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase">From</label>
+                  <p className="text-gray-900 font-medium mt-1">{selectedContact.name}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase">Email</label>
+                  <p className="text-gray-900 mt-1">{selectedContact.email}</p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase">Date Received</label>
+                <p className="text-gray-900 mt-1">
+                  {new Date(selectedContact.created_at).toLocaleString()}
+                </p>
+              </div>
+              
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-gray-500 uppercase">Status</label>
+                  {!editingStatus ? (
+                    <button
+                      onClick={() => setEditingStatus(true)}
+                      className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm"
+                    >
+                      <Edit2 size={14} />
+                      Edit
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setEditingStatus(false)}
+                      className="text-gray-500 hover:text-gray-700 text-sm"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+                
+                {editingStatus ? (
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={newStatus}
+                      onChange={(e) => setNewStatus(e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="unread">Unread</option>
+                      <option value="read">Read</option>
+                    </select>
+                    <button
+                      onClick={() => updateContactStatus(selectedContact.id, newStatus)}
+                      disabled={updatingStatus}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                    >
+                      {updatingStatus ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                      Save
+                    </button>
+                  </div>
+                ) : (
+                  <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+                    selectedContact.status === 'unread' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                  }`}>
+                    {selectedContact.status === 'unread' ? <Clock size={14} /> : <CheckCircle size={14} />}
+                    {selectedContact.status || 'unread'}
+                  </span>
+                )}
+              </div>
+              
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase block mb-2">Message</label>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-wrap">{selectedContact.message}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end p-6 border-t border-gray-200">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

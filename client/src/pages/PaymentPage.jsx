@@ -1,12 +1,15 @@
+// pages/PaymentPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { paymentAPI } from '../services/api';
+import GooglePay from '../components/GooglePay';
+import ApplePay from '../components/ApplePay';
 
 const PaymentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cart } = useCart(); // Get cart data from context
+  const { cart } = useCart();
   
   const getEmptyFormData = () => ({
     cardNumber: '',
@@ -25,7 +28,6 @@ const PaymentPage = () => {
 
   const [formData, setFormData] = useState(getEmptyFormData());
   
-  // Calculate order summary from cart (same as CartPage and OrderSummary1)
   const subtotal = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
   const shipping = 12.87;
   const total = subtotal + shipping;
@@ -114,7 +116,6 @@ const PaymentPage = () => {
     }
   }, [formData]);
 
-  // Redirect if cart is empty
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-black flex flex-col">
@@ -231,63 +232,52 @@ const PaymentPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!validateForm()) {
-    return;
-  }
-  
-  setIsSubmitting(true);
-  setPaymentStatus({ type: 'processing', message: 'Processing payment...' });
-  
-  try {
-    // Get address ID from localStorage
+  const processPaymentWithToken = async (paymentMethodToken, cardLast4, cardType, walletData = null) => {
     const addressId = localStorage.getItem('addressId');
-    const addressData = JSON.parse(localStorage.getItem('addressData') || '{}');
     const shippingData = JSON.parse(localStorage.getItem('shippingData') || '{}');
     
-    console.log('Address ID from localStorage:', addressId);
-    console.log('Address Data:', addressData);
+    console.log('Processing payment with:', {
+      addressId,
+      cardType,
+      cardLast4,
+      paymentMethodToken: typeof paymentMethodToken === 'object' ? 'OBJECT' : paymentMethodToken
+    });
     
     if (!addressId) {
       throw new Error('No address found. Please go back to address page.');
     }
     
-    const getTestPaymentToken = (cardType) => {
-      const tokens = {
-        'visa': 'pm_card_visa',
-        'mastercard': 'pm_card_mastercard',
-      };
-      return tokens[cardType] || 'pm_card_visa';
-    };
+    const billingName = walletData?.billingAddress 
+      ? `${walletData.billingAddress.givenName || ''} ${walletData.billingAddress.familyName || ''}`.trim()
+      : `${formData.firstName} ${formData.lastName}`;
+    const billingEmail = walletData?.email || formData.email;
+    const billingPhone = walletData?.billingAddress?.phoneNumber || formData.phoneNumber;
     
-    const paymentMethodToken = getTestPaymentToken(formData.cardType);
-    
+    // Format the payment data exactly as your backend expects
     const paymentData = {
       amount: orderSummary.total,
       payment_method_token: paymentMethodToken,
-      email: formData.email,
-      name: `${formData.firstName} ${formData.lastName}`,
+      email: billingEmail,
+      name: billingName,
       billing_address: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zipCode: formData.zipCode,
-        phoneNumber: formData.phoneNumber,
-        email: formData.email
+        firstName: walletData?.billingAddress?.givenName || formData.firstName,
+        lastName: walletData?.billingAddress?.familyName || formData.lastName,
+        address: walletData?.billingAddress?.address1 || formData.address,
+        city: walletData?.billingAddress?.locality || formData.city,
+        state: walletData?.billingAddress?.administrativeArea || formData.state,
+        zipCode: walletData?.billingAddress?.postalCode || formData.zipCode,
+        phoneNumber: billingPhone,
+        email: billingEmail
       }
     };
     
+    console.log('Sending to backend:', paymentData);
+    
     const paymentResponse = await paymentAPI.processPayment(paymentData);
+    console.log('Backend response:', paymentResponse.data);
     
     if (paymentResponse.data.success && paymentResponse.data.payment_status === 'succeeded') {
       setPaymentStatus({ type: 'success', message: 'Payment successful! Redirecting to review...' });
-
-      const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
-      const cardLast4 = cleanCardNumber.slice(-4);
       
       const reviewData = {
         orderSummary: {
@@ -299,8 +289,8 @@ const PaymentPage = () => {
         paymentIntentId: paymentResponse.data.payment_intent_id,
         paymentInfo: {
           card_last4: cardLast4,
-          card_type: formData.cardType,
-          name: `${formData.firstName} ${formData.lastName}`,
+          card_type: cardType,
+          name: billingName,
           accountNumber: `**** **** **** ${cardLast4}`,
           paidDate: new Date().toLocaleDateString('en-US', { 
             year: 'numeric', 
@@ -309,13 +299,13 @@ const PaymentPage = () => {
           })
         },
         shippingAddress: {
-          name: `${formData.firstName} ${formData.lastName}`,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
-          number: formData.phoneNumber,
-          email: formData.email
+          name: billingName,
+          address: walletData?.billingAddress?.address1 || formData.address,
+          city: walletData?.billingAddress?.locality || formData.city,
+          state: walletData?.billingAddress?.administrativeArea || formData.state,
+          zipCode: walletData?.billingAddress?.postalCode || formData.zipCode,
+          number: billingPhone,
+          email: billingEmail
         },
         deliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
           weekday: 'long', 
@@ -323,36 +313,101 @@ const PaymentPage = () => {
           day: 'numeric' 
         }),
         userInfo: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber
+          firstName: walletData?.billingAddress?.givenName || formData.firstName,
+          lastName: walletData?.billingAddress?.familyName || formData.lastName,
+          email: billingEmail,
+          phoneNumber: billingPhone
         },
-        // CRITICAL: Add addressId to reviewData
         addressId: addressId,
-        shippingCost: shippingData.cost || orderSummary.shipping
+        shippingCost: shippingData.cost || orderSummary.shipping,
+        paymentMethod: cardType
       };
       
-      console.log('Saving review data with addressId:', addressId);
       localStorage.setItem('reviewOrderData', JSON.stringify(reviewData));
       
       setTimeout(() => {
         navigate('/review');
       }, 1500);
     } else {
-      throw new Error('Payment failed');
+      throw new Error(paymentResponse.data.message || 'Payment failed');
     }
-  } catch (error) {
-    console.error('Error processing payment:', error);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setPaymentStatus({ type: 'processing', message: 'Processing payment...' });
+    
+    try {
+      const getTestPaymentToken = (cardType) => {
+        const tokens = {
+          'visa': 'pm_card_visa',
+          'mastercard': 'pm_card_mastercard',
+        };
+        return tokens[cardType] || 'pm_card_visa';
+      };
+      
+      const paymentMethodToken = getTestPaymentToken(formData.cardType);
+      const cleanCardNumber = formData.cardNumber.replace(/\s/g, '');
+      const cardLast4 = cleanCardNumber.slice(-4);
+      
+      await processPaymentWithToken(paymentMethodToken, cardLast4, formData.cardType);
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      setPaymentStatus({ 
+        type: 'error', 
+        message: error.response?.data?.message || error.message || 'Payment failed. Please try again.' 
+      });
+      setTimeout(() => setPaymentStatus(null), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDigitalWalletSuccess = async (paymentMethodToken, cardLast4, cardType, walletData) => {
+    setIsSubmitting(true);
+    setPaymentStatus({ type: 'processing', message: 'Processing payment...' });
+    
+    try {
+      if (walletData?.billingAddress) {
+        setFormData(prev => ({
+          ...prev,
+          firstName: walletData.billingAddress.givenName || prev.firstName,
+          lastName: walletData.billingAddress.familyName || prev.lastName,
+          address: walletData.billingAddress.address1 || prev.address,
+          city: walletData.billingAddress.locality || prev.city,
+          state: walletData.billingAddress.administrativeArea || prev.state,
+          zipCode: walletData.billingAddress.postalCode || prev.zipCode,
+          email: walletData.email || prev.email,
+          phoneNumber: walletData.billingAddress.phoneNumber || prev.phoneNumber
+        }));
+      }
+      
+      await processPaymentWithToken(paymentMethodToken, cardLast4, cardType, walletData);
+    } catch (error) {
+      console.error('Digital wallet payment failed:', error);
+      setPaymentStatus({ 
+        type: 'error', 
+        message: error.response?.data?.message || error.message || 'Payment failed. Please try again.' 
+      });
+      setTimeout(() => setPaymentStatus(null), 5000);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDigitalWalletError = (error) => {
+    console.error('Digital wallet error:', error);
     setPaymentStatus({ 
       type: 'error', 
-      message: error.response?.data?.message || error.message || 'Payment failed. Please try again.' 
+      message: typeof error === 'string' ? error : 'Payment failed. Please try another method.' 
     });
     setTimeout(() => setPaymentStatus(null), 5000);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   const CardTypeDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -421,10 +476,20 @@ const PaymentPage = () => {
     );
   };
 
+  const billingAddressForWallets = {
+    firstName: formData.firstName,
+    lastName: formData.lastName,
+    address: formData.address,
+    city: formData.city,
+    state: formData.state,
+    zipCode: formData.zipCode,
+    email: formData.email,
+    phoneNumber: formData.phoneNumber
+  };
+
   return (
     <div className="min-h-screen bg-black flex flex-col">
       <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Progress Steps */}
         <div className="flex items-center justify-center gap-6 mb-12">
           {['Address', 'Shipping', 'Payment', 'Review'].map((label, index) => (
             <React.Fragment key={index}>
@@ -449,7 +514,6 @@ const PaymentPage = () => {
           ))}
         </div>
 
-        {/* Payment Status Message */}
         {paymentStatus && (
           <div className={`mb-6 p-4 rounded-lg ${
             paymentStatus.type === 'processing' ? 'bg-blue-900/50 text-blue-200 border border-blue-500' :
@@ -465,14 +529,50 @@ const PaymentPage = () => {
           </div>
         )}
 
-        {/* Main Content */}
+<div className="mb-6">
+  <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl p-6 border border-gray-700">
+    <h3 className="text-lg font-semibold text-white mb-4 text-center">Quick & Secure Checkout</h3>
+    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+      <div className="flex justify-center">
+        <ApplePay
+          total={orderSummary.total}
+          onSuccess={handleDigitalWalletSuccess}
+          onError={handleDigitalWalletError}
+          isDisabled={isSubmitting}
+          billingAddress={billingAddressForWallets}
+        />
+      </div>
+      
+      <div className="flex justify-center">
+        <GooglePay
+          total={orderSummary.total}
+          onSuccess={handleDigitalWalletSuccess}
+          onError={handleDigitalWalletError}
+          isDisabled={isSubmitting}
+          billingAddress={billingAddressForWallets}
+        />
+      </div>
+    </div>
+    <p className="text-xs text-gray-500 text-center mt-4">
+      Secure checkout with digital wallet • Total: ${orderSummary.total.toFixed(2)}
+    </p>
+  </div>
+</div>
+
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-700"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-black text-gray-400">OR pay with card</span>
+          </div>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Side - Forms */}
           <div className="flex-1 space-y-6">
-            {/* Payment Information Section */}
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
               <h2 className="text-2xl font-semibold text-white mb-6 border-b border-gray-700 pb-3 inline-block">
-                Payment Information
+                Card Information
               </h2>
               
               <div className="space-y-4">
@@ -492,7 +592,6 @@ const PaymentPage = () => {
                   {errors.cardNumber && <p className="mt-1 text-sm text-red-500">{errors.cardNumber}</p>}
                 </div>
 
-                {/* Three columns */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Card Type</label>
@@ -536,10 +635,9 @@ const PaymentPage = () => {
               </div>
             </div>
 
-            {/* Billing Address Section */}
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
               <h2 className="text-2xl font-semibold text-white mb-6 border-b border-gray-700 pb-3 inline-block">
-                Billing address
+                Billing Address
               </h2>
               
               <div className="space-y-4">
@@ -666,7 +764,6 @@ const PaymentPage = () => {
             </div>
           </div>
 
-          {/* Right Side - Order Summary */}
           <div className="lg:w-96">
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 sticky top-4">
               <h2 className="text-xl font-semibold text-yellow-500 mb-4">Order Summary ({cartItemCount} items)</h2>
@@ -708,7 +805,7 @@ const PaymentPage = () => {
                 onClick={handleSubmit} 
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Processing...' : 'Continue'}
+                {isSubmitting ? 'Processing...' : 'Pay with Card'}
               </button>
             </div>
 

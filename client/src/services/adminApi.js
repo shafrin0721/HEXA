@@ -83,6 +83,15 @@ export const adminAPI = {
   
   getLeadsTable: () => 
     apiClient.get('/admin/sales/leads-table'),
+
+   getContacts: () => 
+    apiClient.get('/admin/contacts'),
+
+ updateContactStatus: (id, status) => 
+    apiClient.put(`/admin/contacts/${id}/status`, { status }),
+
+ getContactById: (id) => 
+    apiClient.get(`/admin/contacts/${id}`),
   
   // Logistics APIs
   getMetrics: () => 
