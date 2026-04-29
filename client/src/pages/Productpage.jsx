@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
 import { getProductById } from '../services/api';
 import confetti from 'canvas-confetti';
+import FitQuiz from '../components/FitQuiz';
 
 
 export default function ProductPage() {
@@ -18,6 +19,8 @@ export default function ProductPage() {
   const [error, setError] = useState(null);
   const [selectedSize, setSelectedSize] = useState('S');
   const [quantity, setQuantity] = useState(1);
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [recommendedSize, setRecommendedSize] = useState(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const productId = Number(searchParams.get('id')) || 1;
@@ -170,7 +173,7 @@ const handleAddToCart = () => {
           </div>
           
           {/* Size Selection */}
-          <div className="mb-2">
+          {/* <div className="mb-2">
             <label className="block font-semibold text-white text-sm mb-2">
               Size:
             </label>
@@ -184,10 +187,59 @@ const handleAddToCart = () => {
               <option>L</option>
               <option>XL</option>
             </select>
+          </div> */}
+
+          {/* Size Selection */}
+          <div className="mb-2">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block font-semibold text-white text-sm">
+                Size:
+              </label>
+              {/* Find My Size Button */}
+              <button 
+                onClick={() => setIsQuizOpen(true)}
+                className="text-[#d4af37] text-xs underline hover:text-[#f4e27a] transition-colors"
+              >
+                Find My Size?
+              </button>
+            </div>
+
+            {/* Recommended Size Badge */}
+            {recommendedSize && (
+              <div className="mb-3 p-2 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg text-[#d4af37] text-xs flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] animate-pulse" />
+                Recommended for you: <strong>{recommendedSize}</strong>
+              </div>
+            )}
+
+            <select 
+              value={selectedSize} 
+              onChange={(e) => setSelectedSize(e.target.value)}
+              className="w-full max-w-[200px] px-4 py-2.5 border border-[#2a2a2a] rounded-lg bg-white/5 text-white text-sm font-medium cursor-pointer transition-all hover:border-[#d4af37] hover:bg-white/10 focus:outline-none focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20"
+            >
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+            </select>
           </div>
 
           {/* Quantity Selector */}
           <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
+
+          {/* Quiz Modal Component */}
+          <FitQuiz 
+            isOpen={isQuizOpen} 
+            onClose={() => setIsQuizOpen(false)} 
+            onFinish={(size) => {
+              setRecommendedSize(size);
+              setSelectedSize(size); // ස්වයංක්‍රීයව අදාළ සයිස් එක Select කරමු
+              setIsQuizOpen(false);
+            }}
+          />
+
+          {/* Quantity Selector */}
+          {/* <QuantitySelector quantity={quantity} setQuantity={setQuantity} /> */}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mt-1">
