@@ -56,6 +56,7 @@ const Navbar = () => {
           <Link to="/products" className="text-white hover:text-gray-300">Products</Link>
           <Link to="/about" className="text-white hover:text-gray-300">About</Link>
           <Link to="/contact" className="text-white hover:text-gray-300">Contact</Link>
+          <Link to="/wishlist" className="text-white hover:text-gray-300">wishlist</Link>
         </div>
         
         <div className="flex items-center gap-6">
