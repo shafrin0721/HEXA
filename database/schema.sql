@@ -1,5 +1,5 @@
 -- Run once: mysql -u root -p < schema.sql
-CREATE DATABASE IF NOT EXISTS hexal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS hexa_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
  USE hexa_db
 
 CREATE TABLE `users` (
