@@ -29,7 +29,24 @@ const PaymentPage = () => {
   const [formData, setFormData] = useState(getEmptyFormData());
   
   const subtotal = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
-  const shipping = 12.87;
+  const getShippingCost = () => {
+    if (location.state?.shippingCost) {
+      return location.state.shippingCost;
+    }
+    const savedShippingCost = localStorage.getItem('shippingCost');
+    if (savedShippingCost) {
+      return parseFloat(savedShippingCost);
+    }
+    return 12.87;
+  };
+  const getSelectedShippingMethod = () => {
+    if (location.state?.selectedShipping) {
+      return location.state.selectedShipping;
+    }
+    return localStorage.getItem('selectedShipping') || 'standard';
+  };
+  const shipping = getShippingCost();
+  const selectedShippingMethod = getSelectedShippingMethod();
   const total = subtotal + shipping;
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   
@@ -240,6 +257,7 @@ const PaymentPage = () => {
       addressId,
       cardType,
       cardLast4,
+      shippingCost: shipping,
       paymentMethodToken: typeof paymentMethodToken === 'object' ? 'OBJECT' : paymentMethodToken
     });
     
@@ -279,7 +297,9 @@ const PaymentPage = () => {
     if (paymentResponse.data.success && paymentResponse.data.payment_status === 'succeeded') {
       setPaymentStatus({ type: 'success', message: 'Payment successful! Redirecting to review...' });
       
+      const orderId = paymentResponse.data.order_id || paymentResponse.data.orderId;
       const reviewData = {
+        orderId: orderId,
         orderSummary: {
           items: orderSummary.items,
           subtotal: orderSummary.subtotal,
@@ -319,14 +339,20 @@ const PaymentPage = () => {
           phoneNumber: billingPhone
         },
         addressId: addressId,
-        shippingCost: shippingData.cost || orderSummary.shipping,
+        shippingCost: shipping,
+        shippingMethod: selectedShippingMethod,
         paymentMethod: cardType
       };
       
       localStorage.setItem('reviewOrderData', JSON.stringify(reviewData));
       
       setTimeout(() => {
-        navigate('/review');
+        navigate('/review',{
+          state: { 
+          orderId: orderId,
+          fromPayment: true 
+         }
+        });
       }, 1500);
     } else {
       throw new Error(paymentResponse.data.message || 'Payment failed');
@@ -485,6 +511,11 @@ const PaymentPage = () => {
     zipCode: formData.zipCode,
     email: formData.email,
     phoneNumber: formData.phoneNumber
+  };
+
+  const getShippingMethodName = () => {
+    if (selectedShippingMethod === 'express') return 'Express';
+    return 'Standard';
   };
 
   return (
@@ -791,7 +822,7 @@ const PaymentPage = () => {
                   <span>${orderSummary.subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-300">
-                  <span>Shipping</span>
+                  <span>Shipping ({getShippingMethodName()})</span>
                   <span>${orderSummary.shipping.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-white pt-2 border-t border-gray-800">

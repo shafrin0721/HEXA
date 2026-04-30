@@ -31,7 +31,7 @@ const ReviewPage = () => {
     shippingCost: 0,
     total: 0,
     paymentIntentId: '',
-    addressId: null // Add addressId to state
+    addressId: null
   });
 
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ const ReviewPage = () => {
           payment_intent_id: data.paymentIntentId || ''
         },
         shipping: {
-          method: 'Standard shipping',
+          method: data.shippingMethod === 'express' ? 'Express shipping' : 'Standard shipping',
           deliveryDate: data.deliveryDate || ''
         },
         items: data.orderSummary?.items || [],
@@ -70,7 +70,7 @@ const ReviewPage = () => {
         shippingCost: data.shippingCost || data.orderSummary?.shipping || 0,
         total: data.orderSummary?.total || 0,
         paymentIntentId: data.paymentIntentId || '',
-        addressId: data.addressId || addressId // Use addressId from review data or localStorage
+        addressId: data.addressId || addressId
       });
       setLoading(false);
     } else {
@@ -89,7 +89,6 @@ const ReviewPage = () => {
     setPlacingOrder(true);
     
     try {
-      // Get address ID from state or localStorage
       const addressId = orderDetails.addressId || localStorage.getItem('addressId');
       const addressData = JSON.parse(localStorage.getItem('addressData') || '{}');
       
@@ -102,9 +101,8 @@ const ReviewPage = () => {
         return;
       }
       
-      // Prepare shipping address with the correct ID
       const shippingAddress = {
-        addressId: parseInt(addressId), // Ensure it's a number
+        addressId: parseInt(addressId),
         firstName: addressData.firstName || orderDetails.shippingAddress.name?.split(' ')[0] || 'Unknown',
         lastName: addressData.lastName || orderDetails.shippingAddress.name?.split(' ')[1] || 'Unknown',
         email: addressData.email || orderDetails.shippingAddress.email,
@@ -140,6 +138,19 @@ const ReviewPage = () => {
       if (orderResponse.data.success) {
         console.log('Order created successfully:', orderResponse.data);
         
+        // Extract order ID from the response structure
+        const orderId = orderResponse.data.data?.order?.id || 
+                       orderResponse.data.order?.id || 
+                       orderResponse.data.data?.id || 
+                       orderResponse.data.id;
+        
+        console.log('Extracted order ID:', orderId);
+        
+        if (!orderId) {
+          console.error('Could not extract order ID from response:', orderResponse.data);
+          alert('Order created but could not retrieve order number. Please check your email for confirmation.');
+        }
+        
         // Clear all checkout data
         localStorage.removeItem('reviewOrderData');
         localStorage.removeItem('paymentData');
@@ -150,19 +161,20 @@ const ReviewPage = () => {
         localStorage.removeItem('selectedShipping');
         localStorage.removeItem('shippingCost');
         
-        // Navigate to success page
+        // Navigate to success page with order ID
         navigate('/order-success', { 
           state: { 
-            orderId: orderResponse.data.data.order.id,
-            orderDetails: orderResponse.data.data
-          } 
+            orderId: orderId,
+            orderNumber: orderId ? `#${orderId}` : '#TEMP123',
+            fromReview: true 
+          }
         });
       } else {
         throw new Error(orderResponse.data.message || 'Order creation failed');
       }
     } catch (error) {
       console.error('Error placing order:', error);
-      alert(error.response?.data?.message || 'Failed to place order. Please try again.');
+      alert(error.response?.data?.message || error.message || 'Failed to place order. Please try again.');
     } finally {
       setPlacingOrder(false);
     }

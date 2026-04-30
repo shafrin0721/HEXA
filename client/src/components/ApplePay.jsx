@@ -1,4 +1,3 @@
-// components/ApplePay.jsx - With self-centering
 import React, { useState } from 'react';
 
 const ApplePay = ({ total, onSuccess, onError, isDisabled, billingAddress, orderId }) => {

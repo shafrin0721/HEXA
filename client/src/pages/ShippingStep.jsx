@@ -5,11 +5,10 @@ import { useCart } from '../context/CartContext';
 export default function ShippingStep() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cart } = useCart(); // Get cart data from context
+  const { cart } = useCart();
   
   const [selectedShipping, setSelectedShipping] = useState('standard');
   
-  // Calculate totals from cart
   const subtotal = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   
@@ -28,7 +27,6 @@ export default function ShippingStep() {
     },
   ];
 
-  // Get current shipping cost based on selection
   const getShippingCost = () => {
     const option = shippingOptions.find(opt => opt.id === selectedShipping);
     return option ? option.price : 12.87;
@@ -37,7 +35,6 @@ export default function ShippingStep() {
   const shippingCost = getShippingCost();
   const total = subtotal + shippingCost;
 
-  // Load saved shipping data from localStorage if returning from payment/review
   useEffect(() => {
     const savedSelectedShipping = localStorage.getItem('selectedShipping');
     if (savedSelectedShipping) {
@@ -45,7 +42,6 @@ export default function ShippingStep() {
     }
   }, []);
 
-  // Redirect if cart is empty
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-black flex flex-col">
@@ -66,7 +62,6 @@ export default function ShippingStep() {
   }
 
   const handleContinue = () => {
-    // Get address data from localStorage (saved in CheckoutAddress)
     const addressData = localStorage.getItem('addressData');
     let shippingData = {};
     
@@ -78,15 +73,23 @@ export default function ShippingStep() {
       }
     }
     
-    // Save shipping selection
+    const selectedOption = shippingOptions.find(opt => opt.id === selectedShipping);
+
     localStorage.setItem('selectedShipping', selectedShipping);
     localStorage.setItem('shippingCost', shippingCost.toString());
-    localStorage.setItem('shippingData', JSON.stringify(shippingData));
+    localStorage.setItem('shippingData', JSON.stringify({
+    ...shippingData,
+    method: selectedShipping,
+    methodName: selectedOption?.name,
+    cost: shippingCost,
+    description: selectedOption?.description
+  }));
     
     navigate('/payment', { 
       state: { 
         shippingData: shippingData,
         selectedShipping: selectedShipping,
+        selectedShippingOption: selectedOption,
         shippingCost: shippingCost,
         orderItems: cart,
         subtotal: subtotal,

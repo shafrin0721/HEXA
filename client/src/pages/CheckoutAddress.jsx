@@ -77,20 +77,6 @@ const CheckoutAddress = () => {
   const [showSavedAddresses, setShowSavedAddresses] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
 
-  const states = [
-    'Select state',
-    'California',
-    'New York',
-    'Texas',
-    'Florida',
-    'Illinois',
-    'Pennsylvania',
-    'Ohio',
-    'Georgia',
-    'North Carolina',
-    'Michigan'
-  ];
-
   // Load saved addresses on component mount
   useEffect(() => {
     if (userId) {
@@ -159,8 +145,8 @@ const CheckoutAddress = () => {
     if (!formData.lastName) newErrors.lastName = 'Last name is required';
     if (!formData.address) newErrors.address = 'Street address is required';
     if (!formData.city) newErrors.city = 'City is required';
-    if (!formData.state || formData.state === 'Select state') {
-      newErrors.state = 'Please select a state';
+    if (!formData.state) {
+      newErrors.state = 'Please enter a state';
     }
     if (!formData.zipCode) {
       newErrors.zipCode = 'Zip code is required';
@@ -439,7 +425,7 @@ const CheckoutAddress = () => {
                   {errors.address && <p className="mt-1 text-sm text-red-500">{errors.address}</p>}
                 </div>
 
-                {/* City / State / Zip Row */}
+                {/* City / State / Zip Row - State is now a text input */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
@@ -457,20 +443,16 @@ const CheckoutAddress = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">State</label>
-                    <select
+                    <input
+                      type="text"
                       name="state"
                       value={formData.state}
                       onChange={handleChange}
+                      placeholder="California"
                       className={`w-full px-4 py-2 bg-black border rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 ${
                         errors.state ? 'border-red-500' : 'border-gray-700'
                       }`}
-                    >
-                      {states.map((state, idx) => (
-                        <option key={idx} value={state === 'Select state' ? '' : state}>
-                          {state}
-                        </option>
-                      ))}
-                    </select>
+                    />
                     {errors.state && <p className="mt-1 text-sm text-red-500">{errors.state}</p>}
                   </div>
                   <div>

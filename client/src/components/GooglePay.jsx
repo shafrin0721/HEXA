@@ -1,17 +1,36 @@
-// frontend/src/components/GooglePay.jsx
 import GooglePayButton from "@google-pay/button-react";
 import { useCart } from '../context/CartContext';
 import { paymentAPI } from '../services/api';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const GooglePay = ({ onSuccess, onError, isDisabled, billingAddress }) => {
+const GooglePay = ({ onSuccess, onError, isDisabled, billingAddress,  selectedShipping, shippingCost }) => {
   const { cart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  // Calculate cart total
+  const [dynamicShippingCost, setDynamicShippingCost] = useState(12.87);
+  const [dynamicSelectedShipping, setDynamicSelectedShipping] = useState('standard');
+
+  useEffect(() => {
+    if (shippingCost !== undefined) {
+      setDynamicShippingCost(shippingCost);
+    } else {
+      const savedShippingCost = localStorage.getItem('shippingCost');
+      if (savedShippingCost) {
+        setDynamicShippingCost(parseFloat(savedShippingCost));
+      }
+    }
+
+    if (selectedShipping !== undefined) {
+      setDynamicSelectedShipping(selectedShipping);
+    } else {
+      const savedSelectedShipping = localStorage.getItem('selectedShipping');
+      if (savedSelectedShipping) {
+        setDynamicSelectedShipping(savedSelectedShipping);
+      }
+    }
+  }, [shippingCost, selectedShipping]);
+
   const subtotal = cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
-  const shipping = 12.87;
-  const total = (subtotal + shipping).toFixed(2);
+  const total = (subtotal + dynamicShippingCost).toFixed(2);
   
   const processGooglePayPayment = async (paymentData) => {
     if (isProcessing || isDisabled) return;
@@ -21,13 +40,10 @@ const GooglePay = ({ onSuccess, onError, isDisabled, billingAddress }) => {
     try {
       console.log('Google Pay payment data:', paymentData);
       
-      // Parse the token from Google Pay response
       const tokenObject = JSON.parse(paymentData.paymentMethodData.tokenizationData.token);
       const stripeToken = tokenObject.id;
       
       console.log('Stripe Token:', stripeToken);
-      
-      // Convert token to payment method
       const convertResponse = await paymentAPI.convertTokenToPaymentMethod({
         tokenId: stripeToken
       });
@@ -39,10 +55,23 @@ const GooglePay = ({ onSuccess, onError, isDisabled, billingAddress }) => {
         const cardLast4 = convertResponse.data.card?.last4 || '0000';
         const cardType = convertResponse.data.card?.brand || 'google_pay';
         
+        const googlePayAddress = paymentData.shippingAddress;
+        const googlePayEmail = paymentData.email;
+
         const walletData = {
-          billingAddress: billingAddress,
-          email: paymentData.email || billingAddress?.email,
-          paymentType: 'google_pay'
+          billingAddress: billingAddress || {
+            givenName: googlePayAddress?.name?.split(' ')[0] || '',
+            familyName: googlePayAddress?.name?.split(' ').slice(1).join(' ') || '',
+            address1: googlePayAddress?.address1 || '',
+            locality: googlePayAddress?.locality || '',
+            administrativeArea: googlePayAddress?.administrativeArea || '',
+            postalCode: googlePayAddress?.postalCode || '',
+            phoneNumber: googlePayAddress?.phoneNumber || ''
+          },
+          email: googlePayEmail || billingAddress?.email,
+          paymentType: 'google_pay',
+          shippingMethod: dynamicSelectedShipping,
+          shippingCost: dynamicShippingCost
         };
         
         await onSuccess(paymentMethodId, cardLast4, cardType, walletData);
@@ -78,7 +107,7 @@ const GooglePay = ({ onSuccess, onError, isDisabled, billingAddress }) => {
                 parameters: {
                   gateway: 'stripe',
                   'stripe:version': '2024-06-20',
-                  'stripe:publishableKey': 'pk_test_51TGu5dBH31pt7B5lehbsnQmaEH2iBFfffkbYMhCJ0vsFjAvEJ8EUUUL7JTMGmZDrrkMYnsaVjt6baiVp7HkXO73J00tZ0ohRoB'
+                  'stripe:publishableKey': 'pk_test_51TGu5ABewZFiD3qE5EtyR6SJO8cnMHRGWT3PwwpF3SYRYSsNl3Dz1hfqmlCXKbz8f9sc97sv334Or628zKgIDy4u00cWyVE9Ky'
                 },
               },
             },
@@ -96,6 +125,10 @@ const GooglePay = ({ onSuccess, onError, isDisabled, billingAddress }) => {
           },
           emailRequired: true,
           shippingAddressRequired: true,
+          shippingAddressParameters: {
+            allowedCountryCodes: ['US'],
+            phoneNumberRequired: true,
+          },
         }}
         onLoadPaymentData={processGooglePayPayment}
         onError={(error) => {
