@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from '../context/CartContext';
 import avatar from "../assets/avatar.jpg";
 import logo from "../assets/logo.png";
-import productImg from "../assets/t-6.jpg";
+import productImg from "../assets/t- 6.jpg";
 
 function OrderSummary1() {
   const { cart } = useCart();

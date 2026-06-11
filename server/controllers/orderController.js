@@ -1,3 +1,46 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+const db = require("../config/db");
+
+// GET order by ID
+exports.getOrderById = (req, res) => {
+  const { id } = req.params;
+
+  db.query("SELECT * FROM orders WHERE id = ?", [id], (err, result) => {
+    if (err) return res.status(500).json(err);
+
+    res.json(result[0]);
+  });
+};
+
+// CREATE order
+exports.createOrder = (req, res) => {
+  const { total, user_name } = req.body;
+
+  const sql = "INSERT INTO orders (total, user_name) VALUES (?, ?)";
+
+ db.query("SELECT * FROM orders WHERE id = ?", [id], (err, result) => {
+  if (err) return res.status(500).json(err);
+
+  if (result.length === 0) {
+    return res.json({ message: "No order found" });
+  }
+
+  res.json(result[0]);
+});
+
+
+db.query("SELECT * FROM orders WHERE id = ?", [id], (err, result) => {
+  if (err) return res.status(500).json(err);
+
+  if (result.length === 0) {
+    return res.json({ message: "No order found" });
+  }
+
+  res.json(result[0]);
+})}
+=======
+=======
 const pool = require('../config/db');
 
 // Get all orders (Admin only)
@@ -85,7 +128,11 @@ exports.deleteOrder = async (req, res) => {
         res.status(500).json({ message: 'Error deleting order', error: error.message });
     }
 };
+<<<<<<< HEAD
+>>>>>>> b98b82deb166e0de0658e790c74377b906552853
+=======
 
+>>>>>>> 86d2863c6906941107115a59baed94cc8f797951
 exports.createOrder = async (req, res) => {
   try {
     const { 
@@ -190,3 +237,7 @@ exports.createOrder = async (req, res) => {
     });
   }
 };
+<<<<<<< HEAD
+>>>>>>> c9e1987fbacd03873143ae7c13629f7fc46a3982
+=======
+>>>>>>> b98b82deb166e0de0658e790c74377b906552853
